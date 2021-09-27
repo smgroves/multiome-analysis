@@ -1,0 +1,19 @@
+name: multiome
+channels:
+  - conda-forge
+dependencies:
+  - pip
+  - python=3.9.6
+  - jupyter=1.0.0
+  - seaborn
+  - anndata
+  - jupyterlab
+  - leidenalg
+  - matplotlib
+  - pandas
+  - scanorama
+  - scanpy 
+  - scvelo
+  - umap-learn
+  - pip:
+    - dropkick==1.2.6
