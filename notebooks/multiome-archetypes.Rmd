@@ -1,0 +1,54 @@
+---
+title: "archetpe_analysis_multiome"
+author: "Sarah Groves"
+date: "10/4/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Load data and packages
+
+reference SCLC multiome analysis.Rmd for in depth description of sclc RDS.
+```{r setup, message=FALSE}
+library(Signac)
+library(Seurat)
+library(GenomeInfoDb)
+library(EnsDb.Mmusculus.v79) 
+library(ggplot2)
+library(patchwork)
+library(dplyr)
+set.seed(1234)
+```
+
+```{r}
+reticulate::py_discover_config("py_pcha")
+reticulate::use_condaenv("reticulate_PCHA", conda = "auto",
+                         required = TRUE) # set TRUE to force R to use reticulate_PCHA
+library(ParetoTI)
+```
+
+```{r}
+sclc <- readRDS('/Users/smgroves/Documents/Github/multiome-analysis/data/sclc.rds')
+sclc
+```
+
+
+## Run ParetoTI on SCTransformed scaled.data table
+```{r}
+data = sclc@assays$SCT@scale.data
+PCs = t(sclc@reductions$pca@cell.embeddings)
+
+arc_ks = k_fit_pch(PCs, ks = 2:8, check_installed = T,
+                   bootstrap = T, bootstrap_N = 200, maxiter = 1000,
+                   bootstrap_type = "m", seed = 2543, 
+                   volume_ratio = "t_ratio", # set to "none" if too slow
+                   delta=0, conv_crit = 1e-04, order_type = "align",
+                   sample_prop = 0.75)
+
+# Show variance explained by a polytope with each k (cumulative)
+plot_arc_var(arc_ks, type = "varexpl", point_size = 2, line_size = 1.5) + theme_bw()
+```
+
