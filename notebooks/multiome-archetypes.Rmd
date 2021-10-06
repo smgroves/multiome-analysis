@@ -20,28 +20,64 @@ library(EnsDb.Mmusculus.v79)
 library(ggplot2)
 library(patchwork)
 library(dplyr)
+# install.packages('devtools')
+library(devtools)
+# BiocManager::install("scater")
+library(scater)
+# install loomR from GitHub using the remotes package 
+# remotes::install_github(repo ='mojaveazure/loomR', ref = 'develop')
 set.seed(1234)
 ```
 
-```{r}
+```{r import include=FALSE}
+# ParetoTI::install_py_pcha(method = "conda", 
+#                           extra_packages = c("tensorflow", "tensorflow-probability",
+#                                         "pandas", "keras", "h5py",
+#                                         "geosketch", "pydot", "scikit-learn==0.20",
+#                                         "umap-learn"))
+# ParetoTI::install_py_pcha()
 reticulate::py_discover_config("py_pcha")
 reticulate::use_condaenv("reticulate_PCHA", conda = "auto",
                          required = TRUE) # set TRUE to force R to use reticulate_PCHA
 library(ParetoTI)
 ```
 
-```{r}
-sclc <- readRDS('/Users/smgroves/Documents/Github/multiome-analysis/data/sclc.rds')
+```{r read-data}
+sclc <- readRDS('/Users/smgroves/Box/multiome_data/M1/outs/TKO.rds')
 sclc
 ```
 
+```{r}
+write.csv(sclc@assays$SCT@scale.data, '../data/scaled-SCT-data.csv')
+write.csv(sclc@reductions$pca@cell.embeddings, '../data/pca-embedding.csv')
+write.csv(sclc@reductions$pca@feature.loadings, '../data/pca-feature-loadings.csv')
+
+sclc <- ProjectDim(sclc, reduction = 'pca')
+
+write.csv(sclc@reductions$pca@feature.loadings.projected, '../data/pca-feature-loadings-projected.csv')
+```
 
 ## Run ParetoTI on SCTransformed scaled.data table
-```{r}
-data = sclc@assays$SCT@scale.data
-PCs = t(sclc@reductions$pca@cell.embeddings)
+```{r paretoti}
 
-arc_ks = k_fit_pch(PCs, ks = 2:8, check_installed = T,
+# x <- sclc@assays$SCT@scale.data
+x_pca <- read.csv('../data/pca-embedding.csv',header = TRUE,row.names = 1)
+x_pca <- t(x_pca)
+x_pca <- x_pca[1:20,] #keep only top 18 PCs
+loadings<- read.csv('../data/pca-feature-loadings-projected.csv', header = TRUE, row.names = 1)
+loadings <- as.matrix(loadings)
+##################################
+
+# Fit 5 archetypes
+arc <- fit_pch((x_pca), noc = 5)
+# Fit 5 archetypes with bootstrapping for robustness 
+arc_rob = fit_pch_bootstrap(x_pca, n = 200, sample_prop = .8, seed = 2543, delta = 1,
+                            noc = 5)
+arc_ave <- average_pch_fits(arc_rob)
+
+
+
+arc_ks = ParetoTI::k_fit_pch(x_pca, ks = 2:8, check_installed = T,
                    bootstrap = T, bootstrap_N = 200, maxiter = 1000,
                    bootstrap_type = "m", seed = 2543, 
                    volume_ratio = "t_ratio", # set to "none" if too slow
@@ -49,6 +85,89 @@ arc_ks = k_fit_pch(PCs, ks = 2:8, check_installed = T,
                    sample_prop = 0.75)
 
 # Show variance explained by a polytope with each k (cumulative)
-plot_arc_var(arc_ks, type = "varexpl", point_size = 2, line_size = 1.5) + theme_bw()
+ParetoTI::plot_arc_var(arc_ks, type = "varexpl", point_size = 2, line_size = 1.5) + theme_bw()
+```
+
+
+```{r}
+
+# Extract tSNE information from Seurat Object
+umap_1 <- sclc[["umap"]]@cell.embeddings[,1]
+umap_2 <- sclc[["umap"]]@cell.embeddings[,2]
+
+# Visualize what headings are called so that you can extract them to form a dataframe
+Embeddings(object = sclc, reduction = "umap")
+
+# Prepare a dataframe for cell plotting
+plot.data <- FetchData(object = sclc, vars = c("UMAP_1", "UMAP_2", "cluster"))
+
+# Make a column of row name identities (these will be your cell/barcode names)
+plot.data$label <- paste(rownames(plot.data))
+install.packages('plotly')
+
+# Load plot_ly
+library(plotly)
+# Plot your data, in this example my Seurat object had 21 clusters (0-20)
+plot_ly(data = plot.data, 
+        x = ~UMAP_1, y = ~UMAP_2,
+        color = ~cluster,
+        mode = "markers", 
+        colors = palette(rainbow(20)),
+        type = 'scatter',
+        marker = list(size = 5, width=2), # controls size of points
+        text=~label, #This is that extra column we made earlier for which we will use for cell ID
+        hoverinfo="text") #When you visualize your plotly object, hovering your mouse pointer over a point shows cell names
+
+
+# Extract tSNE information from Seurat Object
+pca_1 <- sclc[["pca"]]@cell.embeddings[,1]
+pca_2 <- sclc[["pca"]]@cell.embeddings[,2]
+pca_3 <- sclc[["pca"]]@cell.embeddings[,3]
+
+
+# Visualize what headings are called so that you can extract them to form a dataframe
+Seurat::Embeddings(object = sclc, reduction = "pca")
+plot.data <- FetchData(object = sclc, vars = c("PC_1", "PC_2","PC_3", "cluster"))
+plot.data$label <- paste(rownames(plot.data))
+plot_ly(data = plot.data, 
+        x = ~PC_1, y = ~PC_2,z = ~PC_3,
+        color = ~cluster,
+        mode = "markers", 
+        colors = palette(rainbow(20)),
+        type = 'scatter3d',
+        marker = list(size = 5, width=2), # controls size of points
+        text=~label, #This is that extra column we made earlier for which we will use for cell ID
+        hoverinfo="text") #
+VizDimLoadings(data, dims = 1:3, reduction = "pca")
+```
+
+```{r}
+
+
+# cols <- c(brewer.pal(9, "Set1"),'gray')
+
+ParetoTI::plot_arc(arc_data = arc, data = x_pca,
+                   which_dimensions = 1:2,colors = palette(rainbow(20)),
+                  data_lab = as.character(Idents(sclc))) + theme_bw()
+p_pca = ParetoTI::plot_arc(arc_data = arc, data = x_pca, 
+                 which_dimensions = 1:3, line_size = 1.5,
+                 colors = palette(rainbow(20)),
+                  data_lab = as.character(Idents(sclc)),
+                 text_size = 60, data_size = 2) 
+plotly::layout(p_pca, title = "Archetypes for Top 18 PCs")
+
+plasticity <- "/Users/smgroves/Documents/pycharm_workspace/archetypes/code/adata_R_plasticity.csv"
+plas <- read.csv(plasticity,header = TRUE,row.names = 1)
+plas[plas > .5] <- .5
+p_pca = plot_arc(arc_data = arc_rob, data = x_pca, 
+                 which_dimensions = 1:3, line_size = 1.5,
+                  data_lab = as.numeric(plas$log1p_plasticity),
+                 text_size = 60, data_size = 4) 
+plotly::layout(p_pca, title = "Average Archetypes for Top 20 PCs")
+htmlwidgets::saveWidget(p_pca, "plasticity.html")
+
+save(arc, file="../data/arc.Robj")
+save(arc_ks, file="../data/arc_ks.Robj")
+
 ```
 
