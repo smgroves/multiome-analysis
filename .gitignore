@@ -12,3 +12,8 @@ data/data_from_debbie/scaled-SCT-data.csv
 data/data_from_debbie/scaled-SCT-data_small.csv
 data/PC_smg/scaled-SCT-data_small.csv
 .DS_Store
+*.gz
+data/magic_imputed_no_ciliated.csv
+*.gz
+data/TKO_imputed.csv.gz
+data/magic_imputed_no_ciliated.csv
