@@ -1,0 +1,280 @@
+---
+title: "Multiome archetype analysis using MAGIC imputed dataset"
+author: "Sarah Groves"
+date: "10/4/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Load data and packages
+
+reference SCLC multiome analysis.Rmd for in depth description of sclc RDS.
+```{r setup-libraries, include=FALSE}
+library(Signac)
+library(Seurat)
+library(GenomeInfoDb)
+library(EnsDb.Mmusculus.v79) 
+library(ggplot2)
+library(patchwork)
+library(dplyr)
+# install.packages('devtools')
+library(devtools)
+# BiocManager::install("scater")
+library(scater)
+
+# Load plot_ly
+library(plotly)
+
+# install loomR from GitHub using the remotes package 
+# remotes::install_github(repo ='mojaveazure/loomR', ref = 'develop')
+set.seed(1234)
+```
+
+```{r, import_pareto, include=FALSE}
+# install.packages("BiocManager") # for installing BioConductor dependencies
+# BiocManager::install("vitkl/ParetoTI", dependencies = c("Depends", "Imports", "LinkingTo"))
+# ParetoTI::install_py_pcha(method = "conda",
+                          # extra_packages = c("tensorflow", "tensorflow-probability",
+                          #               "pandas", "keras", "h5py",
+                          #               "geosketch", "pydot", "scikit-learn==0.20",
+                          #               "umap-learn"))
+# ParetoTI::install_py_pcha()
+library(reticulate)
+reticulate::use_condaenv("reticulate_PCHA", conda = "auto",
+                         required = TRUE) # set TRUE to force R to use reticulate_PCHA
+reticulate::py_discover_config("py_pcha")
+
+library(ParetoTI)
+```
+
+
+# SCLC imputed data without ciliated cells
+Using data from Debbie, with her PCA and labels.
+
+It looks like ciliated cells are dominating PC2, so we are going to remove those cells and just look at the four archetypes defining the other cell types. 
+```{r without-ciliated, message=FALSE}
+TKO <- readRDS('./data/TKO_with_MAGIC_11_1.rds')
+DefaultAssay(TKO) <- "Imputed_counts"
+
+TKO <- Seurat::ScaleData(object = TKO)
+TKO<- Seurat::FindVariableFeatures(TKO)
+TKO <- Seurat::RunPCA(object = TKO)
+TKO <- Seurat::ProjectDim(TKO, reduction = 'pca')
+
+TKO_pca <- TKO@reductions$pca@cell.embeddings
+TKO_pca <- t(TKO_pca)
+TKO_pca <- TKO_pca[1:20,] #keep only top 18 PCs
+loadings<- TKO@reductions$pca@feature.loadings.projected
+loadings <- as.matrix(loadings)
+
+
+```
+
+
+## Plot PCA of smaller dataset (no ciliated cells)
+```{r, include = FALSE}
+
+# Extract tSNE information from Seurat Object
+pca_1 <- TKO[["pca"]]@cell.embeddings[,1]
+pca_2 <- TKO[["pca"]]@cell.embeddings[,2]
+pca_3 <- TKO[["pca"]]@cell.embeddings[,3]
+
+
+# Visualize what headings are called so that you can extract them to form a dataframe
+Seurat::Embeddings(object = TKO, reduction = "pca")
+```
+
+
+
+```{r, echo = FALSE}
+plot.data <- Seurat::FetchData(object = TKO, vars = c("PC_1", "PC_2","PC_3", "orig.ident"))
+plot.data$label <- paste(rownames(plot.data))
+plot_ly(data = plot.data, 
+        x = ~PC_1, y = ~PC_2,z = ~PC_3,
+        color = ~orig.ident,
+        mode = "markers", 
+        colors = palette(rainbow(20)),
+        type = 'scatter3d',
+        marker = list(size = 5, width=2), # controls size of points
+        text=~label, #This is that extra column we made earlier for which we will use for cell ID
+        hoverinfo="text") #
+# VizDimLoadings(data, dims = 1:3, reduction = "pca")
+```
+# Run archetype analysis on imputed data
+``` {r}
+
+
+
+##################################
+
+# arc_ks = ParetoTI::k_fit_pch(x_pca_small, ks = 2:8, check_installed = T,
+#                    bootstrap = T, bootstrap_N = 200, maxiter = 1000,
+#                    bootstrap_type = "m", seed = 2543,
+#                    volume_ratio = "t_ratio", # set to "none" if too slow
+#                    delta=0, conv_crit = 1e-04, order_type = "align",
+#                    sample_prop = 0.75)
+
+# # Show variance explained by a polytope with each k (cumulative)
+ParetoTI::plot_arc_var(arc_ks, type = "varexpl", point_size = 2, line_size = 1.5) + theme_bw()
+# Show variance explained by k-vertex model on top of k-1 model (each k separately)
+ParetoTI::plot_arc_var(arc_ks, type = "res_varexpl", point_size = 2, line_size = 1.5) + theme_bw()
+# Show variance in position of vertices obtained using bootstraping 
+# - use this to find largest k that has low variance
+ParetoTI::plot_arc_var(arc_ks, type = "total_var", point_size = 2, line_size = 1.5) +
+  theme_bw() +
+  ylab("Mean variance in position of vertices")
+# Show t-ratio
+ParetoTI::plot_arc_var(arc_ks, type = "t_ratio", point_size = 2, line_size = 1.5) + theme_bw()
+
+# 
+```
+
+
+```{r}
+# Fit 4 archetypes
+arc <- fit_pch((x_pca_small), noc = 4)
+# Fit 4 archetypes with bootstrapping for robustness
+arc_rob = fit_pch_bootstrap(x_pca_small, n = 200, sample_prop = .8, seed = 2543, delta = 1,
+                            noc = 4)
+arc_ave <- average_pch_fits(arc_rob)
+
+
+p_pca = plot_arc(arc_data = arc, data = x_pca_small, 
+                 which_dimensions = 1:3, line_size = 1.5,
+                  data_lab = (Seurat::Idents(sclc_small)),
+                 colors = palette(rainbow(20)),
+                 text_size = 60, data_size = 4) 
+plotly::layout(p_pca, title = "Average Archetypes for Top 20 PCs")
+```
+```{r}
+p_pca = plot_arc(arc_data = arc, data = x_pca_small, 
+                 which_dimensions = 1:3, line_size = 1.5,
+                 data_lab = sclc_small@assays$SCT@data['Scgb1a1',],
+                 text_size = 60, data_size = 4) 
+plotly::layout(p_pca, title = "Average Archetypes for Top 20 PCs")
+```
+
+```{r}
+
+save(arc, file="../data/data_from_debbie/arc_small.Robj")
+save(arc_ks, file="../data/data_from_debbie/arc_ks_small.Robj")
+save(arc_rob, file="../data/data_from_debbie/arc_rob_small.Robj")
+save(arc_ave, file="../data/data_from_debbie/arc_ave_small.Robj")
+```
+
+# Randomize data to compute background distirbution of scores
+
+This method is used to compare the archetypes on the data to randomized data-- how likely is it to explain a similar amount of variance, get a similar t-ratio, or similar variance in archetype position, by chance?
+
+94% of the variance (proportion of the top 18 PC's explained variance, not total variance in dataset) is explained by the archetypes (5 dimensions). This has a p-value of 0.001. 
+
+```{r}
+# start = Sys.time()
+# pch_rand = randomise_fit_pch(x_pca, arc_data = arc,
+#                              n_rand = 1000,
+#                              replace = FALSE, 
+#                              volume_ratio = "t_ratio",
+#                              maxiter = 500, delta = 1, conv_crit = 1e-4)
+# # use type m to run on a single machine or cloud
+# # type = "m", clust_options = list(cores = 3))
+# # use clustermq (type cmq) to run as jobs on a computing cluster (higher parallelisation)
+# # type = "cmq", clust_options = list(njobs = 10)) 
+# 
+# # This analysis took:
+# Sys.time() - start
+# plot(pch_rand, type = c("t_ratio"), nudge_y = 5)
+
+```
+
+# Determine enriched genes and gene sets to define archetypes
+
+This will be especially interesting for comparing archetypes 4 and 5, since it is pretty clear that the shape of the data is not clearly defined without an archetype at 5, but not many cells actually lie close to it. We use the ParetoTI package to evaulate gene sets enriched in each location. 
+
+```{r}
+library(matrixStats)
+
+# x.orig <- as.matrix(data[['RNA']]@data)
+# 
+# rownames(x.orig)<-gsub("-", ".", rownames(x.orig))
+# 
+# 
+# 
+# ix <- which(rownames(x.orig) %in%c('1.Sep','10.Sep','11.Mar','11.Sep','2.Sep','3.Mar','3.Sep','4.Mar','4.Sep','5.Sep', '5.Mar','6.Sep','6.Mar','7.Sep','7.Mar','8.Sep','8.Mar','9.Sep','9.Mar','RP11-206L10.1'))
+# ix <- which(rownames(x.orig) %in% c('7SK.1'))
+# clean <- x.orig[-ix, ]
+
+# data <- read.csv('../data/data_from_debbie/scaled-SCT-data_small.csv', header = TRUE,row.names = 1)
+data <- as.matrix(sclc_small@assays$SCT@data)
+activ__unscaled = measure_activity(as.matrix(data), activity_method = 'pseudoinverse',# row names are assumed to be gene identifiers,
+                         which = 'BP', return_as_matrix = F,
+                         taxonomy_id = 10090, keytype = "ALIAS", #10090 is mouse
+                         lower = 10, upper = 1000)
+                         # aucell_options =list(aucMaxRank =
+                          # nrow(as.matrix(x.orig)) * 0.05, binary = F, nCores = 3, plotStats = TRUE))
+save(activ_pi, file="../data/data_from_debbie/activ_pi.Robj")
+load("../data/data_from_debbie/activ_pi.Robj")
+# activ_pi <- within(activ_pi, rm('2__deoxyribonucleotide_biosynthetic_process','2__deoxyribonucleotide_metabolic_process','2_oxoglutarate_metabolic_process','3__phosphoadenosine_5__phosphosulfate_metabolic_process',
+# '3__UTR_mediated_mRNA_destabilization',
+# '3__UTR_mediated_mRNA_stabilization',
+# '7_methylguanosine_mRNA_capping',
+# '7_methylguanosine_RNA_capping',
+# '4_hydroxyproline_metabolic_process'))
+# 
+# activ_pi <- within(activ_pi, rm(`_de_novo__posttranslational_protein_folding`,
+# `_de_novo__protein_folding`,
+# `poly_A_+_mRNA_export_from_nucleus`))
+
+
+data_attr = merge_arch_dist(arc_data = arc, data = x_pca_small, 
+                            feature_data = as.matrix(data),
+                            colData = activ_pi, 
+                            dist_metric = c("euclidean", "arch_weights")[1],
+                            colData_id = "cells", rank = F) 
+
+enriched_genes = find_decreasing_wilcox(data_attr$data, data_attr$arc_col,
+                                features = data_attr$features_col,
+                                bin_prop = 0.05, method = "BioQC")
+write.csv(enriched_genes, '../data/data_from_debbie/enriched-genes.csv')
+
+enriched_sets = find_decreasing_wilcox(data_attr$data, data_attr$arc_col,
+                                features = data_attr$colData_col,
+                                bin_prop = 0.05, method = "BioQC")
+
+labs = get_top_decreasing(summary_genes = enriched_genes, summary_sets = enriched_sets,
+                          cutoff_genes = 0.05,cutoff_sets = 0.05,
+                          cutoff_metric = "wilcoxon_p_val", 
+                          p.adjust.method = "fdr", 
+                          order_by = "mean_diff", order_decreasing = T)
+
+p_pca = plot_arc(arc_data = arc, data = x_pca_small,
+                 which_dimensions = 1:3, line_size = 1.5,
+                 data_lab = activ_pi$neural_crest_cell_development,
+                 text_size = 60, data_size = 6)
+plotly::layout(p_pca, title = "neural crest activity")
+
+
+#below takes forever
+# enriched_genes_gam = find_decreasing(data_attr$data, data_attr$arc_col,
+#                                 features = data_attr$features_col, return_only_summary = TRUE)
+# write.csv(enriched_genes_gam, '../data/single-cell/enriched_genes_gam.csv')
+# 
+# enriched_sets_gam = find_decreasing(data_attr$data, data_attr$arc_col,
+#                                 features = data_attr$colData_col, return_only_summary = TRUE)
+# write.csv(enriched_sets_gam, '../data/single-cell/enriched_sets_gam.csv')
+# 
+# 
+# 
+# labs_gam = get_top_decreasing(summary_genes = enriched_genes_gam, summary_sets = enriched_sets_gam,
+#                           cutoff_genes = 0.05,cutoff_sets = 0.05,
+#                           cutoff_metric = "mean_prob", 
+#                           p.adjust.method = "none", 
+#                           order_by = "deriv50", order_decreasing = F,
+#                           min_max_diff_cutoff_g = .05)
+# 
+# fit_arc_gam_1('ASCL1', "archetype_2", data_attr)
+```
+
+

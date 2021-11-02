@@ -7,3 +7,7 @@
 .DS_Store
 .RData
 data/scaled-SCT-data.csv
+*.Robj
+data/data_from_debbie/scaled-SCT-data.csv
+data/data_from_debbie/scaled-SCT-data_small.csv
+data/PC_smg/scaled-SCT-data_small.csv
