@@ -56,7 +56,7 @@ Using data from Debbie, with her PCA and labels.
 
 It looks like ciliated cells are dominating PC2, so we are going to remove those cells and just look at the four archetypes defining the other cell types. 
 ```{r without-ciliated, message=FALSE}
-TKO <- readRDS('./data/TKO_with_MAGIC_11_1.rds')
+TKO <- readRDS('../data//TKO_with_MAGIC_11_1.rds')
 DefaultAssay(TKO) <- "Imputed_counts"
 
 TKO <- Seurat::ScaleData(object = TKO)
@@ -69,6 +69,53 @@ TKO_pca <- t(TKO_pca)
 TKO_pca <- TKO_pca[1:20,] #keep only top 18 PCs
 loadings<- TKO@reductions$pca@feature.loadings.projected
 loadings <- as.matrix(loadings)
+
+
+```
+```{r}
+TKO <- RunUMAP(TKO, dims = 1:30, verbose = FALSE, assay = 'Imputed_counts')
+
+TKO <- FindNeighbors(TKO, dims = 1:30)
+TKO <- FindClusters(TKO)
+
+
+# build a UMAP visualization
+TKO <- RunUMAP(
+  object = TKO,
+  nn.name = "weighted.nn",
+  assay = "Imputed_counts",
+  verbose = TRUE,
+  reduction.key = 'UMAP_imputed',
+  reduction.name = 'UMAP_imputed'
+)
+Idents(TKO) <- 'old.ident'
+TKO <- RenameIdents(
+  object = TKO,
+  '0' = 'Club cells-1', #
+  '1' = "NE-1",
+  '2' = 'NE-2',
+  '3' = 'NE-3',
+  '4' = 'NE-4',
+  '5' = 'NE-5',
+  '6' = 'NFIB High NE',#
+  '7' = 'Club cells-2',
+  '8' = 'Club cells-3', #,
+  '9' = 'NE-6',
+  '10' = 'NE-7',
+  '11' = 'AT2 cells', #
+  '12' ='Ciliated cells', #'NE-8',
+  '13' =  'Endothelial cells',
+  '14' = 'Stromal cells'
+)
+DimPlot(TKO, label = TRUE, repel = TRUE, reduction = "UMAP_imputed") + NoLegend()
+FeaturePlot(
+  object = TKO,
+  features = "Scgb1a1",
+  min.cutoff = 'q10',
+  max.cutoff = 'q95',
+  reduction = 'UMAP_imputed',
+  pt.size = 0.1
+)
 
 
 ```
@@ -90,11 +137,12 @@ Seurat::Embeddings(object = TKO, reduction = "pca")
 
 
 ```{r, echo = FALSE}
-plot.data <- Seurat::FetchData(object = TKO, vars = c("PC_1", "PC_2","PC_3", "orig.ident"))
+TKO[["cluster.ident"]] = Idents(TKO)
+plot.data <- Seurat::FetchData(object = TKO, vars = c("PC_1", "PC_2","PC_3", "cluster.ident"))
 plot.data$label <- paste(rownames(plot.data))
 plot_ly(data = plot.data, 
         x = ~PC_1, y = ~PC_2,z = ~PC_3,
-        color = ~orig.ident,
+        color = ~cluster.ident,
         mode = "markers", 
         colors = palette(rainbow(20)),
         type = 'scatter3d',
@@ -110,12 +158,12 @@ plot_ly(data = plot.data,
 
 ##################################
 
-# arc_ks = ParetoTI::k_fit_pch(x_pca_small, ks = 2:8, check_installed = T,
-#                    bootstrap = T, bootstrap_N = 200, maxiter = 1000,
-#                    bootstrap_type = "m", seed = 2543,
-#                    volume_ratio = "t_ratio", # set to "none" if too slow
-#                    delta=0, conv_crit = 1e-04, order_type = "align",
-#                    sample_prop = 0.75)
+arc_ks = ParetoTI::k_fit_pch(TKO_pca, ks = 2:8, check_installed = T,
+                   bootstrap = T, bootstrap_N = 200, maxiter = 1000,
+                   bootstrap_type = "m", seed = 2543,
+                   volume_ratio = "t_ratio", # set to "none" if too slow
+                   delta=0, conv_crit = 1e-04, order_type = "align",
+                   sample_prop = 0.75)
 
 # # Show variance explained by a polytope with each k (cumulative)
 ParetoTI::plot_arc_var(arc_ks, type = "varexpl", point_size = 2, line_size = 1.5) + theme_bw()
