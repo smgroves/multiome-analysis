@@ -17,3 +17,5 @@ data/magic_imputed_no_ciliated.csv
 *.gz
 data/TKO_imputed.csv.gz
 data/magic_imputed_no_ciliated.csv
+.DS_Store
+notebooks/.idea/workspace.xml
