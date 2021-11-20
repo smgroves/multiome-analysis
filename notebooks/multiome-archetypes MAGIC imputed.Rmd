@@ -56,7 +56,11 @@ Using data from Debbie, with her PCA and labels.
 
 It looks like ciliated cells are dominating PC2, so we are going to remove those cells and just look at the four archetypes defining the other cell types. 
 ```{r without-ciliated, message=FALSE}
+<<<<<<< Updated upstream
 TKO <- readRDS('../data//TKO_with_MAGIC_11_1.rds')
+=======
+TKO <- readRDS('../data/TKO_with_MAGIC_11_1.rds')
+>>>>>>> Stashed changes
 DefaultAssay(TKO) <- "Imputed_counts"
 
 TKO <- Seurat::ScaleData(object = TKO)
@@ -69,10 +73,12 @@ TKO_pca <- t(TKO_pca)
 TKO_pca <- TKO_pca[1:20,] #keep only top 18 PCs
 loadings<- TKO@reductions$pca@feature.loadings.projected
 loadings <- as.matrix(loadings)
+ElbowPlot(TKO)
 
 
 ```
 ```{r}
+<<<<<<< Updated upstream
 TKO <- RunUMAP(TKO, dims = 1:30, verbose = FALSE, assay = 'Imputed_counts')
 
 TKO <- FindNeighbors(TKO, dims = 1:30)
@@ -118,6 +124,11 @@ FeaturePlot(
 )
 
 
+=======
+DimHeatmap(TKO, dims = 1:20, cells = 500, balanced = TRUE)
+# TKO <- JackStraw(TKO, num.replicate = 100)
+# TKO <- ScoreJackStraw(TKO, dims = 1:20)
+>>>>>>> Stashed changes
 ```
 
 
@@ -151,10 +162,41 @@ plot_ly(data = plot.data,
         hoverinfo="text") #
 # VizDimLoadings(data, dims = 1:3, reduction = "pca")
 ```
+# Labeling cells
+Somehow we lost the cell labels, so we'll read those in from Debbie and use them to plot. 
+
+```{r}
+labels <- read.table('../data/meta_cells.txt', row.names = 1)
+TKO[['new.ident']] = labels
+Idents(TKO) <- TKO[['new.ident']]
+plot.data <- Seurat::FetchData(object = TKO, vars = c("PC_1", "PC_2","PC_3", "new.ident"))
+plot.data$label <- paste(rownames(plot.data))
+saveRDS(object = TKO, file = "../data/TKO_MAGIC_updated.rds")
+
+plot_ly(data = plot.data, 
+        x = ~PC_1, y = ~PC_2,z = ~PC_3,
+        color = ~new.ident,
+        mode = "markers", 
+        colors = palette(rainbow(20)),
+        type = 'scatter3d',
+        marker = list(size = 5, width=2), # controls size of points
+        text=~label, #This is that extra column we made earlier for which we will use for cell ID
+        hoverinfo="text") #
+# VizDimLoadings(data, dims = 1:3, reduction = "pca")
+
+```
+
+
+
 # Run archetype analysis on imputed data
 ``` {r}
 
-
+TKO <- readRDS( file = "../data/TKO_MAGIC_updated.rds")
+TKO_pca <- TKO@reductions$pca@cell.embeddings
+TKO_pca <- t(TKO_pca)
+TKO_pca <- TKO_pca[1:20,] #keep only top 18 PCs
+loadings<- TKO@reductions$pca@feature.loadings.projected
+loadings <- as.matrix(loadings)
 
 ##################################
 
@@ -183,20 +225,38 @@ ParetoTI::plot_arc_var(arc_ks, type = "t_ratio", point_size = 2, line_size = 1.5
 
 ```{r}
 # Fit 4 archetypes
-arc <- fit_pch((x_pca_small), noc = 4)
+arc <- fit_pch((TKO_pca), noc = 4)
 # Fit 4 archetypes with bootstrapping for robustness
-arc_rob = fit_pch_bootstrap(x_pca_small, n = 200, sample_prop = .8, seed = 2543, delta = 1,
+arc_rob = fit_pch_bootstrap(TKO_pca, n = 200, sample_prop = .8, seed = 2543, delta = 1,
                             noc = 4)
 arc_ave <- average_pch_fits(arc_rob)
 
 
-p_pca = plot_arc(arc_data = arc, data = x_pca_small, 
+p_pca = plot_arc(arc_data = arc, data = TKO_pca, 
                  which_dimensions = 1:3, line_size = 1.5,
-                  data_lab = (Seurat::Idents(sclc_small)),
-                 colors = palette(rainbow(20)),
+                  data_lab = (Seurat::Idents(TKO)),
+                 colors = palette(rainbow(20)), mode = "markers", 
                  text_size = 60, data_size = 4) 
 plotly::layout(p_pca, title = "Average Archetypes for Top 20 PCs")
 ```
+```{r}
+arc_tsne = arch_to_tsne(arc, TKO_pca, which_dimensions = 1:2)
+plot_arc(arc_data = arc_tsne$arc_data, data = arc_tsne$data,data_lab = (Seurat::Idents(TKO)),
+                 colors = palette(rainbow(20)),
+    which_dimensions = 1:2) +
+    theme_bw()
+# install.packages(
+# 'umap'
+# )
+arc_umap = arch_to_umap(arc, TKO_pca, which_dimensions = 1:2,
+                        method = c( 'naive'))# implemented in R and slow
+                                   #"umap-learn")) # requires python module
+plot_arc(arc_data = arc_umap$arc_data, data = arc_umap$data,data_lab = (Seurat::Idents(TKO)),
+                 colors = palette(rainbow(20)),
+    which_dimensions = 1:2) +
+    theme_bw()
+```
+
 ```{r}
 p_pca = plot_arc(arc_data = arc, data = x_pca_small, 
                  which_dimensions = 1:3, line_size = 1.5,
@@ -207,10 +267,10 @@ plotly::layout(p_pca, title = "Average Archetypes for Top 20 PCs")
 
 ```{r}
 
-save(arc, file="../data/data_from_debbie/arc_small.Robj")
-save(arc_ks, file="../data/data_from_debbie/arc_ks_small.Robj")
-save(arc_rob, file="../data/data_from_debbie/arc_rob_small.Robj")
-save(arc_ave, file="../data/data_from_debbie/arc_ave_small.Robj")
+save(arc, file="../data/arc_updated.Robj")
+save(arc_ks, file="../data/arc_ks_updated.Robj")
+save(arc_rob, file="../data/arc_rob_updated.Robj")
+save(arc_ave, file="../data/arc_ave_updated.Robj")
 ```
 
 # Randomize data to compute background distirbution of scores
@@ -255,15 +315,15 @@ library(matrixStats)
 # clean <- x.orig[-ix, ]
 
 # data <- read.csv('../data/data_from_debbie/scaled-SCT-data_small.csv', header = TRUE,row.names = 1)
-data <- as.matrix(sclc_small@assays$SCT@data)
-activ__unscaled = measure_activity(as.matrix(data), activity_method = 'pseudoinverse',# row names are assumed to be gene identifiers,
+data <- as.matrix(TKO@assays$Imputed_counts@data)
+activ = measure_activity(as.matrix(data), activity_method = 'pseudoinverse',# row names are assumed to be gene identifiers,
                          which = 'BP', return_as_matrix = F,
                          taxonomy_id = 10090, keytype = "ALIAS", #10090 is mouse
                          lower = 10, upper = 1000)
                          # aucell_options =list(aucMaxRank =
                           # nrow(as.matrix(x.orig)) * 0.05, binary = F, nCores = 3, plotStats = TRUE))
-save(activ_pi, file="../data/data_from_debbie/activ_pi.Robj")
-load("../data/data_from_debbie/activ_pi.Robj")
+save(activ, file="../data/data_from_debbie/activ_imputed.Robj")
+# load("../data/data_from_debbie/activ_pi.Robj")
 # activ_pi <- within(activ_pi, rm('2__deoxyribonucleotide_biosynthetic_process','2__deoxyribonucleotide_metabolic_process','2_oxoglutarate_metabolic_process','3__phosphoadenosine_5__phosphosulfate_metabolic_process',
 # '3__UTR_mediated_mRNA_destabilization',
 # '3__UTR_mediated_mRNA_stabilization',
@@ -276,9 +336,9 @@ load("../data/data_from_debbie/activ_pi.Robj")
 # `poly_A_+_mRNA_export_from_nucleus`))
 
 
-data_attr = merge_arch_dist(arc_data = arc, data = x_pca_small, 
+data_attr = merge_arch_dist(arc_data = arc, data = TKO_pca, 
                             feature_data = as.matrix(data),
-                            colData = activ_pi, 
+                            colData = activ, 
                             dist_metric = c("euclidean", "arch_weights")[1],
                             colData_id = "cells", rank = F) 
 
@@ -325,4 +385,208 @@ plotly::layout(p_pca, title = "neural crest activity")
 # fit_arc_gam_1('ASCL1', "archetype_2", data_attr)
 ```
 
+# Only NE populations
+
+```{r}
+
+NE <- subset(x = TKO, idents = c( "NFIB high_NE",  "NE_1", "NE_2", "NE_3","NE_4","NE_6",  "NE_5",  "NE_7","NE_8"))
+
+DefaultAssay(NE) <- "Imputed_counts"
+
+NE <- Seurat::ScaleData(object = NE)
+NE<- Seurat::FindVariableFeatures(NE)
+NE <- Seurat::RunPCA(object = NE)
+NE <- Seurat::ProjectDim(NE, reduction = 'pca')
+
+NE_pca <- NE@reductions$pca@cell.embeddings
+NE_pca <- t(NE_pca)
+ElbowPlot(NE)
+
+NE_pca <- NE_pca[1:20,] #keep only top 18 PCs
+loadings<- NE@reductions$pca@feature.loadings.projected
+loadings <- as.matrix(loadings)
+NE[["cluster"]] = Idents(NE)
+plot.data <- Seurat::FetchData(object = NE, vars = c("PC_1", "PC_2","PC_3", "cluster"))
+plot.data$label <- paste(rownames(plot.data))
+plot_ly(data = plot.data, 
+        x = ~PC_1, y = ~PC_2,z = ~PC_3,
+        color = ~cluster,
+        mode = "markers", 
+        colors = palette(rainbow(20)),
+        type = 'scatter3d',
+        marker = list(size = 5, width=2), # controls size of points
+        text=~label, #This is that extra column we made earlier for which we will use for cell ID
+        hoverinfo="text") #
+
+```
+
+```{r}
+arc_ne = ParetoTI::k_fit_pch(NE_pca, ks = 2:8, check_installed = T,
+                   bootstrap = T, bootstrap_N = 200, maxiter = 1000,
+                   bootstrap_type = "m", seed = 2543,
+                   volume_ratio = "t_ratio", # set to "none" if too slow
+                   delta=0, conv_crit = 1e-04, order_type = "align",
+                   sample_prop = 0.75)
+
+# # Show variance explained by a polytope with each k (cumulative)
+ParetoTI::plot_arc_var(arc_ne, type = "varexpl", point_size = 2, line_size = 1.5) + theme_bw()
+# Show variance explained by k-vertex model on top of k-1 model (each k separately)
+ParetoTI::plot_arc_var(arc_ne, type = "res_varexpl", point_size = 2, line_size = 1.5) + theme_bw()
+# Show variance in position of vertices obtained using bootstraping 
+# - use this to find largest k that has low variance
+ParetoTI::plot_arc_var(arc_ne, type = "total_var", point_size = 2, line_size = 1.5) +
+  theme_bw() +
+  ylab("Mean variance in position of vertices")
+# Show t-ratio
+ParetoTI::plot_arc_var(arc_ne, type = "t_ratio", point_size = 2, line_size = 1.5) + theme_bw()
+
+
+```
+```{r}
+
+# Fit 4 archetypes
+arc <- fit_pch((NE_pca), noc = 4)
+# Fit 4 archetypes with bootstrapping for robustness
+arc_rob = fit_pch_bootstrap(NE_pca, n = 200, sample_prop = .8, seed = 2543, delta = 1,
+                            noc = 4)
+arc_ave <- average_pch_fits(arc_rob)
+
+
+p_pca = plot_arc(arc_data = arc_ave, data = NE_pca, 
+                 which_dimensions = 1:3, line_size = 1.5,
+                  data_lab = (Seurat::Idents(NE)),
+                 colors = palette(rainbow(20)),
+                 text_size = 60, data_size = 4) 
+plotly::layout(p_pca, title = "Average Archetypes for Top 20 PCs")
+```
+
+```{r}
+library(matrixStats)
+
+# x.orig <- as.matrix(data[['RNA']]@data)
+# 
+# rownames(x.orig)<-gsub("-", ".", rownames(x.orig))
+# 
+# 
+# 
+# ix <- which(rownames(x.orig) %in%c('1.Sep','10.Sep','11.Mar','11.Sep','2.Sep','3.Mar','3.Sep','4.Mar','4.Sep','5.Sep', '5.Mar','6.Sep','6.Mar','7.Sep','7.Mar','8.Sep','8.Mar','9.Sep','9.Mar','RP11-206L10.1'))
+# ix <- which(rownames(x.orig) %in% c('7SK.1'))
+# clean <- x.orig[-ix, ]
+
+# data <- read.csv('../data/data_from_debbie/scaled-SCT-data_small.csv', header = TRUE,row.names = 1)
+data <- as.matrix(NE@assays$Imputed_counts@data)
+activ = measure_activity(as.matrix(data), activity_method = 'pseudoinverse',# row names are assumed to be gene identifiers,
+                         which = 'BP', return_as_matrix = F,
+                         taxonomy_id = 10090, keytype = "ALIAS", #10090 is mouse
+                         lower = 10, upper = 1000)
+                         # aucell_options =list(aucMaxRank =
+                          # nrow(as.matrix(x.orig)) * 0.05, binary = F, nCores = 3, plotStats = TRUE))
+save(activ, file="../data/activ_imputed_NE.Robj")
+
+###########################
+
+load("../data/activ_imputed_NE.Robj")
+# activ_pi <- within(activ_pi, rm('2__deoxyribonucleotide_biosynthetic_process','2__deoxyribonucleotide_metabolic_process','2_oxoglutarate_metabolic_process','3__phosphoadenosine_5__phosphosulfate_metabolic_process',
+# '3__UTR_mediated_mRNA_destabilization',
+# '3__UTR_mediated_mRNA_stabilization',
+# '7_methylguanosine_mRNA_capping',
+# '7_methylguanosine_RNA_capping',
+# '4_hydroxyproline_metabolic_process'))
+# 
+# activ_pi <- within(activ_pi, rm(`_de_novo__posttranslational_protein_folding`,
+# `_de_novo__protein_folding`,
+# `poly_A_+_mRNA_export_from_nucleus`))
+
+
+data_attr = merge_arch_dist(arc_data = arc_ave, data = NE_pca, 
+                            feature_data = as.matrix(data),
+                            colData = activ, 
+                            dist_metric = c("euclidean", "arch_weights")[1],
+                            colData_id = "cells", rank = T) 
+ans <- data_attr$data[,1:5]
+save(arc, file="../data/arc_NE.Robj")
+save(arc_rob, file="../data/arc_rob_NE.Robj")
+save(arc_ave, file="../data/arc_ave_NE.Robj")
+save(data_attr, file="../data/data_attr_NE.Robj")
+write.csv(ans, '../data/arc_distance_inputed-ne.csv')
+
+```
+At this point, we saved the data as a csv with distances to each archetype and all the expression data. We'l read this into python and make labels for each cell for each archetype: "10_pct_closest_arc1", "10_pct_closest_arc2", etc.
+
+```{r}
+
+labels <- read.table('../data/labels_arc_dist.csv', row.names = 1, sep = ',', header = TRUE)
+
+NE[['arc.distance.ident']] = labels
+Idents(NE) <- NE[['arc.distance.ident']]
+saveRDS(object = NE, file = "../data/NE_MAGIC_updated.rds")
+
+for_cibersort <- subset(x = NE, idents = c( "archetype_1_closest",  "archetype_2_closest", "archetype_3_closest", "archetype_4_closest"))
+cibersort_data <- as.matrix(for_cibersort@assays$Imputed_counts@data)
+colnames(cibersort_data) <- Idents(for_cibersort)
+rownames(cibersort_data)<-toupper(rownames(cibersort_data))
+write.csv(cibersort_data, '../data/cibersort-ne-cells-closest-to-archetypes.csv')
+write.table(cibersort_data, '../data/cibersort-ne-cells-closest-to-archetypes.txt', sep = "\t")
+
+saveRDS(object = for_cibersort, file = "../data/NE_ForCibersort_MAGIC_updated.rds")
+
+cibersort_data_clustered <- as.matrix(NE@assays$Imputed_counts@data)
+Idents(NE) <- NE[['new.ident']]
+colnames(cibersort_data_clustered) <- Idents(NE)
+rownames(cibersort_data_clustered)<-toupper(rownames(cibersort_data_clustered))
+write.table(cibersort_data_clustered, '../data/cibersort-ne-cells-clustered.txt', sep = "\t")
+write.table(Idents(NE), '../data/NE_cell_clusters.txt', sep = "\t")
+
+
+```
+
+
+``` {r pca-plots}
+
+p_pca = plot_arc(arc_data = arc_ave, data = NE_pca, 
+                 which_dimensions = 1:3, line_size = 1.5,
+                  data_lab = (Seurat::Idents(NE)),
+                 colors = palette(rainbow(20)),
+                 text_size = 60, data_size = 4) 
+plotly::layout(p_pca, title = "Average Archetypes for Top 20 PCs")
+
+
+p_pca = plot_arc(arc_data = arc_ave, data = NE_pca, 
+                 which_dimensions = 1:3, line_size = 1.5,
+                  data_lab = as.numeric(data_attr$data$archetype_4),
+                 text_size = 60, data_size = 4) 
+plotly::layout(p_pca, title = "Average Archetypes for Top 20 PCs")
+install.packages('htmlwidgets')
+library(htmlwidgets)
+
+htmlwidgets::saveWidget(p_pca, "closest_to_arc.html")
+
+```
+
+
+
+```{r enrichments}
+enriched_genes = find_decreasing_wilcox(data_attr$data, data_attr$arc_col,
+                                features = data_attr$features_col,
+                                bin_prop = 0.05, method = "BioQC")
+write.csv(enriched_genes, '../data/enriched-genes-imputed-ne.csv')
+
+enriched_sets = find_decreasing_wilcox(data_attr$data, data_attr$arc_col,
+                                features = data_attr$colData_col,
+                                bin_prop = 0.05, method = "BioQC")
+write.csv(enriched_sets, '../data/enriched-sets-imputed-ne.csv')
+
+labs = get_top_decreasing(summary_genes = enriched_genes, summary_sets = enriched_sets,
+                          cutoff_genes = 0.05,cutoff_sets = 0.05,
+                          cutoff_metric = "wilcoxon_p_val", 
+                          p.adjust.method = "fdr", 
+                          order_by = "mean_diff", order_decreasing = T)
+
+p_pca = plot_arc(arc_data = arc, data = x_pca_small,
+                 which_dimensions = 1:3, line_size = 1.5,
+                 data_lab = activ_pi$neural_crest_cell_development,
+                 text_size = 60, data_size = 6)
+plotly::layout(p_pca, title = "neural crest activity")
+
+```
 
