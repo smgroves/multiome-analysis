@@ -584,7 +584,7 @@ labs = get_top_decreasing(summary_genes = enriched_genes, summary_sets = enriche
 
 p_pca = plot_arc(arc_data = arc, data = x_pca_small,
                  which_dimensions = 1:3, line_size = 1.5,
-                 data_lab = activ_pi$neural_crest_cell_development,
+                 data_lab = activ$neural_crest_cell_development,
                  text_size = 60, data_size = 6)
 plotly::layout(p_pca, title = "neural crest activity")
 
