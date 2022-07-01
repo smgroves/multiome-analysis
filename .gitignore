@@ -30,3 +30,30 @@ data/cibersort-ne-cells-closest-to-archetypes.txt
 data/cibersort-ne-cells-closest-to-archetypes.csv
 data/cibersort-ne-cells-closest-to-archetypes copy.txt
 data/cibersort-ne-cells-closest-to-archetypes copy.txt
+data/M1/cibersort-ne-cells-closest-to-archetypes copy.txt
+data/M1/cibersort-ne-cells-closest-to-archetypes.csv
+data/M1/cibersort-ne-cells-closest-to-archetypes.txt
+data/M1/data_attr_data_imputed-ne.csv
+data/M1/cibersort-ne-cells-clustered.txt
+data/M1/data_from_debbie/scaled-SCT-data.csv
+data/M1/data_from_debbie/scaled-SCT-data_small.csv
+data/M1/data_from_debbie/umap-embedding_small.csv
+data/M1/PC_smg/scaled-SCT-data_small.csv
+data/M2/adata_01.h5ad
+data/M2/adata_01_filtered.h5ad
+data/M2/adata_01_small.h5ad
+data/M2/adata_02.h5ad
+data/M2/adata_02_filtered.h5ad
+data/M2/adata_03.h5ad
+data/M2/adata_03_filtered.h5ad
+data/M2/adata_03b.h5ad
+data/M2/adata_04_by-timepoint_filtered.h5ad
+data/M2/X_magic_02.h5ad
+data/M2/X_magic_02_filtered.h5ad
+data/M2/X_magic_03b.h5ad
+data/M2/X_magic_for_R.h5ad
+data/M2/X_magic_for_R.h5seurat
+data/M2/X_magic_for_R_filtered.h5ad
+*.h5ad
+data/M1/magic_imputed_no_ciliated.csv
+notebooks/ParetoTI/integrated-corrected-data.csv
