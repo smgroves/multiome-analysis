@@ -36,9 +36,9 @@ def idx2binary(idx, n):
 # Set variables and csvs
 # To modulate which parts of the pipeline need to be computed, use the following variables
 # =============================================================================
-split_train_test = False
-write_binarized_data = False
-fit_rules = False
+split_train_test = True
+write_binarized_data = True
+fit_rules = True
 validation = True
 validation_averages = True
 find_average_states = True
@@ -49,14 +49,14 @@ on_nodes = []
 off_nodes = []
 
 dir_prefix = '/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference'
-network_path = '_2_network.csv'
-data_path = 'data/train_t0_M2.csv'
-data_t1_path = 'data/train_t1_M2.csv'
+network_path = '_0_network.csv'
+data_path = 'data/t0_M2.csv'
+data_t1_path = 'data/t1_M2.csv'
 data_test_path = 'data/test_t0_M2.csv'
 data_test_t1_path = 'data/test_t1_M2.csv'
 cellID_table = 'data/M2_clusters.csv'
 #########################################
-brcd = str(2364)
+brcd = str(0000)
 cluster_header_list = ['class'] #don't rename this; replace header with "class" for whichever cluster ID column you are using
 # cluster_header_list = ["cell.line","source","branch_col","class","subtype_v2","phenotype","nphenotype"]
 node_normalization = 0.3
@@ -198,7 +198,7 @@ else:
 #         gene2color[g] = [0.5098039215686274, 0.37254901960784315, 0.5294117647058824, 1]
 #         vertex_group[g] = 1
 # # print(gene2color)
-draw_grn(graph,vertex_dict,rules, regulators_dict,op.join(dir_prefix,f"M2_network.pdf"))#, gene2color = gene2color)
+draw_grn(graph,vertex_dict,rules, regulators_dict,op.join(dir_prefix,f"M2_network_0.pdf"))#, gene2color = gene2color)
 
 
 # =============================================================================
