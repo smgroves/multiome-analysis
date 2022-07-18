@@ -10,6 +10,13 @@
             </Attribute>
           </value>
         </entry>
+        <entry key="/network-inference/_1_network.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
         <entry key="/network-inference/_2_network.csv">
           <value>
             <Attribute>
@@ -17,21 +24,28 @@
             </Attribute>
           </value>
         </entry>
-        <entry key="/network-inference/t0_M2.csv">
+        <entry key="/network-inference/test_t0_M2.csv">
           <value>
             <Attribute>
               <option name="separator" value="," />
             </Attribute>
           </value>
         </entry>
-        <entry key="/network-inference/t1_M2.csv">
+        <entry key="/network-inference/test_t1_M2.csv">
           <value>
             <Attribute>
               <option name="separator" value="," />
             </Attribute>
           </value>
         </entry>
-        <entry key="/notebooks/network-inference/M2_clusters.csv">
+        <entry key="/network-inference/train_t0_M2.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="/network-inference/train_t1_M2.csv">
           <value>
             <Attribute>
               <option name="separator" value="," />

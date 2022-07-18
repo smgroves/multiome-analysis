@@ -39,21 +39,21 @@ def idx2binary(idx, n):
 split_train_test = False
 write_binarized_data = False
 fit_rules = False
-validation = False
-validation_averages = False
-find_average_states = False
-find_attractors = False
+validation = True
+validation_averages = True
+find_average_states = True
+find_attractors = True
 tf_basin = -1 # if -1, use average distance between clusters. otherwise use the same size basin for all phenotypes
-filter_attractors = False
+filter_attractors = True
 on_nodes = []
 off_nodes = []
 
 dir_prefix = '/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference'
 network_path = '_2_network.csv'
-data_path = 'data/t0_M2.csv'
-data_t1_path = 'data/t1_M2.csv'
-data_test_path = 'data/t0_test.csv'
-data_test_t1_path = 'data/t1_test.csv'
+data_path = 'data/train_t0_M2.csv'
+data_t1_path = 'data/train_t1_M2.csv'
+data_test_path = 'data/test_t0_M2.csv'
+data_test_t1_path = 'data/test_t1_M2.csv'
 cellID_table = 'data/M2_clusters.csv'
 #########################################
 brcd = str(2364)
@@ -177,7 +177,7 @@ if fit_rules:
     strengths.to_csv(f'{dir_prefix}{brcd}/{test_set}/strengths.csv')
     signed_strengths.to_csv(f'{dir_prefix}{brcd}/{test_set}/signed_strengths.csv')
 else:
-    rules, regulators_dict = graph_fit.load_rules(fname=f"{dir_prefix}{brcd}/{test_set}/rules_{brcd}_0.txt")
+    rules, regulators_dict = graph_fit.load_rules(fname=f"{dir_prefix}{brcd}/{test_set}/rules_{brcd}.txt")
 #
 # colors = ["windows blue", "amber", "greyish", "faded green", "dusty purple"]
 # color_palette = sns.xkcd_palette(colors)
