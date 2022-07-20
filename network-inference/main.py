@@ -52,8 +52,8 @@ dir_prefix = '/Users/smgroves/Documents/GitHub/multiome-analysis/network-inferen
 network_path = '_0_network.csv'
 data_path = 'data/t0_M2.csv'
 data_t1_path = 'data/t1_M2.csv'
-data_test_path = 'data/test_t0_M2.csv'
-data_test_t1_path = 'data/test_t1_M2.csv'
+data_test_path = '2364/test_t0_M2.csv'
+data_test_t1_path = '2364/test_t1_M2.csv'
 cellID_table = 'data/M2_clusters.csv'
 #########################################
 brcd = str(0000)
@@ -65,6 +65,7 @@ transpose = True
 test_set = 'validation_set'
 fname = 'M2'
 
+
 if dir_prefix[-1] != os.sep:
     dir_prefix = dir_prefix + os.sep
 if not network_path.endswith('.csv') or not os.path.isfile(dir_prefix + network_path):
@@ -74,6 +75,33 @@ if not data_path.endswith('.csv') or not os.path.isfile(dir_prefix + data_path):
 if cellID_table is not None:
     if not cellID_table.endswith('.csv') or not os.path.isfile(dir_prefix + cellID_table):
         raise Exception('CellID path must be a .csv file.  Check file name and location')
+
+# =============================================================================
+# Write out information about the this job
+# =============================================================================
+# Append the results to a MasterResults file
+T = {}
+# t2 = time.time()
+# T['time'] = (t2 - t1) / 60.
+# # How much memory did I use?   Only can use on linux platform
+# if os.name == 'posix':
+#     T['memory_Mb'] = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss / 1000.
+# else:
+#     T['memory_Mb'] = np.nan
+T['barcode'] = brcd
+T['dir_prefix'] = dir_prefix
+T['network_path'] = network_path
+T['data_path'] = data_path
+T['cellID_table'] = cellID_table
+T['node_normalization'] = node_normalization
+T['node_threshold'] = node_threshold
+
+T = pd.DataFrame([T])
+if not os.path.isfile(dir_prefix + 'Job_specs.csv'):
+    T.to_csv(dir_prefix + 'Job_specs.csv')
+else:
+    with open(dir_prefix + 'Job_specs.csv', 'a') as f:
+        T.to_csv(f, header=False)
 
 # =============================================================================
 # Start the timer and generate a barcode identifier for this job
