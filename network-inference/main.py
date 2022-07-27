@@ -103,6 +103,10 @@ else:
     with open(dir_prefix + 'Job_specs.csv', 'a') as f:
         T.to_csv(f, header=False)
 
+if not os.path.exists(dir_prefix + brcd):
+    # Create a new directory because it does not exist
+    os.makedirs(dir_prefix + brcd)
+
 # =============================================================================
 # Start the timer and generate a barcode identifier for this job
 # =============================================================================

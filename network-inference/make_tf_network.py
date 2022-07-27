@@ -48,10 +48,14 @@ def prune_to_chea(G_orig, prune_self_loops=True):
                 if not True in ['ChEA' in i for i in edges[target]['db']]: G.remove_edge(tf, target)
     #                if len(edges[target]['db']) < 2: G.remove_edge(tf, target)
     return prune(G)
-tfs = ['Prdm16','Mecom','Runx1','Ahr','Esr1','Rarb','Npas2','Tcf7l2','Nfia','Sox5','Meis2','Prox1','Ascl1','Tbx15','Rorb','Jund','Fosb','Jun','Fos',
-       'Junb','Egr1','Kmt2a','Lmx1b','Nfatc2','Bach1','Hif1a','Hsf2','Six1','Six4','Ets1','Pknox2','Cux2','Tfdp1','Nfib','Pbx1','Tcf12','Zbtb20','Creb1',
-       'Bbx','Kdm2a','Lcor','Trps1','Nr3c2','Tcf4','Sox6','Zeb1','Epas1','Smad3','Sp100','Nfix','Bach2','Foxo3','Glis3','Ehf','Nfe2l2','Tcf7l1','Arid5b','Thrb',
-       'Cux1','Grhl2','Stat1','Stat2','Nr6a1','Tead1','Nfkb1','Nfyc','Stat4','Pparg']
+# tfs = ['Prdm16','Mecom','Runx1','Ahr','Esr1','Rarb','Npas2','Tcf7l2','Nfia','Sox5','Meis2','Prox1','Ascl1','Tbx15','Rorb','Jund','Fosb','Jun','Fos',
+#        'Junb','Egr1','Kmt2a','Lmx1b','Nfatc2','Bach1','Hif1a','Hsf2','Six1','Six4','Ets1','Pknox2','Cux2','Tfdp1','Nfib','Pbx1','Tcf12','Zbtb20','Creb1',
+#        'Bbx','Kdm2a','Lcor','Trps1','Nr3c2','Tcf4','Sox6','Zeb1','Epas1','Smad3','Sp100','Nfix','Bach2','Foxo3','Glis3','Ehf','Nfe2l2','Tcf7l1','Arid5b','Thrb',
+#        'Cux1','Grhl2','Stat1','Stat2','Nr6a1','Tead1','Nfkb1','Nfyc','Stat4','Pparg']
+tfs = ['Ascl1', 'Meis2', 'Prox1', 'Tbx15', 'Rorb', 'Fosb', 'Jund', 'Jun', 'Fos', 'Egr1', 'JunB', 'Kmt2c', 'Lxm1b', 'Nfatc2', 'Hif1a', 'Hsf2', 'Six1',
+       'Six4', 'Cux2', 'Pknox2', 'Nfib', 'Pbx1', 'Tcf12', 'Tcf4', 'Kdm2a', 'Zbtb20', 'Creb1', 'Bbx', 'Lcor', 'Sox6', 'Zeb1']
+
+
 tfs = [i.upper() for i in tfs]
 
 G = nx.DiGraph()
@@ -72,21 +76,21 @@ for tf in tfs:
 #         G.add_edge(edge[0], edge[1])
 
 outdir = '.'
-outfile = open("_0_network.csv", "w")
+outfile = open("_0_network_NE.csv", "w")
 for edge in G.edges(): outfile.write("%s,%s\n" % (edge[0], edge[1]))
 outfile.close()
 
-Gp = prune(G, prune_sinks=False, prune_sources=False)
-# Gp.add_edge('NEUROD1',"MYC",db=["ChEA_2013","ChEA_2015"]) #artificially add NEUROD1 --> MYC connection based on Borromeo et al. 2016
-
-outfile = open("_1_network.csv", "w")
-for edge in G.edges(): outfile.write("%s,%s\n" % (edge[0], edge[1]))
-outfile.close()
-Gpp = prune_info(Gp)
-
-# add code to keep INS and GCG even though they don't have out-going edges
-Gpp = prune_to_chea(Gp)
-
-outfile = open("_2_network.csv", "w")
-for edge in Gpp.edges(): outfile.write("%s,%s\n" % (edge[0], edge[1]))
-outfile.close()
+# Gp = prune(G, prune_sinks=False, prune_sources=False)
+# # Gp.add_edge('NEUROD1',"MYC",db=["ChEA_2013","ChEA_2015"]) #artificially add NEUROD1 --> MYC connection based on Borromeo et al. 2016
+#
+# outfile = open("_1_network_NE.csv", "w")
+# for edge in G.edges(): outfile.write("%s,%s\n" % (edge[0], edge[1]))
+# outfile.close()
+# Gpp = prune_info(Gp)
+#
+# # add code to keep INS and GCG even though they don't have out-going edges
+# Gpp = prune_to_chea(Gp)
+#
+# outfile = open("_2_network_NE.csv", "w")
+# for edge in Gpp.edges(): outfile.write("%s,%s\n" % (edge[0], edge[1]))
+# outfile.close()

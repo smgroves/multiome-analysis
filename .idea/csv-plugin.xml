@@ -10,6 +10,13 @@
             </Attribute>
           </value>
         </entry>
+        <entry key="/network-inference/_0_network_NE.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
         <entry key="/network-inference/_1_network.csv">
           <value>
             <Attribute>
