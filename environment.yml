@@ -15,5 +15,9 @@ dependencies:
   - scanpy 
   - scvelo
   - umap-learn
+  - graph-tool
   - pip:
     - dropkick==1.2.6
+    - magic-impute
+    - cellrank
+    - scrublet
