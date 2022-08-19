@@ -36,11 +36,11 @@ def idx2binary(idx, n):
 # Set variables and csvs
 # To modulate which parts of the pipeline need to be computed, use the following variables
 # =============================================================================
-split_train_test = True
-write_binarized_data = True
-fit_rules = True
-validation = True
-validation_averages = True
+split_train_test = False
+write_binarized_data = False
+fit_rules = False
+validation = False
+validation_averages = False
 find_average_states = True
 find_attractors = True
 tf_basin = -1 # if -1, use average distance between clusters. otherwise use the same size basin for all phenotypes
@@ -50,10 +50,10 @@ off_nodes = []
 
 dir_prefix = '/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference'
 network_path = '_0_network.csv'
-data_path = 'data/t0_M2.csv'
-data_t1_path = 'data/t1_M2.csv'
-data_test_path = '2364/test_t0_M2.csv'
-data_test_t1_path = '2364/test_t1_M2.csv'
+data_path = 'data/train_t0_M2.csv' #after split train test is done, these should point to training data, not full data
+data_t1_path = 'data/train_t1_M2.csv'
+data_test_path = 'data/test_t0_M2.csv'
+data_test_t1_path = 'data/test_t1_M2.csv'
 cellID_table = 'data/M2_clusters.csv'
 #########################################
 brcd = str(0000)
@@ -120,6 +120,8 @@ graph, vertex_dict = graph_utils.load_network(f'{dir_prefix + network_path}', re
                                               remove_sources=False)
 v_names = graph.vertex_properties['name']  # Map of vertex -> name (basically the inverse of vertex_dict)
 nodes = sorted(vertex_dict.keys())
+print(nodes)
+print("Number of nodes:", len(nodes))
 print('Reading in data')
 
 # =============================================================================

@@ -1,3 +1,6 @@
 ,barcode,dir_prefix,network_path,data_path,cellID_table,node_normalization,node_threshold
 0,0,/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference/,_0_network.csv,data/t0_M2.csv,data/M2_clusters.csv,0.3,0
 0,0,/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference/,_0_network.csv,data/t0_M2.csv,data/M2_clusters.csv,0.3,0
+0,0,/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference/,_0_network.csv,data/t0_M2.csv,data/M2_clusters.csv,0.3,0
+0,0,/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference/,_0_network.csv,data/train_t0_M2.csv,data/M2_clusters.csv,0.3,0
+0,0,/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference/,_0_network.csv,data/train_t0_M2.csv,data/M2_clusters.csv,0.3,0
