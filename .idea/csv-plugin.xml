@@ -3,6 +3,76 @@
   <component name="CsvFileAttributes">
     <option name="attributeMap">
       <map>
+        <entry key="/network-inference-DIRECT-NET/DIRECT-NET-FILES/Direct_net.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="/network-inference-DIRECT-NET/DIRECT-NET-FILES/FigR_DORC_TF.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="/network-inference-DIRECT-NET/data/t0_M2.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="/network-inference-DIRECT-NET/data/t1_M2.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="/network-inference-DIRECT-NET/networks/DIRECT-NET_network.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="/network-inference-DIRECT-NET/networks/DIRECT-NET_network_threshold_0.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="/network-inference-DIRECT-NET/networks/DIRECT-NET_network_threshold_0_withRORB.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="/network-inference-DIRECT-NET/networks/DIRECT-NET_network_threshold_10.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="/network-inference-DIRECT-NET/networks/DIRECT-NET_network_with_FIGR.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="/network-inference-DIRECT-NET/networks/FIGR_network.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
         <entry key="/network-inference/2364/tprs_fprs_2364.csv">
           <value>
             <Attribute>
@@ -18,6 +88,13 @@
           </value>
         </entry>
         <entry key="/network-inference/2364/validation_set/signed_strengths.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="/network-inference/Job_specs.csv">
           <value>
             <Attribute>
               <option name="separator" value="," />
@@ -46,34 +123,6 @@
           </value>
         </entry>
         <entry key="/network-inference/_2_network.csv">
-          <value>
-            <Attribute>
-              <option name="separator" value="," />
-            </Attribute>
-          </value>
-        </entry>
-        <entry key="/network-inference/test_t0_M2.csv">
-          <value>
-            <Attribute>
-              <option name="separator" value="," />
-            </Attribute>
-          </value>
-        </entry>
-        <entry key="/network-inference/test_t1_M2.csv">
-          <value>
-            <Attribute>
-              <option name="separator" value="," />
-            </Attribute>
-          </value>
-        </entry>
-        <entry key="/network-inference/train_t0_M2.csv">
-          <value>
-            <Attribute>
-              <option name="separator" value="," />
-            </Attribute>
-          </value>
-        </entry>
-        <entry key="/network-inference/train_t1_M2.csv">
           <value>
             <Attribute>
               <option name="separator" value="," />

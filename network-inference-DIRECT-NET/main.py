@@ -1,36 +1,14 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-Created on Wed Jan 29 2020 4:31:33
-Follow-up code after parallel_rule_builder_Xval.py
-- Plots range of AUC values for cross-validated rule sets
-- Re-fits rules with the entire training dataset
---- alternative would be to average the rules from the cross-validation folds
-- Calculates AUC for test dataset (which has not been used to fit the rules) for a true error calculation
-- Gets attractors and sets the phenotype of each using nearest neighbors from single cell dataset
-- Calculates stability of each attractor and destabilizers/stabilizers using random walks through STG
-- Calculates likelihood of reaching other attractors under different perturbations
-"""
-# =============================================================================
-# If running from command line, Read in the arguments
-# This code can be edited to input a barcode and read the arguments
-# from the Job_specs.csv file
-# =============================================================================
-# =============================================================================
-# Import packages.
-# See spec-file.txt for packages
-# To recreate the environment : conda create --name booleabayes --file spec-file.txt
-# =============================================================================
-from src import graph_fit, graph_utils
+import random
 import time
 import seaborn as sns
-from src.graph_utils import *
+import booleabayes as bb
+import os
+import os.path as op
+import pandas as pd
+import networkx as nx
+import matplotlib.pyplot as plt
 
 customPalette = sns.color_palette('tab10')
-
-def idx2binary(idx, n):
-    binary = "{0:b}".format(idx)
-    return "0" * (n - len(binary)) + binary
 
 # =============================================================================
 # Set variables and csvs
@@ -41,22 +19,22 @@ write_binarized_data = False
 fit_rules = False
 validation = False
 validation_averages = False
-find_average_states = True
-find_attractors = True
+find_average_states = False
+find_attractors = False
 tf_basin = -1 # if -1, use average distance between clusters. otherwise use the same size basin for all phenotypes
-filter_attractors = True
+filter_attractors = False
 on_nodes = []
 off_nodes = []
 
-dir_prefix = '/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference'
-network_path = '_0_network.csv'
+dir_prefix = '/'
+network_path = 'networks/DIRECT-NET_network_with_FIGR_threshold_0.csv'
 data_path = 'data/train_t0_M2.csv' #after split train test is done, these should point to training data, not full data
 data_t1_path = 'data/train_t1_M2.csv'
 data_test_path = 'data/test_t0_M2.csv'
 data_test_t1_path = 'data/test_t1_M2.csv'
 cellID_table = 'data/M2_clusters.csv'
 #########################################
-brcd = str(0000)
+brcd = random.Random.randint(0,99999)
 cluster_header_list = ['class'] #don't rename this; replace header with "class" for whichever cluster ID column you are using
 # cluster_header_list = ["cell.line","source","branch_col","class","subtype_v2","phenotype","nphenotype"]
 node_normalization = 0.3
@@ -116,7 +94,7 @@ print(brcd)
 # =============================================================================
 # Load the network
 # =============================================================================
-graph, vertex_dict = graph_utils.load_network(f'{dir_prefix + network_path}', remove_sinks=False, remove_selfloops=False,
+graph, vertex_dict = bb.utils.load_network(f'{dir_prefix + network_path}', remove_sinks=False, remove_selfloops=False,
                                               remove_sources=False)
 v_names = graph.vertex_properties['name']  # Map of vertex -> name (basically the inverse of vertex_dict)
 nodes = sorted(vertex_dict.keys())
@@ -128,9 +106,9 @@ print('Reading in data')
 # Load the data and clusters
 # =============================================================================
 if split_train_test:
-    data = graph_utils.load_data(op.join(dir_prefix, f"{data_path}"), nodes, norm=node_normalization, delimiter=',',
+    data = bb.utils.load_data(op.join(dir_prefix, f"{data_path}"), nodes, norm=node_normalization, delimiter=',',
                                  log1p=False, transpose=transpose, sample_order=False, fillna=0)
-    data_t1 = graph_utils.load_data(op.join(dir_prefix, f"{data_t1_path}"), nodes, norm=node_normalization,
+    data_t1 = bb.utils.load_data(op.join(dir_prefix, f"{data_t1_path}"), nodes, norm=node_normalization,
                                     delimiter=',',
                                     log1p=False, transpose=transpose, sample_order=False, fillna=0)
     print('Reading in cell cluster labels')
@@ -142,20 +120,20 @@ if split_train_test:
         clusters.columns = cluster_header_list
     else:
         clusters = pd.DataFrame([0] * len(data.index), index=data.index, columns=['class'])
-    data, data_test, data_t1, data_test_t1, clusters_train, clusters_test = graph_utils.split_train_test(data, data_t1,
+    data, data_test, data_t1, data_test_t1, clusters_train, clusters_test = bb.utils.split_train_test(data, data_t1,
                                                                                                          clusters,
                                                                                                          dir_prefix,
                                                                                                          fname=fname)
 else:
-    data = graph_utils.load_data(op.join(dir_prefix, f"{data_path}"), nodes, norm=node_normalization, delimiter=',',
+    data = bb.utils.load_data(op.join(dir_prefix, f"{data_path}"), nodes, norm=node_normalization, delimiter=',',
                                  log1p=False, transpose=transpose, sample_order=False, fillna=0)
-    data_t1 = graph_utils.load_data(op.join(dir_prefix, f"{data_t1_path}"), nodes, norm=node_normalization,
+    data_t1 = bb.utils.load_data(op.join(dir_prefix, f"{data_t1_path}"), nodes, norm=node_normalization,
                                     delimiter=',',
                                     log1p=False, transpose=transpose, sample_order=False, fillna=0)
 
-    data_test = graph_utils.load_data(op.join(dir_prefix, f"{data_test_path}"), nodes, norm=node_normalization, delimiter=',',
+    data_test = bb.utils.load_data(op.join(dir_prefix, f"{data_test_path}"), nodes, norm=node_normalization, delimiter=',',
                                       log1p=False, transpose=transpose, sample_order=False, fillna = 0)
-    data_test_t1 = graph_utils.load_data(op.join(dir_prefix, f"{data_test_t1_path}"), nodes, norm=node_normalization, delimiter=',',
+    data_test_t1 = bb.utils.load_data(op.join(dir_prefix, f"{data_test_t1_path}"), nodes, norm=node_normalization, delimiter=',',
                                          log1p=False, transpose=transpose, sample_order=False, fillna = 0)
 
     print('Reading in cell cluster labels')
@@ -173,11 +151,11 @@ else:
 # Read in binarized data
 # =============================================================================
 print('Binarizing data')
-binarized_data = graph_utils.binarize_data(data, phenotype_labels=clusters)
-binarized_data_t1 = graph_utils.binarize_data(data_t1, phenotype_labels=clusters)
+binarized_data = bb.utils.binarize_data(data, phenotype_labels=clusters)
+binarized_data_t1 = bb.utils.binarize_data(data_t1, phenotype_labels=clusters)
 print('Binarizing test data')
-binarized_data_test = graph_utils.binarize_data(data_test, phenotype_labels=clusters)
-binarized_data_t1_test = graph_utils.binarize_data(data_test_t1, phenotype_labels=clusters)
+binarized_data_test = bb.utils.binarize_data(data_test, phenotype_labels=clusters)
+binarized_data_t1_test = bb.utils.binarize_data(data_test_t1, phenotype_labels=clusters)
 
 if write_binarized_data:
     with open(dir_prefix + brcd + os.sep + 'binarized_data_' + brcd + '.csv', 'w+') as outfile:
@@ -204,14 +182,14 @@ if fit_rules:
         print(f"Folder {brcd}/{test_set} already exists. Rewriting any data inside folder.")
 
 
-    rules, regulators_dict,strengths, signed_strengths = graph_fit.get_rules_scvelo(data, data_t1, vertex_dict,
+    rules, regulators_dict,strengths, signed_strengths = bb.tl.get_rules_scvelo(data, data_t1, vertex_dict,
                                                                                     directory=dir_prefix + brcd + os.sep + "rules_" + brcd,
                                                                                     plot=False, threshold=node_threshold)
-    graph_fit.save_rules(rules, regulators_dict, fname=f"{dir_prefix}{brcd}/{test_set}/rules_{brcd}.txt")
+    bb.tl.save_rules(rules, regulators_dict, fname=f"{dir_prefix}{brcd}/{test_set}/rules_{brcd}.txt")
     strengths.to_csv(f'{dir_prefix}{brcd}/{test_set}/strengths.csv')
     signed_strengths.to_csv(f'{dir_prefix}{brcd}/{test_set}/signed_strengths.csv')
 else:
-    rules, regulators_dict = graph_fit.load_rules(fname=f"{dir_prefix}{brcd}/{test_set}/rules_{brcd}.txt")
+    rules, regulators_dict = bb.tl.load_rules(fname=f"{dir_prefix}{brcd}/{test_set}/rules_{brcd}.txt")
 #
 # colors = ["windows blue", "amber", "greyish", "faded green", "dusty purple"]
 # color_palette = sns.xkcd_palette(colors)
@@ -254,10 +232,10 @@ if validation:
     for g in nodes:
         print(g)
 
-        validation = graph_utils.plot_accuracy_scvelo(data_test, data_test_t1, g, regulators_dict, rules, save_plots='test',
+        validation = bb.utils.plot_accuracy_scvelo(data_test, data_test_t1, g, regulators_dict, rules, save_plots='test',
                                                       plot=True, plot_clusters=False, save_df=True,
                                                       dir_prefix=dir_prefix + brcd + os.sep + str(test_set) + os.sep)
-        tprs, fprs, area = graph_utils.roc(validation, g, n_thresholds=50, save_plots='test', plot=True, save=True,
+        tprs, fprs, area = bb.utils.roc(validation, g, n_thresholds=50, save_plots='test', plot=True, save=True,
                                            dir_prefix=dir_prefix + brcd + os.sep + str(test_set) + os.sep)
         tpr_all[g] = tprs
         fpr_all[g] = fprs
@@ -292,7 +270,7 @@ if validation_averages:
         validation = pd.read_csv(
             f'{dir_prefix}{brcd}/{test_set}/{g}_validation.csv',
             index_col=0, header=0)
-        tprs, fprs, area = graph_utils.roc(validation, g, n_thresholds=50, save_plots='', save = False, plot = False)
+        tprs, fprs, area = bb.utils.roc(validation, g, n_thresholds=50, save_plots='', save = False, plot = False)
         tpr_all[g] = tprs
         fpr_all[g] = fprs
         area_all.append(area)
@@ -321,12 +299,12 @@ if find_average_states:
     average_states = dict()
 
     for k in binarized_data.keys():
-        ave = graph_utils.average_state(binarized_data[k], n)
+        ave = bb.utils.average_state(binarized_data[k], n)
         state = ave.copy()
         state[state < 0.5] = 0
         state[state >= 0.5] = 1
         state = [int(i) for i in state]
-        idx = graph_utils.state2idx(''.join(["%d" % i for i in state]))
+        idx = bb.utils.state2idx(''.join(["%d" % i for i in state]))
         average_states[k] = idx
     print(average_states)
 
@@ -338,7 +316,7 @@ if find_average_states:
     for k in average_states.keys():
         file_idx = open(op.join(dir_prefix, f'{brcd}/average_states_idx_{k}.txt'), 'w+')
         file_idx.write(',average_state')
-        att = graph_utils.idx2binary(average_states[k], n)
+        att = bb.utils.idx2binary(average_states[k], n)
         file.write(f"{k}")
         for i in att:
             file.write(f",{i}")
@@ -346,7 +324,7 @@ if find_average_states:
         file.write("\n")
         file_idx.close()
     file.close()
-    graph_utils.plot_attractors(op.join(dir_prefix, f'{brcd}/average_states.txt'))
+    bb.utils.plot_attractors(op.join(dir_prefix, f'{brcd}/average_states.txt'))
 
 
 if find_attractors:
@@ -366,7 +344,7 @@ if find_attractors:
                     for t in binarized_data[k]:
                         if s == t: pass
                         else:
-                            dist = graph_utils.hamming_idx(s, t, n)
+                            dist = bb.utils.hamming_idx(s, t, n)
                             if dist < min_dist: min_dist = dist
                     distances.append(min_dist)
             try:
@@ -374,10 +352,10 @@ if find_attractors:
                 print(dist_dict[k])
 
             except ValueError: print("Not enough data in group to find distances.")
-        attractor_dict = graph_utils.find_attractors(binarized_data, rules, nodes, regulators_dict, outfile_name, tf_basin=dist_dict, on_nodes=on_nodes, off_nodes=off_nodes)
+        attractor_dict = bb.utils.find_attractors(binarized_data, rules, nodes, regulators_dict, outfile_name, tf_basin=dist_dict, on_nodes=on_nodes, off_nodes=off_nodes)
 
     else:
-        attractor_dict = graph_utils.find_attractors(binarized_data, rules, nodes, regulators_dict, outfile_name, tf_basin=tf_basin, on_nodes=on_nodes, off_nodes=off_nodes)
+        attractor_dict = bb.utils.find_attractors(binarized_data, rules, nodes, regulators_dict, outfile_name, tf_basin=tf_basin, on_nodes=on_nodes, off_nodes=off_nodes)
 
 
     file = open(op.join(dir_prefix, f'{brcd}/attractors_unfiltered.txt'), 'w+')
@@ -386,7 +364,7 @@ if find_attractors:
         file.write(f",{j}")
     file.write("\n")
     for k in attractor_dict.keys():
-        att = [graph_utils.idx2binary(x, len(nodes)) for x in attractor_dict[k]]
+        att = [bb.utils.idx2binary(x, len(nodes)) for x in attractor_dict[k]]
         for i, a in zip(att, attractor_dict[k]):
             file.write(f"{k}")
             for c in i:
@@ -394,7 +372,7 @@ if find_attractors:
             file.write("\n")
 
     file.close()
-    graph_utils.plot_attractors(op.join(dir_prefix, f'{brcd}/attractors_unfiltered.txt'))
+    bb.utils.plot_attractors(op.join(dir_prefix, f'{brcd}/attractors_unfiltered.txt'))
 
 
 if filter_attractors:
@@ -418,8 +396,8 @@ if filter_attractors:
                 n_same = list(set(attractor_dict[p]).intersection(set(attractor_dict[q])))
                 if len(n_same) != 0:
                     for x in n_same:
-                        p_dist = graph_utils.hamming_idx(x, average_states[p], len(nodes))
-                        q_dist = graph_utils.hamming_idx(x, average_states[q], len(nodes))
+                        p_dist = bb.utils.hamming_idx(x, average_states[p], len(nodes))
+                        q_dist = bb.utils.hamming_idx(x, average_states[q], len(nodes))
                         if p_dist < q_dist:
                             a[q].remove(x)
                         elif q_dist < p_dist:
@@ -439,7 +417,7 @@ if filter_attractors:
         file.write(f",{j}")
     file.write("\n")
     for k in attractor_dict.keys():
-        att = [graph_utils.idx2binary(x, len(nodes)) for x in attractor_dict[k]]
+        att = [bb.utils.idx2binary(x, len(nodes)) for x in attractor_dict[k]]
         for i, a in zip(att, attractor_dict[k]):
             file.write(f"{k}")
             for c in i:
@@ -447,7 +425,7 @@ if filter_attractors:
             file.write("\n")
 
     file.close()
-    graph_utils.plot_attractors(op.join(dir_prefix, f'{brcd}/attractors_filtered.txt'))
+    bb.utils.plot_attractors(op.join(dir_prefix, f'{brcd}/attractors_filtered.txt'))
 
 # =============================================================================
 # Perform random walks for calculating stability and identifying destabilizers
