@@ -7,15 +7,77 @@ import os.path as op
 import pandas as pd
 import networkx as nx
 import matplotlib.pyplot as plt
+from graph_tool import all as gt
+from graph_tool import GraphView
 
 customPalette = sns.color_palette('tab10')
+
+def draw_grn(G, gene2vertex, rules, regulators_dict, fname, gene2group=None, gene2color=None, type = "", B_min = 5):
+    vertex2gene = G.vertex_properties['name']
+
+    vertex_group = None
+    if gene2group is not None:
+        vertex_group = G.new_vertex_property("int")
+        for gene in gene2group.keys():
+            vertex_group[gene2vertex[gene]] = gene2group[gene]
+
+    vertex_colors = [0.4, 0.2, 0.4, 1]
+    if gene2color is not None:
+        vertex_colors = G.new_vertex_property("vector<float>")
+        for gene in gene2color.keys():
+            vertex_colors[gene2vertex[gene]] = gene2color[gene]
+
+    edge_weight_df = pd.DataFrame(index=sorted(regulators_dict.keys()), columns=sorted(regulators_dict.keys()))
+    edge_binary_df = pd.DataFrame(index=sorted(regulators_dict.keys()), columns=sorted(regulators_dict.keys()))
+
+    edge_markers = G.new_edge_property("string")
+    edge_weights = G.new_edge_property("float")
+    edge_colors = G.new_edge_property("vector<float>")
+    for edge in G.edges():
+        edge_colors[edge] = [0., 0., 0., 0.3]
+        edge_markers[edge] = "arrow"
+        edge_weights[edge] = 0.2
+
+    for edge in G.edges():
+        vs, vt = edge.source(), edge.target()
+        source = vertex2gene[vs]
+        target = vertex2gene[vt]
+        regulators = regulators_dict[target]
+        if source in regulators:
+            i = regulators.index(source)
+            n = 2 ** len(regulators)
+
+            rule = rules[target]
+            off_leaves, on_leaves = bb.tl.get_leaves_of_regulator(n, i)
+            if rule[off_leaves].mean() < rule[on_leaves].mean():  # The regulator is an activator
+                edge_colors[edge] = [0., 0.3, 0., 0.8]
+                edge_binary_df.loc[target,source] = 1
+            else:
+                edge_markers[edge] = "bar"
+                edge_colors[edge] = [0.88, 0., 0., 0.5]
+                edge_binary_df.loc[target,source] = -1
+
+            edge_weights[edge] = rule[on_leaves].mean() - rule[off_leaves].mean() + 0.2
+            edge_weight_df.loc[target, source] = rule[on_leaves].mean() - rule[off_leaves].mean()
+    G.edge_properties["edge_weights"] = edge_weights
+    pos = gt.sfdp_layout(G, groups=vertex_group,mu = 1, eweight=edge_weights, max_iter=1000)
+    # pos = gt.arf_layout(G, max_iter=100, dt=1e-4)
+    eprops = {"color": edge_colors, "pen_width": 2, "marker_size": 15, "end_marker": edge_markers}
+    vprops = {"text": vertex2gene, "shape": "circle", "size": 20, "pen_width": 1, 'fill_color': vertex_colors}
+    if type == 'circle':
+        state = gt.minimize_nested_blockmodel_dl(G, B_min = B_min)
+        state.draw(vprops=vprops, eprops=eprops)  # mplfig=ax[0,1])
+    else:
+        gt.graph_draw(G, pos=pos, output=fname, vprops=vprops, eprops=eprops, output_size=(1000, 1000))
+    return G, edge_weight_df, edge_binary_df
+
 
 # =============================================================================
 # Set variables and csvs
 # To modulate which parts of the pipeline need to be computed, use the following variables
 # =============================================================================
-split_train_test = False
-write_binarized_data = False
+split_train_test = True
+write_binarized_data = True
 fit_rules = False
 validation = False
 validation_averages = False
@@ -26,23 +88,40 @@ filter_attractors = False
 on_nodes = []
 off_nodes = []
 
-dir_prefix = '/'
-network_path = 'networks/DIRECT-NET_network_with_FIGR_threshold_0.csv'
-data_path = 'data/train_t0_M2.csv' #after split train test is done, these should point to training data, not full data
-data_t1_path = 'data/train_t1_M2.csv'
-data_test_path = 'data/test_t0_M2.csv'
-data_test_t1_path = 'data/test_t1_M2.csv'
-cellID_table = 'data/M2_clusters.csv'
+dir_prefix = '/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET'
+network_path = 'networks/DIRECT-NET_network_with_FIGR_threshold_0_no_NEUROG2.csv'
+data_path = 'data/Cytotrace_DGE_2_SCT.csv' #after split train test is done, these should point to training data, not full data
+t1 = False
+
+data_t1_path = None #if no T1 (i.e. single dataset), replace with None
+
+cellID_table = 'data/metadata_final_nodashes.csv'
+# Assign headers to cluster csv, with one called "class"
+# cluster_header_list = ['class']
+
+# cluster headers with "identity" replaced with "class"
+cluster_header_list = ["orig.ident","nCount_RNA","nFeature_RNA","nCount_ATAC","nFeature_ATAC","nucleosome_signal",
+                       "nucleosome_percentile","TSS.enrichment","TSS.percentile","barcode","sample","ATAC_snn_res.0.5",
+                       "seurat_clusters","nCount_peaks","nFeature_peaks","peaks_snn_res.0.5","percent.mt","nCount_SCT",
+                       "nFeature_SCT","SCT_snn_res.0.5","SCT.weight","peaks.weight","nCount_Imputed_counts",
+                       "nFeature_Imputed_counts","nCount_gene_activity","nFeature_gene_activity","NE_score1",
+                       "class","non.NE_score1","comb.score","S.Score","G2M.Score","Phase","old.ident","wsnn_res.0.5"
+                       ]
 #########################################
-brcd = random.Random.randint(0,99999)
-cluster_header_list = ['class'] #don't rename this; replace header with "class" for whichever cluster ID column you are using
-# cluster_header_list = ["cell.line","source","branch_col","class","subtype_v2","phenotype","nphenotype"]
+# brcd = str(random.Random.randint(0,99999))
+brcd = str(1000)
 node_normalization = 0.3
 node_threshold = 0  # don't remove any parents
-transpose = True
-test_set = 'validation_set'
+transpose = False
+external_validation = 'validation_set'
 fname = 'M2'
 
+# if rerunning a brcd and data has already been split into training and testing sets, use the below code
+# Otherwise, these settings are ignored
+data_train_t0_path = f'{brcd}/data_split/train_t0_M2.csv'
+data_train_t1_path = f'{brcd}/data_split/train_t1_M2.csv' #if no T1, replace with None
+data_test_t0_path = f'{brcd}/data_split/test_t0_M2.csv'
+data_test_t1_path = f'{brcd}/data_split/test_t1_M2.csv' #if no T1, replace with None
 
 if dir_prefix[-1] != os.sep:
     dir_prefix = dir_prefix + os.sep
@@ -53,6 +132,14 @@ if not data_path.endswith('.csv') or not os.path.isfile(dir_prefix + data_path):
 if cellID_table is not None:
     if not cellID_table.endswith('.csv') or not os.path.isfile(dir_prefix + cellID_table):
         raise Exception('CellID path must be a .csv file.  Check file name and location')
+if t1 == True:
+    if split_train_test == True:
+        if data_t1_path is None:
+            raise Exception('t1 is set to True, but no data_t1_path given.')
+    else:
+        if data_train_t1_path is None or data_test_t1_path is None:
+            raise Exception("t1 is set to True, but no data_[train/test]_t1_path is given.")
+
 
 # =============================================================================
 # Write out information about the this job
@@ -70,9 +157,21 @@ T['barcode'] = brcd
 T['dir_prefix'] = dir_prefix
 T['network_path'] = network_path
 T['data_path'] = data_path
+T['data_t1_path'] = data_t1_path
 T['cellID_table'] = cellID_table
 T['node_normalization'] = node_normalization
 T['node_threshold'] = node_threshold
+T['split_train_test'] = split_train_test
+T['split_train_test'] = write_binarized_data
+T['split_train_test'] = fit_rules
+T['split_train_test'] = validation
+T['split_train_test'] = validation_averages
+T['split_train_test'] = find_average_states
+T['split_train_test'] = find_attractors
+T['split_train_test'] = tf_basin = -1 # if -1, use average distance between clusters. otherwise use the same size basin for all phenotypes
+T['split_train_test'] = filter_attractors
+T['split_train_test'] = on_nodes = []
+T['split_train_test'] = off_nodes = []
 
 T = pd.DataFrame([T])
 if not os.path.isfile(dir_prefix + 'Job_specs.csv'):
@@ -94,102 +193,108 @@ print(brcd)
 # =============================================================================
 # Load the network
 # =============================================================================
-graph, vertex_dict = bb.utils.load_network(f'{dir_prefix + network_path}', remove_sinks=False, remove_selfloops=False,
+graph, vertex_dict = bb.load.load_network(f'{dir_prefix}/{network_path}', remove_sinks=False, remove_selfloops=False,
                                               remove_sources=False)
-v_names = graph.vertex_properties['name']  # Map of vertex -> name (basically the inverse of vertex_dict)
-nodes = sorted(vertex_dict.keys())
+
+v_names, nodes = bb.utils.get_nodes(vertex_dict, graph)
 print(nodes)
 print("Number of nodes:", len(nodes))
-print('Reading in data')
+print(graph)
 
 # =============================================================================
 # Load the data and clusters
 # =============================================================================
+print('Reading in data')
+
+
+
 if split_train_test:
-    data = bb.utils.load_data(op.join(dir_prefix, f"{data_path}"), nodes, norm=node_normalization, delimiter=',',
-                                 log1p=False, transpose=transpose, sample_order=False, fillna=0)
-    data_t1 = bb.utils.load_data(op.join(dir_prefix, f"{data_t1_path}"), nodes, norm=node_normalization,
-                                    delimiter=',',
-                                    log1p=False, transpose=transpose, sample_order=False, fillna=0)
-    print('Reading in cell cluster labels')
-    if cellID_table is not None:
-        clusters = pd.read_csv(op.join(dir_prefix, f"{dir_prefix + cellID_table}"), index_col=0, header=0,
-                               delimiter=',')
-        # clusters.columns = ["cell.stage", "class", "cell.protocol"]
-        # clusters.columns = ["class", "pheno_color","Tuft_score","nonNE_score","NE_score","NEv2_score","NEv1_score","treatment"]
-        clusters.columns = cluster_header_list
+    data_t0 = bb.load.load_data(f'{dir_prefix}/{data_path}', nodes, norm=node_normalization,
+                        delimiter=',', log1p=False, transpose=transpose,
+                        sample_order=False, fillna=0)
+    if data_t1_path is not None:
+        data_t1 = bb.load.load_data(f'{dir_prefix}/{data_t1_path}', nodes, norm=node_normalization,
+                            delimiter=',', log1p=False, transpose=transpose,
+                            sample_order=False, fillna=0)
     else:
-        clusters = pd.DataFrame([0] * len(data.index), index=data.index, columns=['class'])
-    data, data_test, data_t1, data_test_t1, clusters_train, clusters_test = bb.utils.split_train_test(data, data_t1,
-                                                                                                         clusters,
-                                                                                                         dir_prefix,
-                                                                                                         fname=fname)
-else:
-    data = bb.utils.load_data(op.join(dir_prefix, f"{data_path}"), nodes, norm=node_normalization, delimiter=',',
+        data_t1 = None
+
+    # Only need to pass 'data_t0' since this data is not split into train/test
+    clusters = bb.utils.get_clusters(data_t0, cellID_table=f"{dir_prefix}/{cellID_table}",
+                               cluster_header_list=cluster_header_list)
+
+    if not os.path.exists(f"{dir_prefix}/{brcd}/data_split"):
+        os.makedirs(f"{dir_prefix}/{brcd}/data_split")
+
+    data_train_t0, data_test_t0, data_train_t1, data_test_t1, clusters_train, clusters_test =  bb.utils.split_train_test(data_t0, data_t1, clusters,
+                                                                                                        f"{dir_prefix}/{brcd}/data_split", fname='M2')
+else: #load the binarized data
+    data_train_t0 = bb.load.load_data(f'{dir_prefix}/{data_train_t0_path}', nodes, norm=node_normalization, delimiter=',',
                                  log1p=False, transpose=transpose, sample_order=False, fillna=0)
-    data_t1 = bb.utils.load_data(op.join(dir_prefix, f"{data_t1_path}"), nodes, norm=node_normalization,
+    if t1:
+        data_train_t1 = bb.load.load_data(f'{dir_prefix}/{data_train_t1_path}', nodes, norm=node_normalization,
                                     delimiter=',',
                                     log1p=False, transpose=transpose, sample_order=False, fillna=0)
+    else: data_train_t1 = None
 
-    data_test = bb.utils.load_data(op.join(dir_prefix, f"{data_test_path}"), nodes, norm=node_normalization, delimiter=',',
+    data_test_t0 = bb.load.load_data(f'{dir_prefix}/{data_test_t0_path}', nodes, norm=node_normalization, delimiter=',',
                                       log1p=False, transpose=transpose, sample_order=False, fillna = 0)
-    data_test_t1 = bb.utils.load_data(op.join(dir_prefix, f"{data_test_t1_path}"), nodes, norm=node_normalization, delimiter=',',
+
+    if t1:
+        data_test_t1 = bb.load.load_data(f'{dir_prefix}/{data_test_t1_path}', nodes, norm=node_normalization, delimiter=',',
                                          log1p=False, transpose=transpose, sample_order=False, fillna = 0)
+    else: data_test_t1 = None
 
-    print('Reading in cell cluster labels')
-    if cellID_table is not None:
-        clusters = pd.read_csv(op.join(dir_prefix, f"{dir_prefix+cellID_table}"), index_col=0, header=0, delimiter=',')
-        # clusters.columns = ["cell.stage", "class", "cell.protocol"]
-        # clusters.columns = ["class", "pheno_color","Tuft_score","nonNE_score","NE_score","NEv2_score","NEv1_score","treatment"]
-        clusters.columns = cluster_header_list
-        clusters_train = clusters.loc[data.index]
-        clusters_test = clusters.loc[data_test.index]
-    else:
-        clusters = pd.DataFrame([0]*len(data.index), index = data.index, columns=['class'])
-
+    clusters = bb.utils.get_clusters(data_train_t0,data_test=data_test_t0, is_data_split=True,
+                                                          cellID_table=f"{dir_prefix}/{cellID_table}",
+                                                          cluster_header_list=cluster_header_list)
 # =============================================================================
 # Read in binarized data
 # =============================================================================
 print('Binarizing data')
-binarized_data = bb.utils.binarize_data(data, phenotype_labels=clusters)
-binarized_data_t1 = bb.utils.binarize_data(data_t1, phenotype_labels=clusters)
-print('Binarizing test data')
-binarized_data_test = bb.utils.binarize_data(data_test, phenotype_labels=clusters)
-binarized_data_t1_test = bb.utils.binarize_data(data_test_t1, phenotype_labels=clusters)
+if write_binarized_data: save = True
+else: save = False
+if not os.path.exists(f"{dir_prefix}/{brcd}/binarized_data"):
+    # Create a new directory because it does not exist
+    os.makedirs(f"{dir_prefix}/{brcd}/binarized_data")
 
-if write_binarized_data:
-    with open(dir_prefix + brcd + os.sep + 'binarized_data_' + brcd + '.csv', 'w+') as outfile:
-        for k in binarized_data.keys():
-            outfile.write(f"{k}: {binarized_data[k]}\n")
-    with open(dir_prefix + brcd + os.sep + 'binarized_data_t1_' + brcd + '.csv', 'w+') as outfile:
-        for k in binarized_data_t1.keys():
-            outfile.write(f"{k}: {binarized_data_t1[k]}\n")
-    with open(dir_prefix + brcd + os.sep + 'binarized_data_test' + brcd + '.csv', 'w+') as outfile:
-        for k in binarized_data_test.keys():
-            outfile.write(f"{k}: {binarized_data_test[k]}\n")
-    with open(dir_prefix + brcd + os.sep + 'binarized_data_t1_test' + brcd + '.csv', 'w+') as outfile:
-        for k in binarized_data_t1_test.keys():
-            outfile.write(f"{k}: {binarized_data_t1_test[k]}\n")
+binarized_data_train_t0 = bb.proc.binarize_data(data_train_t0, phenotype_labels=clusters, save = save,
+                                       save_dir=f"{dir_prefix}/{brcd}/binarized_data",fname=f'binarized_data_train_t0_{fname}')
+if t1:
+    binarized_data_train_t1 = bb.proc.binarize_data(data_train_t1, phenotype_labels=clusters, save = save,
+                                          save_dir=f"{dir_prefix}/{brcd}/binarized_data",fname=f'binarized_data_train_t1_{fname}')
+else: binarized_data_train_t1 = None
+
+print('Binarizing test data')
+binarized_data_test = bb.proc.binarize_data(data_test_t0, phenotype_labels=clusters, save = save,
+                                            save_dir=f"{dir_prefix}/{brcd}/binarized_data",fname=f'binarized_data_test_t0_{fname}')
+
+if t1:
+    binarized_data_test_t1 = bb.proc.binarize_data(data_test_t1, phenotype_labels=clusters, save = save,
+                                               save_dir=f"{dir_prefix}/{brcd}/binarized_data",fname=f'binarized_data_test_t1_{fname}')
+else: binarized_data_test_t1 = None
 
 
 # =============================================================================
-# Re-fit rules with the entire training dataset
+# Re-fit rules with the training dataset
 # =============================================================================
 if fit_rules:
-    try:
-        os.mkdir(dir_prefix + brcd + os.sep + test_set)
-    except FileExistsError:
-        print(f"Folder {brcd}/{test_set} already exists. Rewriting any data inside folder.")
-
-
-    rules, regulators_dict,strengths, signed_strengths = bb.tl.get_rules_scvelo(data, data_t1, vertex_dict,
+    if not os.path.exists(f"{dir_prefix}/{brcd}/rules"):
+        # Create a new directory because it does not exist
+        os.makedirs(f"dir_prefix/{brcd}/rules")
+    if t1:
+        rules, regulators_dict,strengths, signed_strengths = bb.tl.get_rules_scvelo(data_train_t0, data_train_t1, vertex_dict,
                                                                                     directory=dir_prefix + brcd + os.sep + "rules_" + brcd,
                                                                                     plot=False, threshold=node_threshold)
-    bb.tl.save_rules(rules, regulators_dict, fname=f"{dir_prefix}{brcd}/{test_set}/rules_{brcd}.txt")
-    strengths.to_csv(f'{dir_prefix}{brcd}/{test_set}/strengths.csv')
-    signed_strengths.to_csv(f'{dir_prefix}{brcd}/{test_set}/signed_strengths.csv')
+    else:
+        rules, regulators_dict,strengths, signed_strengths = bb.tl.get_rules(data_train_t0, vertex_dict,
+                                                                                    directory=dir_prefix + brcd + os.sep + "rules_" + brcd,
+                                                                                    plot=False, threshold=node_threshold)
+    bb.tl.save_rules(rules, regulators_dict, fname=f"{dir_prefix}/{brcd}/rules/rules_{brcd}.txt")
+    strengths.to_csv(f"{dir_prefix}/{brcd}/rules/strengths.csv")
+    signed_strengths.to_csv(f"{dir_prefix}/{brcd}/rules/signed_strengths.csv")
 else:
-    rules, regulators_dict = bb.tl.load_rules(fname=f"{dir_prefix}{brcd}/{test_set}/rules_{brcd}.txt")
+    rules, regulators_dict = bb.load.load_rules(fname=f"{dir_prefix}/{brcd}/rules/rules_{brcd}.txt")
 #
 # colors = ["windows blue", "amber", "greyish", "faded green", "dusty purple"]
 # color_palette = sns.xkcd_palette(colors)
@@ -492,27 +597,27 @@ if False:
 # Write out information about the this job
 # =============================================================================
 # Append the results to a MasterResults file
-T = {}
-t2 = time.time()
-T['time'] = (t2 - t1) / 60.
-# How much memory did I use?   Only can use on linux platform
-if os.name == 'posix':
-    T['memory_Mb'] = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss / 1000.
-else:
-    T['memory_Mb'] = np.nan
-T['barcode'] = brcd
-T['dir_prefix'] = dir_prefix
-T['network_path'] = network_path
-T['data_path'] = data_path
-T['cellID_table'] = cellID_table
-T['node_normalization'] = node_normalization
-T['node_threshold'] = node_threshold
-
-T = pd.DataFrame([T])
-if not os.path.isfile(dir_prefix + 'Job_specs_post.csv'):
-    T.to_csv(dir_prefix + 'Job_specs_post.csv')
-else:
-    with open(dir_prefix + 'Job_specs_post.csv', 'a') as f:
-        T.to_csv(f, header=False)
+# T = {}
+# t2 = time.time()
+# T['time'] = (t2 - t1) / 60.
+# # How much memory did I use?   Only can use on linux platform
+# if os.name == 'posix':
+#     T['memory_Mb'] = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss / 1000.
+# else:
+#     T['memory_Mb'] = np.nan
+# # T['barcode'] = brcd
+# # T['dir_prefix'] = dir_prefix
+# # T['network_path'] = network_path
+# # T['data_path'] = data_path
+# # T['cellID_table'] = cellID_table
+# # T['node_normalization'] = node_normalization
+# # T['node_threshold'] = node_threshold
+#
+# T = pd.DataFrame([T])
+# if not os.path.isfile(dir_prefix + 'Job_specs_post.csv'):
+#     T.to_csv(dir_prefix + 'Job_specs_post.csv')
+# else:
+#     with open(dir_prefix + 'Job_specs_post.csv', 'a') as f:
+#         T.to_csv(f, header=False)
 
 

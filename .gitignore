@@ -57,3 +57,5 @@ data/M2/X_magic_for_R_filtered.h5ad
 *.h5ad
 data/M1/magic_imputed_no_ciliated.csv
 notebooks/ParetoTI/integrated-corrected-data.csv
+network-inference-DIRECT-NET/data/Cytotrace_DGE_1_SCT.csv
+network-inference-DIRECT-NET/data/Cytotrace_DGE_2_SCT.csv

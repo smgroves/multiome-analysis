@@ -17,6 +17,27 @@
             </Attribute>
           </value>
         </entry>
+        <entry key="/network-inference-DIRECT-NET/Job_specs.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="/network-inference-DIRECT-NET/data/M2_clusters.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="/network-inference-DIRECT-NET/data/metadata_final_nodashes.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
         <entry key="/network-inference-DIRECT-NET/data/t0_M2.csv">
           <value>
             <Attribute>
@@ -60,6 +81,13 @@
           </value>
         </entry>
         <entry key="/network-inference-DIRECT-NET/networks/DIRECT-NET_network_with_FIGR.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="/network-inference-DIRECT-NET/networks/DIRECT-NET_network_with_FIGR_threshold_0.csv">
           <value>
             <Attribute>
               <option name="separator" value="," />
