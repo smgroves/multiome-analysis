@@ -9,76 +9,17 @@ import networkx as nx
 import matplotlib.pyplot as plt
 from graph_tool import all as gt
 from graph_tool import GraphView
+from bb_utils import *
 
 customPalette = sns.color_palette('tab10')
-
-def draw_grn(G, gene2vertex, rules, regulators_dict, fname, gene2group=None, gene2color=None, type = "", B_min = 5):
-    vertex2gene = G.vertex_properties['name']
-
-    vertex_group = None
-    if gene2group is not None:
-        vertex_group = G.new_vertex_property("int")
-        for gene in gene2group.keys():
-            vertex_group[gene2vertex[gene]] = gene2group[gene]
-
-    vertex_colors = [0.4, 0.2, 0.4, 1]
-    if gene2color is not None:
-        vertex_colors = G.new_vertex_property("vector<float>")
-        for gene in gene2color.keys():
-            vertex_colors[gene2vertex[gene]] = gene2color[gene]
-
-    edge_weight_df = pd.DataFrame(index=sorted(regulators_dict.keys()), columns=sorted(regulators_dict.keys()))
-    edge_binary_df = pd.DataFrame(index=sorted(regulators_dict.keys()), columns=sorted(regulators_dict.keys()))
-
-    edge_markers = G.new_edge_property("string")
-    edge_weights = G.new_edge_property("float")
-    edge_colors = G.new_edge_property("vector<float>")
-    for edge in G.edges():
-        edge_colors[edge] = [0., 0., 0., 0.3]
-        edge_markers[edge] = "arrow"
-        edge_weights[edge] = 0.2
-
-    for edge in G.edges():
-        vs, vt = edge.source(), edge.target()
-        source = vertex2gene[vs]
-        target = vertex2gene[vt]
-        regulators = regulators_dict[target]
-        if source in regulators:
-            i = regulators.index(source)
-            n = 2 ** len(regulators)
-
-            rule = rules[target]
-            off_leaves, on_leaves = bb.tl.get_leaves_of_regulator(n, i)
-            if rule[off_leaves].mean() < rule[on_leaves].mean():  # The regulator is an activator
-                edge_colors[edge] = [0., 0.3, 0., 0.8]
-                edge_binary_df.loc[target,source] = 1
-            else:
-                edge_markers[edge] = "bar"
-                edge_colors[edge] = [0.88, 0., 0., 0.5]
-                edge_binary_df.loc[target,source] = -1
-
-            edge_weights[edge] = rule[on_leaves].mean() - rule[off_leaves].mean() + 0.2
-            edge_weight_df.loc[target, source] = rule[on_leaves].mean() - rule[off_leaves].mean()
-    G.edge_properties["edge_weights"] = edge_weights
-    pos = gt.sfdp_layout(G, groups=vertex_group,mu = 1, eweight=edge_weights, max_iter=1000)
-    # pos = gt.arf_layout(G, max_iter=100, dt=1e-4)
-    eprops = {"color": edge_colors, "pen_width": 2, "marker_size": 15, "end_marker": edge_markers}
-    vprops = {"text": vertex2gene, "shape": "circle", "size": 20, "pen_width": 1, 'fill_color': vertex_colors}
-    if type == 'circle':
-        state = gt.minimize_nested_blockmodel_dl(G, B_min = B_min)
-        state.draw(vprops=vprops, eprops=eprops)  # mplfig=ax[0,1])
-    else:
-        gt.graph_draw(G, pos=pos, output=fname, vprops=vprops, eprops=eprops, output_size=(1000, 1000))
-    return G, edge_weight_df, edge_binary_df
-
 
 # =============================================================================
 # Set variables and csvs
 # To modulate which parts of the pipeline need to be computed, use the following variables
 # =============================================================================
-split_train_test = True
-write_binarized_data = True
-fit_rules = False
+split_train_test = False
+write_binarized_data = False
+fit_rules = True
 validation = False
 validation_averages = False
 find_average_states = False
@@ -89,7 +30,7 @@ on_nodes = []
 off_nodes = []
 
 dir_prefix = '/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET'
-network_path = 'networks/DIRECT-NET_network_with_FIGR_threshold_0_no_NEUROG2.csv'
+network_path = 'networks/DIRECT-NET_network_with_FIGR_threshold_0_no_NEUROG2_top8regs.csv'
 data_path = 'data/Cytotrace_DGE_2_SCT.csv' #after split train test is done, these should point to training data, not full data
 t1 = False
 
@@ -107,9 +48,11 @@ cluster_header_list = ["orig.ident","nCount_RNA","nFeature_RNA","nCount_ATAC","n
                        "nFeature_Imputed_counts","nCount_gene_activity","nFeature_gene_activity","NE_score1",
                        "class","non.NE_score1","comb.score","S.Score","G2M.Score","Phase","old.ident","wsnn_res.0.5"
                        ]
-#########################################
-# brcd = str(random.Random.randint(0,99999))
-brcd = str(1000)
+# brcd = str(random.randint(0,99999))
+brcd =str(35468)
+# random_state = str(random.Random.randint(0,99999)) #for train-test split
+random_state = 1234
+# brcd = str(1000)
 node_normalization = 0.3
 node_threshold = 0  # don't remove any parents
 transpose = False
@@ -119,9 +62,22 @@ fname = 'M2'
 # if rerunning a brcd and data has already been split into training and testing sets, use the below code
 # Otherwise, these settings are ignored
 data_train_t0_path = f'{brcd}/data_split/train_t0_M2.csv'
-data_train_t1_path = f'{brcd}/data_split/train_t1_M2.csv' #if no T1, replace with None
+data_train_t1_path = None #if no T1, replace with None
 data_test_t0_path = f'{brcd}/data_split/test_t0_M2.csv'
-data_test_t1_path = f'{brcd}/data_split/test_t1_M2.csv' #if no T1, replace with None
+data_test_t1_path = None #if no T1, replace with None
+#########################################
+
+# =============================================================================
+# Start timer and check paths
+# =============================================================================
+
+if not os.path.exists(dir_prefix + brcd):
+    # Create a new directory because it does not exist
+    os.makedirs(dir_prefix + brcd)
+
+time1 = time.time()
+
+print(brcd)
 
 if dir_prefix[-1] != os.sep:
     dir_prefix = dir_prefix + os.sep
@@ -142,64 +98,14 @@ if t1 == True:
 
 
 # =============================================================================
-# Write out information about the this job
-# =============================================================================
-# Append the results to a MasterResults file
-T = {}
-# t2 = time.time()
-# T['time'] = (t2 - t1) / 60.
-# # How much memory did I use?   Only can use on linux platform
-# if os.name == 'posix':
-#     T['memory_Mb'] = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss / 1000.
-# else:
-#     T['memory_Mb'] = np.nan
-T['barcode'] = brcd
-T['dir_prefix'] = dir_prefix
-T['network_path'] = network_path
-T['data_path'] = data_path
-T['data_t1_path'] = data_t1_path
-T['cellID_table'] = cellID_table
-T['node_normalization'] = node_normalization
-T['node_threshold'] = node_threshold
-T['split_train_test'] = split_train_test
-T['split_train_test'] = write_binarized_data
-T['split_train_test'] = fit_rules
-T['split_train_test'] = validation
-T['split_train_test'] = validation_averages
-T['split_train_test'] = find_average_states
-T['split_train_test'] = find_attractors
-T['split_train_test'] = tf_basin = -1 # if -1, use average distance between clusters. otherwise use the same size basin for all phenotypes
-T['split_train_test'] = filter_attractors
-T['split_train_test'] = on_nodes = []
-T['split_train_test'] = off_nodes = []
-
-T = pd.DataFrame([T])
-if not os.path.isfile(dir_prefix + 'Job_specs.csv'):
-    T.to_csv(dir_prefix + 'Job_specs.csv')
-else:
-    with open(dir_prefix + 'Job_specs.csv', 'a') as f:
-        T.to_csv(f, header=False)
-
-if not os.path.exists(dir_prefix + brcd):
-    # Create a new directory because it does not exist
-    os.makedirs(dir_prefix + brcd)
-
-# =============================================================================
-# Start the timer and generate a barcode identifier for this job
-# =============================================================================
-t1 = time.time()
-print(brcd)
-
-# =============================================================================
 # Load the network
 # =============================================================================
 graph, vertex_dict = bb.load.load_network(f'{dir_prefix}/{network_path}', remove_sinks=False, remove_selfloops=False,
                                               remove_sources=False)
 
 v_names, nodes = bb.utils.get_nodes(vertex_dict, graph)
-print(nodes)
-print("Number of nodes:", len(nodes))
-print(graph)
+
+print_graph_info(graph, nodes,  fname, brcd = brcd, dir_prefix = dir_prefix,plot = True)
 
 # =============================================================================
 # Load the data and clusters
@@ -228,21 +134,22 @@ if split_train_test:
 
     data_train_t0, data_test_t0, data_train_t1, data_test_t1, clusters_train, clusters_test =  bb.utils.split_train_test(data_t0, data_t1, clusters,
                                                                                                         f"{dir_prefix}/{brcd}/data_split", fname='M2')
-else: #load the binarized data
+                                                                                                        # random_state = random_state)
+else: #load the data
     data_train_t0 = bb.load.load_data(f'{dir_prefix}/{data_train_t0_path}', nodes, norm=node_normalization, delimiter=',',
-                                 log1p=False, transpose=transpose, sample_order=False, fillna=0)
+                                 log1p=False, transpose=True, sample_order=False, fillna=0)
     if t1:
         data_train_t1 = bb.load.load_data(f'{dir_prefix}/{data_train_t1_path}', nodes, norm=node_normalization,
                                     delimiter=',',
-                                    log1p=False, transpose=transpose, sample_order=False, fillna=0)
+                                    log1p=False, transpose=True, sample_order=False, fillna=0)
     else: data_train_t1 = None
 
     data_test_t0 = bb.load.load_data(f'{dir_prefix}/{data_test_t0_path}', nodes, norm=node_normalization, delimiter=',',
-                                      log1p=False, transpose=transpose, sample_order=False, fillna = 0)
+                                      log1p=False, transpose=True, sample_order=False, fillna = 0)
 
     if t1:
         data_test_t1 = bb.load.load_data(f'{dir_prefix}/{data_test_t1_path}', nodes, norm=node_normalization, delimiter=',',
-                                         log1p=False, transpose=transpose, sample_order=False, fillna = 0)
+                                         log1p=False, transpose=True, sample_order=False, fillna = 0)
     else: data_test_t1 = None
 
     clusters = bb.utils.get_clusters(data_train_t0,data_test=data_test_t0, is_data_split=True,
@@ -272,7 +179,8 @@ binarized_data_test = bb.proc.binarize_data(data_test_t0, phenotype_labels=clust
 if t1:
     binarized_data_test_t1 = bb.proc.binarize_data(data_test_t1, phenotype_labels=clusters, save = save,
                                                save_dir=f"{dir_prefix}/{brcd}/binarized_data",fname=f'binarized_data_test_t1_{fname}')
-else: binarized_data_test_t1 = None
+else:
+    binarized_data_test_t1 = None
 
 
 # =============================================================================
@@ -281,19 +189,24 @@ else: binarized_data_test_t1 = None
 if fit_rules:
     if not os.path.exists(f"{dir_prefix}/{brcd}/rules"):
         # Create a new directory because it does not exist
-        os.makedirs(f"dir_prefix/{brcd}/rules")
+        os.makedirs(f"{dir_prefix}/{brcd}/rules")
     if t1:
-        rules, regulators_dict,strengths, signed_strengths = bb.tl.get_rules_scvelo(data_train_t0, data_train_t1, vertex_dict,
-                                                                                    directory=dir_prefix + brcd + os.sep + "rules_" + brcd,
-                                                                                    plot=False, threshold=node_threshold)
+        print("Running time-series-adapted BooleaBayes rule fitting...")
+        rules, regulators_dict,strengths, signed_strengths = bb.tl.get_rules_scvelo(data = data_train_t0, data_t1 = data_train_t1,
+                                                                                    vertex_dict=vertex_dict,
+                                                                                    plot=False,
+                                                                                    threshold=node_threshold)
     else:
-        rules, regulators_dict,strengths, signed_strengths = bb.tl.get_rules(data_train_t0, vertex_dict,
-                                                                                    directory=dir_prefix + brcd + os.sep + "rules_" + brcd,
-                                                                                    plot=False, threshold=node_threshold)
+        print("Running classic BooleaBayes rule fitting with a single timepoint...")
+        rules, regulators_dict,strengths, signed_strengths = bb.tl.get_rules(data = data_train_t0,
+                                                                             vertex_dict=vertex_dict,
+                                                                             plot=False,
+                                                                             threshold=node_threshold)
     bb.tl.save_rules(rules, regulators_dict, fname=f"{dir_prefix}/{brcd}/rules/rules_{brcd}.txt")
     strengths.to_csv(f"{dir_prefix}/{brcd}/rules/strengths.csv")
     signed_strengths.to_csv(f"{dir_prefix}/{brcd}/rules/signed_strengths.csv")
 else:
+    print("Reading in pre-generated rules...")
     rules, regulators_dict = bb.load.load_rules(fname=f"{dir_prefix}/{brcd}/rules/rules_{brcd}.txt")
 #
 # colors = ["windows blue", "amber", "greyish", "faded green", "dusty purple"]
@@ -315,7 +228,9 @@ else:
 #         gene2color[g] = [0.5098039215686274, 0.37254901960784315, 0.5294117647058824, 1]
 #         vertex_group[g] = 1
 # # print(gene2color)
-draw_grn(graph,vertex_dict,rules, regulators_dict,op.join(dir_prefix,f"M2_network_0.pdf"))#, gene2color = gene2color)
+
+draw_grn(graph,vertex_dict,rules, regulators_dict,f"{dir_prefix}/{brcd}/{fname}_network.pdf", save_edge_weights=True,
+         edge_weights_fname=f"{dir_prefix}/{brcd}/rules/edge_weights.csv")#, gene2color = gene2color)
 
 
 # =============================================================================
@@ -323,7 +238,7 @@ draw_grn(graph,vertex_dict,rules, regulators_dict,op.join(dir_prefix,f"M2_networ
 # =============================================================================
 
 if validation:
-    outfile = open(f"{dir_prefix}{brcd}/tprs_fprs_{brcd}.csv", 'w+')
+    outfile = open(f"{dir_prefix}/{brcd}/tprs_fprs_{brcd}.csv", 'w+')
     # data_test = data
     ind = [x for x in np.linspace(0, 1, 50)]
     tpr_all = pd.DataFrame(index=ind)
@@ -354,6 +269,8 @@ if validation:
     for n, a in enumerate(area_all):
         outfile.write(f"{nodes[n]},{a} \n")
     outfile.close()
+else:
+    print("Skipping validation step...")
 
 if validation_averages:
     n = len(nodes)-2
@@ -391,6 +308,8 @@ if validation_averages:
     plt.xlabel("False Positive Rate")
     plt.title(f"ROC Curve Data \n {np.sum(area_all) / n}")
     plt.savefig(f'{dir_prefix}/{brcd}/{test_set}/ROC_AUC_average.pdf')
+else:
+    print("Skipping validation averaging...")
 # =============================================================================
 # Get attractors and set phenotypes using nearest neighbors
 # =============================================================================
@@ -430,7 +349,8 @@ if find_average_states:
         file_idx.close()
     file.close()
     bb.utils.plot_attractors(op.join(dir_prefix, f'{brcd}/average_states.txt'))
-
+else:
+    print("Skipping finding average states...")
 
 if find_attractors:
     outfile_name = f'{dir_prefix}{brcd}/attractors'
@@ -478,7 +398,8 @@ if find_attractors:
 
     file.close()
     bb.utils.plot_attractors(op.join(dir_prefix, f'{brcd}/attractors_unfiltered.txt'))
-
+else:
+    print("Skipping finding attractors")
 
 if filter_attractors:
     average_states = {"SCLC-A": [], "SCLC-A2": [], 'SCLC-Y': [], 'SCLC-P': [], 'SCLC-N': [], 'SCLC-uncl': []}
@@ -531,7 +452,8 @@ if filter_attractors:
 
     file.close()
     bb.utils.plot_attractors(op.join(dir_prefix, f'{brcd}/attractors_filtered.txt'))
-
+else:
+    print("Skipping filtering attractors")
 # =============================================================================
 # Perform random walks for calculating stability and identifying destabilizers
 # =============================================================================
@@ -593,31 +515,13 @@ if False:
 # give list of perturbation nodes and repeat walks with perturbed nodes to record #
 # that make it from one attractor to another
 
-# =============================================================================
-# Write out information about the this job
-# =============================================================================
+
+time2 = time.time()
+time_for_job = (time2 - time1) / 60.
+print("Time for job: ", time_for_job)
+
+
 # Append the results to a MasterResults file
-# T = {}
-# t2 = time.time()
-# T['time'] = (t2 - t1) / 60.
-# # How much memory did I use?   Only can use on linux platform
-# if os.name == 'posix':
-#     T['memory_Mb'] = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss / 1000.
-# else:
-#     T['memory_Mb'] = np.nan
-# # T['barcode'] = brcd
-# # T['dir_prefix'] = dir_prefix
-# # T['network_path'] = network_path
-# # T['data_path'] = data_path
-# # T['cellID_table'] = cellID_table
-# # T['node_normalization'] = node_normalization
-# # T['node_threshold'] = node_threshold
-#
-# T = pd.DataFrame([T])
-# if not os.path.isfile(dir_prefix + 'Job_specs_post.csv'):
-#     T.to_csv(dir_prefix + 'Job_specs_post.csv')
-# else:
-#     with open(dir_prefix + 'Job_specs_post.csv', 'a') as f:
-#         T.to_csv(f, header=False)
-
-
+log_job(dir_prefix, brcd, random_state, network_path, data_path, data_t1_path, cellID_table, node_normalization,
+        node_threshold, split_train_test, write_binarized_data,fit_rules,validation,validation_averages,
+        find_average_states,find_attractors,tf_basin,filter_attractors,on_nodes,off_nodes, time_for_job)
