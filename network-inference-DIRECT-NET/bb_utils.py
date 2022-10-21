@@ -5,6 +5,7 @@ import numpy as np
 from graph_tool import all as gt
 import booleabayes as bb
 
+
 def log_job(dir_prefix, brcd, random_state, network_path, data_path, data_t1_path, cellID_table, node_normalization,
             node_threshold, split_train_test, write_binarized_data,fit_rules,validation,validation_averages,
             find_average_states,find_attractors,tf_basin,filter_attractors,on_nodes,off_nodes, time = None,

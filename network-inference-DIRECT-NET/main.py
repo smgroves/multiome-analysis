@@ -10,6 +10,7 @@ import matplotlib.pyplot as plt
 from graph_tool import all as gt
 from graph_tool import GraphView
 from bb_utils import *
+import sys
 
 customPalette = sns.color_palette('tab10')
 
@@ -17,11 +18,11 @@ customPalette = sns.color_palette('tab10')
 # Set variables and csvs
 # To modulate which parts of the pipeline need to be computed, use the following variables
 # =============================================================================
-split_train_test = False
-write_binarized_data = False
+split_train_test = True
+write_binarized_data = True
 fit_rules = True
-validation = False
-validation_averages = False
+run_validation = True
+validation_averages = True
 find_average_states = False
 find_attractors = False
 tf_basin = -1 # if -1, use average distance between clusters. otherwise use the same size basin for all phenotypes
@@ -29,42 +30,58 @@ filter_attractors = False
 on_nodes = []
 off_nodes = []
 
+## Set variables for computation
+node_normalization = 0.3
+node_threshold = 0  # don't remove any parents
+transpose = True
+validation_fname = 'validation_set'
+fname = 'M2'
+
+## Set paths
 dir_prefix = '/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET'
 network_path = 'networks/DIRECT-NET_network_with_FIGR_threshold_0_no_NEUROG2_top8regs.csv'
-data_path = 'data/Cytotrace_DGE_2_SCT.csv' #after split train test is done, these should point to training data, not full data
+data_path = 'data/adata_04_nodubs_imputed_M2.csv'
 t1 = False
-
 data_t1_path = None #if no T1 (i.e. single dataset), replace with None
 
-cellID_table = 'data/metadata_final_nodashes.csv'
+## Set metadata information
+cellID_table = 'data/M2_clusters.csv'
 # Assign headers to cluster csv, with one called "class"
 # cluster_header_list = ['class']
 
 # cluster headers with "identity" replaced with "class"
-cluster_header_list = ["orig.ident","nCount_RNA","nFeature_RNA","nCount_ATAC","nFeature_ATAC","nucleosome_signal",
-                       "nucleosome_percentile","TSS.enrichment","TSS.percentile","barcode","sample","ATAC_snn_res.0.5",
-                       "seurat_clusters","nCount_peaks","nFeature_peaks","peaks_snn_res.0.5","percent.mt","nCount_SCT",
-                       "nFeature_SCT","SCT_snn_res.0.5","SCT.weight","peaks.weight","nCount_Imputed_counts",
-                       "nFeature_Imputed_counts","nCount_gene_activity","nFeature_gene_activity","NE_score1",
-                       "class","non.NE_score1","comb.score","S.Score","G2M.Score","Phase","old.ident","wsnn_res.0.5"
-                       ]
-# brcd = str(random.randint(0,99999))
-brcd =str(35468)
-# random_state = str(random.Random.randint(0,99999)) #for train-test split
-random_state = 1234
-# brcd = str(1000)
-node_normalization = 0.3
-node_threshold = 0  # don't remove any parents
-transpose = False
-external_validation = 'validation_set'
-fname = 'M2'
+cluster_header_list = ["class"]
 
+# the below headers go with metadata_final
+# cluster_header_list = ["orig.ident","nCount_RNA","nFeature_RNA","nCount_ATAC","nFeature_ATAC","nucleosome_signal",
+#                        "nucleosome_percentile","TSS.enrichment","TSS.percentile","barcode","sample","ATAC_snn_res.0.5",
+#                        "seurat_clusters","nCount_peaks","nFeature_peaks","peaks_snn_res.0.5","percent.mt","nCount_SCT",
+#                        "nFeature_SCT","SCT_snn_res.0.5","SCT.weight","peaks.weight","nCount_Imputed_counts",
+#                        "nFeature_Imputed_counts","nCount_gene_activity","nFeature_gene_activity","NE_score1",
+#                        "class","non.NE_score1","comb.score","S.Score","G2M.Score","Phase","old.ident","wsnn_res.0.5"
+#                        ]
+
+## Set brcd and train/test data if rerun
+brcd = str(random.randint(0,99999))
+print(brcd)
 # if rerunning a brcd and data has already been split into training and testing sets, use the below code
 # Otherwise, these settings are ignored
-data_train_t0_path = f'{brcd}/data_split/train_t0_M2.csv'
+data_train_t0_path = f'{brcd}/data_split/train_t0_{fname}.csv'
 data_train_t1_path = None #if no T1, replace with None
-data_test_t0_path = f'{brcd}/data_split/test_t0_M2.csv'
+data_test_t0_path = f'{brcd}/data_split/test_t0_{fname}.csv'
 data_test_t1_path = None #if no T1, replace with None
+
+
+## Set job barcode and random_state
+# temp = sys.stdout
+sys.stdout = open(f'{brcd}.txt','wt')
+
+job_brcd = str(random.randint(0,99999)) #use a job brcd to keep track of multiple jobs for the same brcd
+print(f"Job barcode: {job_brcd}")
+# brcd =str(35468)
+# random_state = str(random.Random.randint(0,99999)) #for train-test split
+random_state = 1234
+
 #########################################
 
 # =============================================================================
@@ -76,8 +93,6 @@ if not os.path.exists(dir_prefix + brcd):
     os.makedirs(dir_prefix + brcd)
 
 time1 = time.time()
-
-print(brcd)
 
 if dir_prefix[-1] != os.sep:
     dir_prefix = dir_prefix + os.sep
@@ -105,7 +120,7 @@ graph, vertex_dict = bb.load.load_network(f'{dir_prefix}/{network_path}', remove
 
 v_names, nodes = bb.utils.get_nodes(vertex_dict, graph)
 
-print_graph_info(graph, nodes,  fname, brcd = brcd, dir_prefix = dir_prefix,plot = True)
+print_graph_info(graph, nodes,  fname, brcd = brcd, dir_prefix = dir_prefix,plot = False)
 
 # =============================================================================
 # Load the data and clusters
@@ -126,6 +141,8 @@ if split_train_test:
         data_t1 = None
 
     # Only need to pass 'data_t0' since this data is not split into train/test
+    #TODO: change the below code so that you can input which column should be
+    # replaced with "class" instead of full cluster_header_list
     clusters = bb.utils.get_clusters(data_t0, cellID_table=f"{dir_prefix}/{cellID_table}",
                                cluster_header_list=cluster_header_list)
 
@@ -205,6 +222,8 @@ if fit_rules:
     bb.tl.save_rules(rules, regulators_dict, fname=f"{dir_prefix}/{brcd}/rules/rules_{brcd}.txt")
     strengths.to_csv(f"{dir_prefix}/{brcd}/rules/strengths.csv")
     signed_strengths.to_csv(f"{dir_prefix}/{brcd}/rules/signed_strengths.csv")
+    draw_grn(graph,vertex_dict,rules, regulators_dict,f"{dir_prefix}/{brcd}/{fname}_network.pdf", save_edge_weights=True,
+             edge_weights_fname=f"{dir_prefix}/{brcd}/rules/edge_weights.csv")#, gene2color = gene2color)
 else:
     print("Reading in pre-generated rules...")
     rules, regulators_dict = bb.load.load_rules(fname=f"{dir_prefix}/{brcd}/rules/rules_{brcd}.txt")
@@ -229,85 +248,110 @@ else:
 #         vertex_group[g] = 1
 # # print(gene2color)
 
-draw_grn(graph,vertex_dict,rules, regulators_dict,f"{dir_prefix}/{brcd}/{fname}_network.pdf", save_edge_weights=True,
-         edge_weights_fname=f"{dir_prefix}/{brcd}/rules/edge_weights.csv")#, gene2color = gene2color)
+
 
 
 # =============================================================================
 # Calculate AUC for test dataset for a true error calculation
 # =============================================================================
 
-if validation:
-    outfile = open(f"{dir_prefix}/{brcd}/tprs_fprs_{brcd}.csv", 'w+')
-    # data_test = data
-    ind = [x for x in np.linspace(0, 1, 50)]
-    tpr_all = pd.DataFrame(index=ind)
-    fpr_all = pd.DataFrame(index=ind)
-    area_all = []
+if run_validation:
+    VAL_DIR = f"{dir_prefix}/{brcd}/{validation_fname}"
+    try:
+        os.mkdir(VAL_DIR)
+    except FileExistsError:
+        pass
 
-    outfile.write(f",,")
-    for j in ind:
-        outfile.write(str(j)+',')
-    outfile.write('\n')
-    for g in nodes:
-        print(g)
+    validation, tprs_all, fprs_all, area_all = bb.tl.fit_validation(data_test_t0, data_test_t1 = None, nodes = nodes,
+                                                                    regulators_dict=regulators_dict, rules = rules,
+                                                                    save=True, save_dir=VAL_DIR,
+                                                                    show_plots=False, save_df=True, fname = fname)
+    # Saves auc values for each gene (node) in the passed directory as 'aucs.csv'
+    bb.tl.save_auc_by_gene(area_all, nodes, VAL_DIR)
+    # Plot aucs
+    n = len(nodes)
+    aucs = pd.read_csv(f'{VAL_DIR}/aucs.csv', header=None, index_col=0)
+    print("AUC means: ",aucs.mean(axis = 1))
 
-        validation = bb.utils.plot_accuracy_scvelo(data_test, data_test_t1, g, regulators_dict, rules, save_plots='test',
-                                                      plot=True, plot_clusters=False, save_df=True,
-                                                      dir_prefix=dir_prefix + brcd + os.sep + str(test_set) + os.sep)
-        tprs, fprs, area = bb.utils.roc(validation, g, n_thresholds=50, save_plots='test', plot=True, save=True,
-                                           dir_prefix=dir_prefix + brcd + os.sep + str(test_set) + os.sep)
-        tpr_all[g] = tprs
-        fpr_all[g] = fprs
-        outfile.write(f"{g},tprs,{tprs}\n")
-        outfile.write(f"{g},fprs,{fprs}\n")
-        area_all.append(area)
-    outfile.close()
+    bb.plot.plot_aucs(aucs, save=True, save_dir=VAL_DIR, show_plot=True)
 
-    # # save AUC values by gene
-    outfile = open(f"{dir_prefix}{brcd}/aucs.csv", 'w+')
-    for n, a in enumerate(area_all):
-        outfile.write(f"{nodes[n]},{a} \n")
-    outfile.close()
+    # outfile = open(f"{dir_prefix}/{brcd}/tprs_fprs_{brcd}.csv", 'w+')
+    # # data_test = data
+    # ind = [x for x in np.linspace(0, 1, 50)]
+    # tpr_all = pd.DataFrame(index=ind)
+    # fpr_all = pd.DataFrame(index=ind)
+    # area_all = []
+    #
+    # outfile.write(f",,")
+    # for j in ind:
+    #     outfile.write(str(j)+',')
+    # outfile.write('\n')
+    # for g in nodes:
+    #     print(g)
+    #
+    #     validation = bb.utils.plot_accuracy_scvelo(data_test, data_test_t1, g, regulators_dict, rules, save_plots='test',
+    #                                                   plot=True, plot_clusters=False, save_df=True,
+    #                                                   dir_prefix=dir_prefix + brcd + os.sep + str(test_set) + os.sep)
+    #     tprs, fprs, area = bb.utils.roc(validation, g, n_thresholds=50, save_plots='test', plot=True, save=True,
+    #                                        dir_prefix=dir_prefix + brcd + os.sep + str(test_set) + os.sep)
+    #     tpr_all[g] = tprs
+    #     fpr_all[g] = fprs
+    #     outfile.write(f"{g},tprs,{tprs}\n")
+    #     outfile.write(f"{g},fprs,{fprs}\n")
+    #     area_all.append(area)
+    # outfile.close()
+    #
+    # # # save AUC values by gene
+    # outfile = open(f"{dir_prefix}{brcd}/aucs.csv", 'w+')
+    # for n, a in enumerate(area_all):
+    #     outfile.write(f"{nodes[n]},{a} \n")
+    # outfile.close()
 else:
     print("Skipping validation step...")
 
 if validation_averages:
-    n = len(nodes)-2
-    aucs = pd.read_csv(f"{dir_prefix}{brcd}/{test_set}/auc_2364_0.csv", header = None, index_col=0)
-    print(aucs.mean(axis = 1))
-    aucs.columns = ['auc']
-    plt.figure()
-    plt.bar(height=aucs['auc'], x = aucs.index)
-    plt.xticks(rotation = 90)
-    plt.savefig(f"{dir_prefix}/{brcd}/aucs.pdf")
+    if run_validation == False:
+        VAL_DIR = f"{dir_prefix}/{brcd}/{validation_fname}"
+        # Function to calculate roc and tpr, fpr, area from saved validation files
+        # if validation == False, read in values from files instead of from above
+        tpr_all, fpr_all, area_all = bb.tl.roc_from_file(f'{VAL_DIR}/accuracy_plots', nodes, save=True, save_dir=VAL_DIR)
 
-    ind = [i for i in np.linspace(0, 1, 50)]
-    tpr_all = pd.DataFrame(index=ind)
-    fpr_all = pd.DataFrame(index=ind)
-    area_all = []
-
-    for g in nodes:
-        if g in ['NEUROD1','SIX5']: continue
-        validation = pd.read_csv(
-            f'{dir_prefix}{brcd}/{test_set}/{g}_validation.csv',
-            index_col=0, header=0)
-        tprs, fprs, area = bb.utils.roc(validation, g, n_thresholds=50, save_plots='', save = False, plot = False)
-        tpr_all[g] = tprs
-        fpr_all[g] = fprs
-        area_all.append(area)
-    print(area_all)
-
-    plt.figure()
-    ax = plt.subplot()
-    plt.plot(fpr_all.sum(axis=1) / n, tpr_all.sum(axis=1) / n, '-o')
-    ax.plot(ax.get_xlim(), ax.get_ylim(), ls="--", c=".3")
-    plt.xlim(0, 1)
-    plt.ylim(0, 1)
-    plt.ylabel("True Positive Rate")
-    plt.xlabel("False Positive Rate")
-    plt.title(f"ROC Curve Data \n {np.sum(area_all) / n}")
-    plt.savefig(f'{dir_prefix}/{brcd}/{test_set}/ROC_AUC_average.pdf')
+    bb.plot.plot_validation_avgs(fpr_all, tpr_all, len(nodes), area_all, save=True, save_dir=VAL_DIR, show_plot=True)
+    # n = len(nodes)-2
+    # aucs = pd.read_csv(f"{dir_prefix}{brcd}/{validation_fname}/auc_2364_0.csv", header = None, index_col=0)
+    # print(aucs.mean(axis = 1))
+    # aucs.columns = ['auc']
+    # plt.figure()
+    # plt.bar(height=aucs['auc'], x = aucs.index)
+    # plt.xticks(rotation = 90)
+    # plt.savefig(f"{dir_prefix}/{brcd}/aucs.pdf")
+    #
+    # ind = [i for i in np.linspace(0, 1, 50)]
+    # tpr_all = pd.DataFrame(index=ind)
+    # fpr_all = pd.DataFrame(index=ind)
+    # area_all = []
+    #
+    # for g in nodes:
+    #     if g in ['NEUROD1','SIX5']: continue
+    #     validation = pd.read_csv(
+    #         f'{dir_prefix}{brcd}/{validation_fname}/{g}_validation.csv',
+    #         index_col=0, header=0)
+    #     tprs, fprs, area = bb.utils.roc(validation, g, n_thresholds=50, save_plots='', save = False, plot = False)
+    #     tpr_all[g] = tprs
+    #     fpr_all[g] = fprs
+    #     area_all.append(area)
+    # print(area_all)
+    #
+    # plt.figure()
+    # ax = plt.subplot()
+    # plt.plot(fpr_all.sum(axis=1) / n, tpr_all.sum(axis=1) / n, '-o')
+    # ax.plot(ax.get_xlim(), ax.get_ylim(), ls="--", c=".3")
+    # plt.xlim(0, 1)
+    # plt.ylim(0, 1)
+    # plt.ylabel("True Positive Rate")
+    # plt.xlabel("False Positive Rate")
+    # plt.title(f"ROC Curve Data \n {np.sum(area_all) / n}")
+    # plt.savefig(f'{dir_prefix}/{brcd}/{validation_fname}/ROC_AUC_average.pdf')
 else:
     print("Skipping validation averaging...")
 # =============================================================================
