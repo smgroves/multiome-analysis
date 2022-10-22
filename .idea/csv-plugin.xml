@@ -66,20 +66,6 @@
             </Attribute>
           </value>
         </entry>
-        <entry key="/network-inference-DIRECT-NET/data/t0_M2.csv">
-          <value>
-            <Attribute>
-              <option name="separator" value="," />
-            </Attribute>
-          </value>
-        </entry>
-        <entry key="/network-inference-DIRECT-NET/data/t1_M2.csv">
-          <value>
-            <Attribute>
-              <option name="separator" value="," />
-            </Attribute>
-          </value>
-        </entry>
         <entry key="/network-inference-DIRECT-NET/networks/DIRECT-NET_network.csv">
           <value>
             <Attribute>
@@ -123,13 +109,6 @@
           </value>
         </entry>
         <entry key="/network-inference-DIRECT-NET/networks/FIGR_network.csv">
-          <value>
-            <Attribute>
-              <option name="separator" value="," />
-            </Attribute>
-          </value>
-        </entry>
-        <entry key="/network-inference/Job_specs.csv">
           <value>
             <Attribute>
               <option name="separator" value="," />
