@@ -28,7 +28,7 @@ run_validation = False
 validation_averages = False
 find_average_states = True
 find_attractors = True
-tf_basin = 3 # if -1, use average distance between clusters for search basin for attractors.
+tf_basin = 2 # if -1, use average distance between clusters for search basin for attractors.
 # otherwise use the same size basin for all phenotypes. For single cell data, there may be so many samples that average distance is small.
 filter_attractors = False
 on_nodes = []
@@ -47,7 +47,7 @@ fname = 'M2'
 
 ## Set paths
 dir_prefix = '/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET'
-network_path = 'networks/DIRECT-NET_network_with_FIGR_threshold_0_no_NEUROG2_top8regs_wo_sinks.csv'
+network_path = 'networks/DIRECT-NET_network_with_FIGR_threshold_0_no_NEUROG2_top8regs_NO_sinks.csv'
 data_path = 'data/adata_04_nodubs_imputed_M2.csv'
 t1 = False
 data_t1_path = None #if no T1 (i.e. single dataset), replace with None
@@ -71,7 +71,7 @@ cluster_header_list = ["class"]
 
 ## Set brcd and train/test data if rerun
 # brcd = str(random.randint(0,99999))
-brcd = str(2000)
+brcd = str(3000)
 print(brcd)
 # if rerunning a brcd and data has already been split into training and testing sets, use the below code
 # Otherwise, these settings are ignored
@@ -108,7 +108,7 @@ if not os.path.exists(f"{dir_prefix}/{brcd}/jobs"):
     # Create a new directory because it does not exist
     os.makedirs(f"{dir_prefix}/{brcd}/jobs")
 
-sys.stdout = open(f'{dir_prefix}/{brcd}/jobs/{job_brcd}_log.txt','wt')
+# sys.stdout = open(f'{dir_prefix}/{brcd}/jobs/{job_brcd}_log.txt','wt')
 
 
 time1 = time.time()
