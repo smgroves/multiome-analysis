@@ -108,6 +108,13 @@
             </Attribute>
           </value>
         </entry>
+        <entry key="/network-inference-DIRECT-NET/networks/DIRECT-NET_network_with_FIGR_threshold_0_no_NEUROG2_top8regs_wo_sinks.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
         <entry key="/network-inference-DIRECT-NET/networks/FIGR_network.csv">
           <value>
             <Attribute>

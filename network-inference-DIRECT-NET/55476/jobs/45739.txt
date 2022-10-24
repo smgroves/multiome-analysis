@@ -1,0 +1,36 @@
+Job barcode: 45739
+Reading in data
+Binarizing data
+Binarizing test data
+Reading in pre-generated rules...
+Skipping validation step...
+Skipping validation averaging...
+Average states:  {'NE_1': 37771965781136445191, 'Club cells_2': 250444631291929753840, 'NE_7': 40091587937715160877, 'NE_4': 53629302795755194175, 'AT2 cells': 253047817429666164944, 'NE_6': 58529219190334228267, 'NE_5': 44405930241352663850, 'NE_2': 240131298691397799799, 'Club cells_1': 250444631291929753808, 'NE_9': 44406493708853774127, 'NE_11': 53629300079184184234, 'NE_3': 36988503276361157643, 'NE_8': 95893748510198862762, 'NE_10': 37789884521084161803}
+AT2 cells
+2
+Club cells_1
+1
+Club cells_2
+1
+NE_1
+1
+NE_10
+1
+NE_11
+1
+NE_2
+1
+NE_3
+1
+NE_4
+1
+NE_5
+1
+NE_6
+1
+NE_7
+1
+NE_8
+1
+NE_9
+1

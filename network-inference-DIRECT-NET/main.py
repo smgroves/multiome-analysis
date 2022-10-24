@@ -19,7 +19,7 @@ customPalette = sns.color_palette('tab10')
 # Set variables and csvs
 # To modulate which parts of the pipeline need to be computed, use the following variables
 # =============================================================================
-print_graph_information = False #whether to print graph info to {brcd}.txt
+print_graph_information = True #whether to print graph info to {brcd}.txt
 
 split_train_test = False
 write_binarized_data = True
@@ -28,12 +28,17 @@ run_validation = False
 validation_averages = False
 find_average_states = True
 find_attractors = True
-tf_basin = -1 # if -1, use average distance between clusters. otherwise use the same size basin for all phenotypes
+tf_basin = 3 # if -1, use average distance between clusters for search basin for attractors.
+# otherwise use the same size basin for all phenotypes. For single cell data, there may be so many samples that average distance is small.
 filter_attractors = False
 on_nodes = []
 off_nodes = []
 
 ## Set variables for computation
+remove_sinks=False
+remove_selfloops=False
+remove_sources=False
+
 node_normalization = 0.3
 node_threshold = 0  # don't remove any parents
 transpose = True
@@ -42,7 +47,7 @@ fname = 'M2'
 
 ## Set paths
 dir_prefix = '/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET'
-network_path = 'networks/DIRECT-NET_network_with_FIGR_threshold_0_no_NEUROG2_top8regs.csv'
+network_path = 'networks/DIRECT-NET_network_with_FIGR_threshold_0_no_NEUROG2_top8regs_wo_sinks.csv'
 data_path = 'data/adata_04_nodubs_imputed_M2.csv'
 t1 = False
 data_t1_path = None #if no T1 (i.e. single dataset), replace with None
@@ -66,7 +71,7 @@ cluster_header_list = ["class"]
 
 ## Set brcd and train/test data if rerun
 # brcd = str(random.randint(0,99999))
-brcd = str(55476)
+brcd = str(2000)
 print(brcd)
 # if rerunning a brcd and data has already been split into training and testing sets, use the below code
 # Otherwise, these settings are ignored
@@ -78,13 +83,16 @@ data_test_t1_path = None #if no T1, replace with None
 
 ## Set job barcode and random_state
 # temp = sys.stdout
-sys.stdout = open(f'{brcd}.txt','wt')
 
 job_brcd = str(random.randint(0,99999)) #use a job brcd to keep track of multiple jobs for the same brcd
 print(f"Job barcode: {job_brcd}")
+
 # brcd =str(35468)
 # random_state = str(random.Random.randint(0,99999)) #for train-test split
 random_state = 1234
+
+# Append the results to a MasterResults file
+
 
 #########################################
 
@@ -95,6 +103,13 @@ random_state = 1234
 if not os.path.exists(f"{dir_prefix}/{brcd}"):
     # Create a new directory because it does not exist
     os.makedirs(f"{dir_prefix}/{brcd}")
+
+if not os.path.exists(f"{dir_prefix}/{brcd}/jobs"):
+    # Create a new directory because it does not exist
+    os.makedirs(f"{dir_prefix}/{brcd}/jobs")
+
+sys.stdout = open(f'{dir_prefix}/{brcd}/jobs/{job_brcd}_log.txt','wt')
+
 
 time1 = time.time()
 
@@ -119,8 +134,8 @@ if t1 == True:
 # =============================================================================
 # Load the network
 # =============================================================================
-graph, vertex_dict = bb.load.load_network(f'{dir_prefix}/{network_path}', remove_sinks=False, remove_selfloops=False,
-                                              remove_sources=False)
+graph, vertex_dict = bb.load.load_network(f'{dir_prefix}/{network_path}', remove_sinks=remove_sinks, remove_selfloops=remove_selfloops,
+                                              remove_sources=remove_sources)
 
 v_names, nodes = bb.utils.get_nodes(vertex_dict, graph)
 
@@ -190,7 +205,7 @@ if not os.path.exists(f"{dir_prefix}/{brcd}/binarized_data"):
 data_t0 = bb.load.load_data(f'{dir_prefix}/{data_path}', nodes, norm=node_normalization,
                             delimiter=',', log1p=False, transpose=transpose,
                             sample_order=False, fillna=0)
-binarized_data_t0 = bb.proc.binarize_data(data_train_t0, phenotype_labels=clusters, save = save,
+binarized_data_t0 = bb.proc.binarize_data(data_t0, phenotype_labels=clusters, save = save,
                                                 save_dir=f"{dir_prefix}/{brcd}/binarized_data",fname=f'binarized_data_t0_{fname}')
 
 binarized_data_train_t0 = bb.proc.binarize_data(data_train_t0, phenotype_labels=clusters, save = save,
@@ -355,37 +370,6 @@ if find_average_states:
     # Plot average state for each subtype
     bb.plot.plot_attractors(f'{ATTRACTOR_DIR}/average_states.txt', save_dir="")
 
-    # # #cluster name will be appended to this name to form 1 txt file for each phenotype in binarized_data
-    # # #average state of each subtype
-    # average_states = dict()
-    #
-    # for k in binarized_data.keys():
-    #     ave = bb.utils.average_state(binarized_data[k], n)
-    #     state = ave.copy()
-    #     state[state < 0.5] = 0
-    #     state[state >= 0.5] = 1
-    #     state = [int(i) for i in state]
-    #     idx = bb.utils.state2idx(''.join(["%d" % i for i in state]))
-    #     average_states[k] = idx
-    # print(average_states)
-    #
-    # file = open(op.join(dir_prefix,f'{brcd}/average_states.txt'), 'w+')
-    # #plot average state for each subtype
-    # for j in nodes:
-    #     file.write(f",{j}")
-    # file.write("\n")
-    # for k in average_states.keys():
-    #     file_idx = open(op.join(dir_prefix, f'{brcd}/average_states_idx_{k}.txt'), 'w+')
-    #     file_idx.write(',average_state')
-    #     att = bb.utils.idx2binary(average_states[k], n)
-    #     file.write(f"{k}")
-    #     for i in att:
-    #         file.write(f",{i}")
-    #         file_idx.write(f"{i}\n")
-    #     file.write("\n")
-    #     file_idx.close()
-    # file.close()
-    # bb.utils.plot_attractors(op.join(dir_prefix, f'{brcd}/average_states.txt'))
 else:
     print("Skipping finding average states...")
 
@@ -407,53 +391,8 @@ if find_attractors:
     bb.tl.write_attractor_dict(attractor_dict, nodes, outfile)
 
     # Plot average state for each subtype
-    bb.plot.plot_attractors(f'{ATTRACTOR_DIR}/attractors_unfiltered.txt')
+    bb.plot.plot_attractors(f'{ATTRACTOR_DIR}/attractors_unfiltered.txt', save_dir="")
 
-    # outfile_name = f'{dir_prefix}{brcd}/attractors'
-    # if tf_basin < 0:
-    #     dist_dict = dict()
-    #     # find average minimum distance between binarized data points within each cluster
-    #     # and use this to inform the size of tf_basin to search for attractors
-    #     for k in sorted(binarized_data.keys()):
-    #         print(k)
-    #         distances = []
-    #         for s in binarized_data[k]:
-    #             if len(binarized_data[k]) == 1:
-    #                 distances = [4]
-    #             else:
-    #                 min_dist = 20
-    #                 for t in binarized_data[k]:
-    #                     if s == t: pass
-    #                     else:
-    #                         dist = bb.utils.hamming_idx(s, t, n)
-    #                         if dist < min_dist: min_dist = dist
-    #                 distances.append(min_dist)
-    #         try:
-    #             dist_dict[k] = int(np.ceil(np.mean(distances)))
-    #             print(dist_dict[k])
-    #
-    #         except ValueError: print("Not enough data in group to find distances.")
-    #     attractor_dict = bb.utils.find_attractors(binarized_data, rules, nodes, regulators_dict, outfile_name, tf_basin=dist_dict, on_nodes=on_nodes, off_nodes=off_nodes)
-    #
-    # else:
-    #     attractor_dict = bb.utils.find_attractors(binarized_data, rules, nodes, regulators_dict, outfile_name, tf_basin=tf_basin, on_nodes=on_nodes, off_nodes=off_nodes)
-    #
-    #
-    # file = open(op.join(dir_prefix, f'{brcd}/attractors_unfiltered.txt'), 'w+')
-    # # plot average state for each subtype
-    # for j in nodes:
-    #     file.write(f",{j}")
-    # file.write("\n")
-    # for k in attractor_dict.keys():
-    #     att = [bb.utils.idx2binary(x, len(nodes)) for x in attractor_dict[k]]
-    #     for i, a in zip(att, attractor_dict[k]):
-    #         file.write(f"{k}")
-    #         for c in i:
-    #             file.write(f",{c}")
-    #         file.write("\n")
-    #
-    # file.close()
-    # bb.utils.plot_attractors(op.join(dir_prefix, f'{brcd}/attractors_unfiltered.txt'))
 else:
     print("Skipping finding attractors")
 
@@ -576,8 +515,6 @@ time2 = time.time()
 time_for_job = (time2 - time1) / 60.
 print("Time for job: ", time_for_job)
 
-
-# Append the results to a MasterResults file
 log_job(dir_prefix, brcd, random_state, network_path, data_path, data_t1_path, cellID_table, node_normalization,
         node_threshold, split_train_test, write_binarized_data,fit_rules,run_validation,validation_averages,
-        find_average_states,find_attractors,tf_basin,filter_attractors,on_nodes,off_nodes, time = time_for_job, job_barcode= job_brcd)
+        find_average_states,find_attractors,tf_basin,filter_attractors,on_nodes,off_nodes, time = None, job_barcode= job_brcd)

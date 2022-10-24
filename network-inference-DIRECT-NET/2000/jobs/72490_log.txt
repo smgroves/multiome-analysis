@@ -1,0 +1,76 @@
+==================================
+Graph properties
+==================================
+<Graph object, directed, with 63 vertices and 419 edges, 3 internal vertex properties, at 0x7fe869cf2f50>
+Number of nodes: 63
+Nodes:  ['AHR', 'ARID5B', 'ASCL1', 'BACH1', 'CREB1', 'CUX1', 'CUX2', 'EGR1', 'EHF', 'ESR1', 'ETS1', 'FOS', 'FOSB', 'FOXO3', 'GLIS3', 'GRHL2', 'HIF1A', 'HSF2', 'JUN', 'JUNB', 'JUND', 'KMT2A', 'LMX1B', 'MECOM', 'MEIS2', 'NFATC2', 'NFE2L2', 'NFIA', 'NFIB', 'NFIX', 'NFKB1', 'NPAS2', 'NR3C2', 'PBX1', 'PKNOX2', 'PPARG', 'PRDM16', 'PROX1', 'RARB', 'REST', 'RORA', 'RORB', 'RUNX1', 'SIX1', 'SIX4', 'SMAD3', 'SOX5', 'SOX6', 'SOX9', 'SP100', 'STAT1', 'STAT2', 'TBX15', 'TCF12', 'TCF4', 'TCF7L1', 'TCF7L2', 'TEAD1', 'THRB', 'ZBTB18', 'ZBTB20', 'ZBTB7A', 'ZEB1']
+Sources:  ['ZBTB18', 'RORA', 'ZBTB7A', 'SOX9', 'TCF4', 'REST']
+Sinks:  ['NFE2L2', 'GLIS3', 'SOX6', 'TCF12', 'HIF1A', 'STAT2', 'TCF7L1', 'THRB', 'NPAS2', 'ARID5B', 'KMT2A', 'BACH1', 'ZBTB20', 'SOX5', 'MECOM', 'AHR', 'FOSB']
+Network is a single connected component:  True
+Directed acyclic graph:  False
+==================================
+Reading in data
+Binarizing data
+Binarizing test data
+Reading in pre-generated rules...
+Skipping validation step...
+Skipping validation averaging...
+Average states:  {'NE_1': 1264455278853392135, 'Club cells_2': 7667242711968348400, 'NE_7': 1556129359246165805, 'NE_4': 1517822339774744383, 'AT2 cells': 7705549697080064208, 'NE_6': 2130311889097099051, 'NE_5': 1517822081000866602, 'NE_2': 7538867385894086519, 'Club cells_1': 7667242711968348368, 'NE_9': 1517963077263066927, 'NE_11': 1517820981489238954, 'NE_3': 1158660821361918987, 'NE_8': 3346950890040200106, 'NE_10': 1268935238455691019}
+AT2 cells
+1
+Club cells_1
+1
+Club cells_2
+1
+NE_1
+1
+NE_10
+1
+NE_11
+1
+NE_2
+1
+NE_3
+1
+NE_4
+1
+NE_5
+1
+NE_6
+1
+NE_7
+1
+NE_8
+1
+NE_9
+1
+... 9.93 % done
+... 19.86 % done
+... 29.79 % done
+... 39.72 % done
+... 49.65 % done
+... 59.58 % done
+... 69.51 % done
+... 79.44 % done
+... 89.37 % done
+... 99.3 % done
+... 33.78 % done
+... 67.57 % done
+... 22.99 % done
+... 45.98 % done
+... 68.97 % done
+... 91.95 % done
+... 62.11 % done
+... 17.15 % done
+... 34.31 % done
+... 51.46 % done
+... 68.61 % done
+... 85.76 % done
+... 37.31 % done
+... 74.63 % done
+... 72.46 % done
+... 64.52 % done
+... 91.74 % done
+... 46.73 % done
+... 93.46 % done
+Time to find attractors:  0:11:28.964274

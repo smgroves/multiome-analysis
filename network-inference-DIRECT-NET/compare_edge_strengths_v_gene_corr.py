@@ -21,35 +21,64 @@ edge_weights = pd.read_csv(f"{dir_prefix}/{brcd}/rules/edge_weights.csv", header
 
 nodes = strengths.index
 
-if not os.path.exists(f"{dir_prefix}/{brcd}/rules/strength_plots"):
-    # Create a new directory because it does not exist
-    os.makedirs(f"{dir_prefix}/{brcd}/rules/strength_plots")
+def plot_strength_ew(strengths, signed_strengths, edge_weights, nodes, dir_prefix = "", brcd = ""):
+
+    if not os.path.exists(f"{dir_prefix}/{brcd}/rules/strength_plots"):
+        # Create a new directory because it does not exist
+        os.makedirs(f"{dir_prefix}/{brcd}/rules/strength_plots")
+
+    for node in nodes:
+        print(node)
+        s = strengths.loc[node].dropna().sort_index()
+        ss = signed_strengths.loc[node].dropna().sort_index()
+        ew = edge_weights.loc[node].dropna().sort_index()
+
+        plt.figure()
+        plt.scatter(ew, ss)
+        range = ew.max() - ew.min()
+        plt.ylabel(f"Signed Strength (sum(f_{node}(TF = ON) - f_{node}(TF = OFF)))")
+        plt.xlabel(f"Edge Weights (average(f_{node}(TF = ON) - f_{node}(TF = OFF)))")
+        for i in ew.index:
+            plt.text(x=ew[i]+.01*range, y = ss[i],s = i)
+        plt.axhline(y = 0, linestyle = "--", color = 'grey')
+        plt.axvline(x = 0, linestyle = "--", color = 'grey')
+        plt.savefig(f"{dir_prefix}/{brcd}/rules/strength_plots/{node}_ew_ss.png")
+        plt.close()
+
+        plt.figure()
+        plt.scatter(s, ss)
+        range = s.max() - s.min()
+        plt.ylabel(f"Signed Strength (sum(f_{node}(TF = ON) - f_{node}(TF = OFF)))")
+        plt.xlabel(f"Strength (sum(|f_{node}(TF = ON) - f_{node}(TF = OFF)|))")
+        for i in s.index:
+            plt.text(x=s[i]+.01*range, y = ss[i],s = i)
+        plt.axhline(y = 0, linestyle = "--", color = 'grey')
+        plt.savefig(f"{dir_prefix}/{brcd}/rules/strength_plots/{node}_s_ss.png")
+        plt.close()
+
+gene_correlations = pd.read_csv(f"{dir_prefix}/DIRECT-NET-FILES/Dorc_TF_cor.csv", header = 0, index_col=0)
+gene_correlations.index = [i.upper() for i in gene_correlations.index]
+gene_correlations.columns = [i.upper() for i in gene_correlations.columns]
 
 for node in nodes:
-    print(node)
-    s = strengths.loc[node].dropna().sort_index()
-    ss = signed_strengths.loc[node].dropna().sort_index()
-    ew = edge_weights.loc[node].dropna().sort_index()
+    if node in gene_correlations.index:
+        print(node)
+        ew = edge_weights.loc[node].dropna()
+        gc = gene_correlations.loc[node]
 
-    plt.figure()
-    plt.scatter(ew, ss)
-    range = ew.max() - ew.min()
-    plt.ylabel(f"Signed Strength (sum(f_{node}(TF = ON) - f_{node}(TF = OFF)))")
-    plt.xlabel(f"Edge Weights (average(f_{node}(TF = ON) - f_{node}(TF = OFF)))")
-    for i in ew.index:
-        plt.text(x=ew[i]+.01*range, y = ss[i],s = i)
-    plt.axhline(y = 0, linestyle = "--", color = 'grey')
-    plt.axvline(x = 0, linestyle = "--", color = 'grey')
-    plt.savefig(f"{dir_prefix}/{brcd}/rules/strength_plots/{node}_ew_ss.png")
-    plt.close()
+        overlap = list(set(ew.index).intersection(set(gc.index)))
 
-    plt.figure()
-    plt.scatter(s, ss)
-    range = s.max() - s.min()
-    plt.ylabel(f"Signed Strength (sum(f_{node}(TF = ON) - f_{node}(TF = OFF)))")
-    plt.xlabel(f"Strength (sum(|f_{node}(TF = ON) - f_{node}(TF = OFF)|))")
-    for i in s.index:
-        plt.text(x=s[i]+.01*range, y = ss[i],s = i)
-    plt.axhline(y = 0, linestyle = "--", color = 'grey')
-    plt.savefig(f"{dir_prefix}/{brcd}/rules/strength_plots/{node}_s_ss.png")
-    plt.close()
+        ew = ew.loc[overlap].sort_index()
+        gc = gc.loc[overlap].sort_index()
+
+        plt.figure()
+        plt.scatter(ew, gc)
+        range = ew.max() - ew.min()
+        plt.ylabel(f"Gene Correlation")
+        plt.xlabel(f"Edge Weights (average(f_{node}(TF = ON) - f_{node}(TF = OFF)))")
+        for i in ew.index:
+            plt.text(x=ew[i]+.01*range, y = gc[i],s = i)
+        plt.axhline(y = 0, linestyle = "--", color = 'grey')
+        plt.axvline(x = 0, linestyle = "--", color = 'grey')
+        plt.savefig(f"{dir_prefix}/{brcd}/rules/strength_plots/{node}_ew_gc.png")
+        plt.close()

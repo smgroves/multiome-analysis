@@ -1,0 +1,46 @@
+==================================
+Graph properties
+==================================
+<Graph object, directed, with 68 vertices and 453 edges, 3 internal vertex properties, at 0x7fed98e85490>
+Number of nodes: 68
+Nodes:  ['AHR', 'ARID5B', 'ASCL1', 'BACH1', 'BACH2', 'BBX', 'CREB1', 'CUX1', 'CUX2', 'EGR1', 'EHF', 'EPAS1', 'ESR1', 'ETS1', 'FOS', 'FOSB', 'FOXO3', 'GLIS3', 'GRHL2', 'HIF1A', 'HSF2', 'JUN', 'JUNB', 'JUND', 'KMT2A', 'LCOR', 'LMX1B', 'MECOM', 'MEIS2', 'NFATC2', 'NFE2L2', 'NFIA', 'NFIB', 'NFIX', 'NFKB1', 'NPAS2', 'NR3C2', 'PBX1', 'PKNOX2', 'PPARG', 'PRDM16', 'PROX1', 'RARB', 'REST', 'RORA', 'RORB', 'RUNX1', 'SIX1', 'SIX4', 'SMAD3', 'SOX5', 'SOX6', 'SOX9', 'SP100', 'STAT1', 'STAT2', 'STAT4', 'TBX15', 'TCF12', 'TCF4', 'TCF7L1', 'TCF7L2', 'TEAD1', 'THRB', 'ZBTB18', 'ZBTB20', 'ZBTB7A', 'ZEB1']
+Sources:  ['ZBTB18', 'ZBTB7A', 'REST', 'TCF4', 'RORA', 'SOX9']
+Sinks:  ['BACH2', 'KMT2A', 'SOX5', 'HIF1A', 'STAT2', 'LCOR', 'BACH1', 'THRB', 'AHR', 'FOSB', 'GLIS3', 'TCF12', 'SOX6', 'MECOM', 'NPAS2', 'EPAS1', 'ARID5B', 'ZBTB20', 'NFE2L2', 'TCF7L1', 'STAT4', 'BBX']
+Network is a single connected component:  True
+Directed acyclic graph:  False
+==================================
+Reading in data
+Binarizing data
+Binarizing test data
+Reading in pre-generated rules...
+Skipping validation step...
+Skipping validation averaging...
+Average states:  {'NE_1': 37771965781136445191, 'Club cells_2': 250444631291929753840, 'NE_7': 40091587937715160877, 'NE_4': 53629302795755194175, 'AT2 cells': 253047817429666164944, 'NE_6': 58529219190334228267, 'NE_5': 44405930241352663850, 'NE_2': 240131298691397799799, 'Club cells_1': 250444631291929753808, 'NE_9': 44406493708853774127, 'NE_11': 53629300079184184234, 'NE_3': 36988503276361157643, 'NE_8': 95893748510198862762, 'NE_10': 37789884521084161803}
+AT2 cells
+2
+Club cells_1
+1
+Club cells_2
+1
+NE_1
+1
+NE_10
+1
+NE_11
+1
+NE_2
+1
+NE_3
+1
+NE_4
+1
+NE_5
+1
+NE_6
+1
+NE_7
+1
+NE_8
+1
+NE_9
+1
