@@ -4,12 +4,13 @@ import resource
 import numpy as np
 from graph_tool import all as gt
 import booleabayes as bb
+from graph_tool import GraphView
 
 
 def log_job(dir_prefix, brcd, random_state, network_path, data_path, data_t1_path, cellID_table, node_normalization,
             node_threshold, split_train_test, write_binarized_data,fit_rules,validation,validation_averages,
             find_average_states,find_attractors,tf_basin,filter_attractors,on_nodes,off_nodes, time = None,
-            linux = False, memory = False, job_barcode = None):
+            linux = False, memory = False, job_barcode = None, notes_for_job = ""):
     print("printing job details to Job_specs.csv")
     T = {}
     if memory:
@@ -39,6 +40,7 @@ def log_job(dir_prefix, brcd, random_state, network_path, data_path, data_t1_pat
     T['off_nodes'] = off_nodes
     T['total_time'] = time
     T['job_barcode'] = job_barcode
+    T['notes_for_job'] = notes_for_job
 
     T = pd.DataFrame([T])
     if not os.path.isfile(dir_prefix + 'Job_specs.csv'):
@@ -139,4 +141,5 @@ def draw_grn(G, gene2vertex, rules, regulators_dict, fname, gene2group=None, gen
     else:
         gt.graph_draw(G, pos=pos, output=fname, vprops=vprops, eprops=eprops, output_size=(1000, 1000))
     return G, edge_weight_df, edge_binary_df
+
 

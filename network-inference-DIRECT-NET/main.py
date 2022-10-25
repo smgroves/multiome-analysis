@@ -12,6 +12,7 @@ from graph_tool import GraphView
 from bb_utils import *
 import sys
 from datetime import timedelta
+import glob
 
 customPalette = sns.color_palette('tab10')
 
@@ -22,15 +23,15 @@ customPalette = sns.color_palette('tab10')
 print_graph_information = True #whether to print graph info to {brcd}.txt
 
 split_train_test = False
-write_binarized_data = True
+write_binarized_data = False
 fit_rules = False
 run_validation = False
 validation_averages = False
-find_average_states = True
+find_average_states = False
 find_attractors = True
 tf_basin = 2 # if -1, use average distance between clusters for search basin for attractors.
 # otherwise use the same size basin for all phenotypes. For single cell data, there may be so many samples that average distance is small.
-filter_attractors = False
+filter_attractors = True
 on_nodes = []
 off_nodes = []
 
@@ -44,6 +45,7 @@ node_threshold = 0  # don't remove any parents
 transpose = True
 validation_fname = 'validation_set'
 fname = 'M2'
+notes_for_log = "Attractors with threshold 0.7 for pruning STG"
 
 ## Set paths
 dir_prefix = '/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET'
@@ -374,7 +376,7 @@ else:
     print("Skipping finding average states...")
 
 if find_attractors:
-    ATTRACTOR_DIR = f"{dir_prefix}/{brcd}/attractors"
+    ATTRACTOR_DIR = f"{dir_prefix}/{brcd}/attractors/attractors_threshold_0.7"
     try:
         os.mkdir(ATTRACTOR_DIR)
     except FileExistsError:
@@ -382,7 +384,7 @@ if find_attractors:
 
     start = time.time()
 
-    attractor_dict = bb.tl.find_attractors(binarized_data_t0, rules, nodes, regulators_dict, tf_basin=tf_basin,
+    attractor_dict = bb.tl.find_attractors(binarized_data_t0, rules, nodes, regulators_dict, tf_basin=tf_basin,threshold=.7,
                                     save_dir=ATTRACTOR_DIR, on_nodes=on_nodes, off_nodes=off_nodes)
     end = time.time()
     print('Time to find attractors: ', str(timedelta(seconds=end-start)))
@@ -397,42 +399,54 @@ else:
     print("Skipping finding attractors")
 
 if filter_attractors:
-    average_states = {"SCLC-A": [], "SCLC-A2": [], 'SCLC-Y': [], 'SCLC-P': [], 'SCLC-N': [], 'SCLC-uncl': []}
-    attractor_dict = {"SCLC-A": [], "SCLC-A2": [], 'SCLC-Y': [], 'SCLC-P': [], 'SCLC-N': [], 'SCLC-uncl': []}
+    ATTRACTOR_DIR = f"{dir_prefix}/{brcd}/attractors/attractors_threshold_0.7"
+    AVE_STATES_DIR = f"{dir_prefix}/{brcd}/attractors/"
 
-    for phen in ['SCLC-A', 'SCLC-N', 'SCLC-A2', 'SCLC-P', 'SCLC-Y']:
-        d = pd.read_csv(op.join(dir_prefix, f'{brcd}/average_states_idx_{phen}.txt'), sep=',', header=0)
-        average_states[f'{phen}'] = list(np.unique(d['average_state']))
-        d = pd.read_csv(op.join(dir_prefix, f'{brcd}/attractors_{phen}.txt'), sep = ',', header = 0)
+    average_states = {}
+    attractor_dict = {}
+    average_states_df = pd.read_csv(f'{AVE_STATES_DIR}/average_states.txt', sep=',', header=0, index_col=0)
+    for i,r in average_states_df.iterrows():
+        s = ""
+        cnt = 0
+        for letter in list(r):
+            if cnt > 0:
+                s = s+str(letter)
+            cnt += 1
+        average_states[i] = bb.utils.state2idx(s)
+    print(average_states)
+
+    for phen in clusters['class'].unique():
+        d = pd.read_csv(f'{ATTRACTOR_DIR}/attractors_{phen}.txt', sep = ',', header = 0)
         attractor_dict[f'{phen}'] =  list(np.unique(d['attractor']))
 
+    print(attractor_dict)
         #     ##### Below code compares each attractor to average state for each subtype instead of closest single binarized data point
-        a = attractor_dict.copy()
-        # attractor_dict = a.copy()
-        for p in attractor_dict.keys():
-            print(p)
-            for q in attractor_dict.keys():
-                print("q", q)
-                if p == q: continue
-                n_same = list(set(attractor_dict[p]).intersection(set(attractor_dict[q])))
-                if len(n_same) != 0:
-                    for x in n_same:
-                        p_dist = bb.utils.hamming_idx(x, average_states[p], len(nodes))
-                        q_dist = bb.utils.hamming_idx(x, average_states[q], len(nodes))
-                        if p_dist < q_dist:
-                            a[q].remove(x)
-                        elif q_dist < p_dist:
-                            a[p].remove(x)
-                        else:
-                            a[q].remove(x)
-                            a[p].remove(x)
-                            try:
-                                a[f'{q}_{p}'].append(x)
-                            except KeyError:
-                                a[f'{q}_{p}'] = [x]
+    a = attractor_dict.copy()
+    # attractor_dict = a.copy()
+    for p in attractor_dict.keys():
+        print(p)
+        for q in attractor_dict.keys():
+            print("q", q)
+            if p == q: continue
+            n_same = list(set(attractor_dict[p]).intersection(set(attractor_dict[q])))
+            if len(n_same) != 0:
+                for x in n_same:
+                    p_dist = bb.utils.hamming_idx(x, average_states[p], len(nodes))
+                    q_dist = bb.utils.hamming_idx(x, average_states[q], len(nodes))
+                    if p_dist < q_dist:
+                        a[q].remove(x)
+                    elif q_dist < p_dist:
+                        a[p].remove(x)
+                    else:
+                        a[q].remove(x)
+                        a[p].remove(x)
+                        try:
+                            a[f'{q}_{p}'].append(x)
+                        except KeyError:
+                            a[f'{q}_{p}'] = [x]
     attractor_dict = a
     print(attractor_dict)
-    file = open(op.join(dir_prefix,f'{brcd}/attractors_filtered.txt'), 'w+')
+    file = open(f"{ATTRACTOR_DIR}/attractors_filtered.txt", 'w+')
     # plot attractors
     for j in nodes:
         file.write(f",{j}")
@@ -446,7 +460,24 @@ if filter_attractors:
             file.write("\n")
 
     file.close()
-    bb.utils.plot_attractors(op.join(dir_prefix, f'{brcd}/attractors_filtered.txt'))
+    # bb.plot.plot_attractors(f'{ATTRACTOR_DIR}/attractors_filtered.txt', save_dir="")
+    att = pd.read_table(f"{ATTRACTOR_DIR}/attractors_filtered.txt", sep=',', header=0, index_col=0)
+    att = att.transpose()
+    plt.figure(figsize=(20, 12))
+    clust = att.columns.unique()
+    lut = dict(zip(clust, sns.color_palette("tab20")))
+    column_series = pd.Series(att.columns)
+    row_colors = column_series.map(lut)
+    g = sns.clustermap(att.T.reset_index().drop('index', axis = 1).T,linecolor="lightgrey",
+                       linewidths=1, figsize = (20,12),cbar_pos = None,
+                       cmap = 'binary', square = True, row_cluster = True, col_cluster = False, yticklabels = True, xticklabels = False,col_colors = row_colors)
+    markers = []
+    for i in lut.keys():
+        markers.append(plt.Line2D([0,0],[0,0],color=lut[i], marker='o', linestyle=''))
+    lgd = plt.legend(markers, lut.keys(), numpoints=1, loc = 'upper left', bbox_to_anchor=(1.05, 1.0))
+    plt.tight_layout()
+    plt.savefig(f"{ATTRACTOR_DIR}/attractors_filtered_clustered_x.pdf", bbox_extra_artists=(lgd,), bbox_inches='tight')
+
 else:
     print("Skipping filtering attractors")
 # =============================================================================
@@ -517,4 +548,5 @@ print("Time for job: ", time_for_job)
 
 log_job(dir_prefix, brcd, random_state, network_path, data_path, data_t1_path, cellID_table, node_normalization,
         node_threshold, split_train_test, write_binarized_data,fit_rules,run_validation,validation_averages,
-        find_average_states,find_attractors,tf_basin,filter_attractors,on_nodes,off_nodes, time = None, job_barcode= job_brcd)
+        find_average_states,find_attractors,tf_basin,filter_attractors,on_nodes,off_nodes, time = None, job_barcode= job_brcd,
+        notes_for_job=notes_for_log)
