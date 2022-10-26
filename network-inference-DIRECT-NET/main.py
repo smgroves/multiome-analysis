@@ -28,10 +28,12 @@ fit_rules = False
 run_validation = False
 validation_averages = False
 find_average_states = False
-find_attractors = True
+find_attractors = False
 tf_basin = 2 # if -1, use average distance between clusters for search basin for attractors.
 # otherwise use the same size basin for all phenotypes. For single cell data, there may be so many samples that average distance is small.
-filter_attractors = True
+filter_attractors = False
+perturbations = True
+stability = False
 on_nodes = []
 off_nodes = []
 
@@ -45,7 +47,7 @@ node_threshold = 0  # don't remove any parents
 transpose = True
 validation_fname = 'validation_set'
 fname = 'M2'
-notes_for_log = "Attractors with threshold 0.7 for pruning STG"
+notes_for_log = "Attractors with threshold 0.5 for pruning STG"
 
 ## Set paths
 dir_prefix = '/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET'
@@ -488,46 +490,210 @@ else:
 # will make plots for each perturbation for each starting state
 
 dir_prefix_walks = op.join(dir_prefix, brcd)
-radius = 4
+# radius = 4
 
 # attractor_dict = {'A2': [32136863904], 'P': [], 'A': [21349304528], 'uncl': [1446933], 'Y': [14897871719], 'N': [15703179135,17045356415]} #walks from original attractors
 
-if False:
-    for k in attractor_dict.keys():
-        steady_states = attractor_dict[k]
-        random_walks(steady_states, radius, rules, regulators_dict,
-                     nodes, dir_prefix=dir_prefix_walks, phenotype_name = k,
-                     perturbations = True,  iters=1000, max_steps = 500)
+if perturbations:
+    ATTRACTOR_DIR = f"{dir_prefix}/{brcd}/attractors/attractors_threshold_0.5"
+    # attractor_dict = {}
+    # for phen in clusters['class'].unique():
+    #     d = pd.read_csv(f'{ATTRACTOR_DIR}/attractors_{phen}.txt', sep = ',', header = 0)
+    #     attractor_dict[f'{phen}'] =  list(np.unique(d['attractor']))
 
+    attractor_dict = {}
+    attr_filtered = pd.read_csv(f'{ATTRACTOR_DIR}/attractors_filtered.txt', sep = ',', header = 0, index_col = 0)
+    for i,r in attr_filtered.iterrows():
+        attractor_dict[i] = []
+
+    for i,r in attr_filtered.iterrows():
+        attractor_dict[i].append(bb.utils.state_bool2idx(list(r)))
+    # for k in attractor_dict.keys():
+    #     steady_states = attractor_dict[k]
+        # random_walks(steady_states, radius, rules, regulators_dict,
+        #              nodes, dir_prefix=dir_prefix_walks, phenotype_name = k,
+        #              perturbations = True,  iters=1000, max_steps = 500)
+    print("Perturbations...")
+    bb.rw.random_walks(attractor_dict,
+                       rules,
+                       regulators_dict,
+                       nodes,
+                       save_dir = f"{dir_prefix}/{brcd}/",
+                       radius=2,
+                       perturbations=True,
+                       iters=500,
+                       max_steps=500,
+                       stability=False,
+                       reach_or_leave="leave",
+                       random_start=False,
+                       on_nodes=[],
+                       off_nodes=[],
+                       )
+    # save_dir = f"{dir_prefix}/{brcd}/"
+    # radius = 4
+    # iters = 300
+    # max_steps = 500
+    # for k in attractor_dict.keys():
+    #     steady_states = attractor_dict[k]
+    #     for start_idx in steady_states:
+    #         try:
+    #             os.mkdir(op.join(save_dir, "perturbations/%d" % start_idx))
+    #         except FileExistsError:
+    #             pass
+    #
+    #         outfile = open(
+    #             op.join(save_dir, f"perturbations/%d/results.csv" % start_idx),
+    #             "w+",
+    #         )
+    #
+    #         for expt_node in nodes:
+    #             # Arrays of # steps when activating or knocking out
+    #             n_steps_activate = []
+    #             n_steps_knockout = []
+    #             prog = 0
+    #
+    #             expt = "%s_activate" % expt_node
+    #             for iter_ in range(iters):
+    #                 if iter_ % 100 == 0:
+    #                     prog = iter_ / 10
+    #                     print("Progress: ", prog)
+    #                 # To perturb more than one node, add to on_nodes or off_nodes
+    #                 (
+    #                     walk_on,
+    #                     counts_on,
+    #                     switches_on,
+    #                     distances_on,
+    #                 ) = bb.rw.random_walk_until_leave_basin(
+    #                     start_idx,
+    #                     rules,
+    #                     regulators_dict,
+    #                     nodes,
+    #                     radius,
+    #                     max_steps=max_steps,
+    #                     on_nodes=[
+    #                         expt_node,
+    #                     ],
+    #                     off_nodes=[],
+    #                 )
+    #
+    #                 n_steps_activate.append(len(distances_on))
+    #
+    #             # mean of non-perturbed vs perturbed: loc_0 and loc_1
+    #             # histogram plots: inverse gaussian?
+    #             loc_0, loc_1, stabilized = bb.plot.plot_histograms(
+    #                 n_steps_to_leave_0,
+    #                 n_steps_activate,
+    #                 expt,
+    #                 bins=60,
+    #                 fname=op.join(
+    #                     save_dir, "perturbations/%d/%s.pdf" % (start_idx, expt)
+    #                 ),
+    #             )
+    #
+    #             outfile.write(
+    #                 op.join(
+    #                     save_dir,
+    #                     "perturbations/%d,%s,%s,activate,%f\n"
+    #                     % (start_idx, k, expt_node, stabilized),
+    #                     )
+    #             )
+    #             expt = "%s_knockdown" % expt_node
+    #             for iter_ in range(iters):
+    #                 (
+    #                     walk_off,
+    #                     counts_off,
+    #                     switches_off,
+    #                     distances_off,
+    #                 ) = random_walk_until_leave_basin(
+    #                     start_idx,
+    #                     rules,
+    #                     regulators_dict,
+    #                     nodes,
+    #                     radius,
+    #                     max_steps=max_steps,
+    #                     on_nodes=[],
+    #                     off_nodes=[
+    #                         expt_node,
+    #                     ],
+    #                 )
+    #
+    #                 n_steps_knockout.append(len(distances_off))
+    #
+    #             loc_0, loc_1, stabilized = plot_histograms(
+    #                 n_steps_to_leave_0,
+    #                 n_steps_knockout,
+    #                 expt,
+    #                 bins=60,
+    #                 fname=op.join(
+    #                     save_dir, "perturbations/%d/%s.pdf" % (start_idx, expt)
+    #                 ),
+    #             )
+    #             outfile.write(
+    #                 op.join(
+    #                     save_dir,
+    #                     "perturbations/%d,%s,%s,knockdown,%f\n"
+    #                     % (start_idx, k, expt_node, stabilized),
+    #                     )
+    #             )
+    #         outfile.close()
+if stability:
+    ATTRACTOR_DIR = f"{dir_prefix}/{brcd}/attractors/attractors_threshold_0.5"
+    # attractor_dict = {}
+    # for phen in clusters['class'].unique():
+    #     d = pd.read_csv(f'{ATTRACTOR_DIR}/attractors_{phen}.txt', sep = ',', header = 0)
+    #     attractor_dict[f'{phen}'] =  list(np.unique(d['attractor']))
+
+    attractor_dict = {}
+    attr_filtered = pd.read_csv(f'{ATTRACTOR_DIR}/attractors_filtered.txt', sep = ',', header = 0, index_col = 0)
+    for i,r in attr_filtered.iterrows():
+        attractor_dict[i] = []
+
+    for i,r in attr_filtered.iterrows():
+        attractor_dict[i].append(bb.utils.state_bool2idx(list(r)))
     # # record random walk from each attractor in each phenotype with different radii for stability analysis
-
-    for k in attractor_dict.keys():
-        steady_states = attractor_dict[k]
-        dir_prefix_walks = op.join(dir_prefix, brcd)
-        for radius in [1,2,3,5,6,7,8]:
-            random_walks(steady_states, radius, rules, regulators_dict,
-                         nodes, dir_prefix=dir_prefix_walks,
-                         perturbations=False, iters=1000, max_steps=500)
-
+    #
+    # for k in attractor_dict.keys():
+    #     steady_states = attractor_dict[k]
+    #     dir_prefix_walks = op.join(dir_prefix, brcd)
+    #     for radius in [1,2,3,5,6,7,8]:
+    #         random_walks(steady_states, radius, rules, regulators_dict,
+    #                      nodes, dir_prefix=dir_prefix_walks,
+    #                      perturbations=False, iters=1000, max_steps=500)
+    print("Stability...")
+    bb.rw.random_walks(attractor_dict,
+                       rules,
+                       regulators_dict,
+                       nodes,
+                       save_dir = f"{dir_prefix}/{brcd}/",
+                       radius=[2,3,4,5,6,7,8],
+                       perturbations=False,
+                       iters=1000,
+                       max_steps=500,
+                       stability=True,
+                       reach_or_leave="leave",
+                       random_start=False,
+                       on_nodes=[],
+                       off_nodes=[],
+                       )
     # record random walk from random states to compare to for stability
     # for random walks to compare stability of attractor states
-    try:
-        os.mkdir(op.join(dir_prefix, f'{brcd}/walks/random'))
-    except FileExistsError:
-        pass
-    dir_prefix_random = op.join(dir_prefix, f'{brcd}/walks/random')
+    # try:
+    #     os.mkdir(op.join(dir_prefix, f'{brcd}/walks/random'))
+    # except FileExistsError:
+    #     pass
+    # dir_prefix_random = op.join(dir_prefix, f'{brcd}/walks/random')
+    #
+    # length = 100
+    # random_list = []
+    # for i in range(length):
+    #     rand_state = random.choices([0,1], k=n)
+    #     rand_idx = bb.utils.state_bool2idx(rand_state)
+    #     random_list.append(rand_idx)
 
-    length = 100
-    random_list = []
-    for i in range(length):
-        rand_state = random.choices([0,1], k=n)
-        rand_idx = state_bool2idx(rand_state)
-        random_list.append(rand_idx)
-
-    for radius in [1,2,3,4,5,6,7,8]:
-        random_walks(random_list, radius, rules, regulators_dict,
-                     nodes, dir_prefix=dir_prefix_walks,
-                     perturbations=False, iters=1000, max_steps=500)
+    # for radius in [1,2,3,4,5,6,7,8]:
+    #     random_walks(random_list, radius, rules, regulators_dict,
+    #                  nodes, dir_prefix=dir_prefix_walks,
+    #                  perturbations=False, iters=1000, max_steps=500)
 
 # =============================================================================
 # Calculate and plot stability of each attractor
@@ -548,5 +714,6 @@ print("Time for job: ", time_for_job)
 
 log_job(dir_prefix, brcd, random_state, network_path, data_path, data_t1_path, cellID_table, node_normalization,
         node_threshold, split_train_test, write_binarized_data,fit_rules,run_validation,validation_averages,
-        find_average_states,find_attractors,tf_basin,filter_attractors,on_nodes,off_nodes, time = None, job_barcode= job_brcd,
+        find_average_states,find_attractors,tf_basin,filter_attractors,on_nodes,off_nodes,perturbations, stability,
+        time = None, job_barcode= job_brcd,
         notes_for_job=notes_for_log)

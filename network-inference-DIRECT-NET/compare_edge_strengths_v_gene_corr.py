@@ -100,7 +100,7 @@ edge_df = pd.read_csv(f"{dir_prefix}/networks/DIRECT-NET_network_with_FIGR_thres
 for i,r in edge_df.iterrows():
     G.add_edge(r[0],r[1], weight = edge_weights.loc[r[1],r[0]])
 
-keep_nodes = ['PBX1']
+keep_nodes = ['ZBTB7A']
 
 total_keep = keep_nodes.copy()
 attrs = {}
