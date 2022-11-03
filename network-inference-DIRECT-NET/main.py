@@ -496,10 +496,6 @@ dir_prefix_walks = op.join(dir_prefix, brcd)
 
 if perturbations:
     ATTRACTOR_DIR = f"{dir_prefix}/{brcd}/attractors/attractors_threshold_0.5"
-    # attractor_dict = {}
-    # for phen in clusters['class'].unique():
-    #     d = pd.read_csv(f'{ATTRACTOR_DIR}/attractors_{phen}.txt', sep = ',', header = 0)
-    #     attractor_dict[f'{phen}'] =  list(np.unique(d['attractor']))
 
     attractor_dict = {}
     attr_filtered = pd.read_csv(f'{ATTRACTOR_DIR}/attractors_filtered.txt', sep = ',', header = 0, index_col = 0)
@@ -508,11 +504,7 @@ if perturbations:
 
     for i,r in attr_filtered.iterrows():
         attractor_dict[i].append(bb.utils.state_bool2idx(list(r)))
-    # for k in attractor_dict.keys():
-    #     steady_states = attractor_dict[k]
-        # random_walks(steady_states, radius, rules, regulators_dict,
-        #              nodes, dir_prefix=dir_prefix_walks, phenotype_name = k,
-        #              perturbations = True,  iters=1000, max_steps = 500)
+
     print("Perturbations...")
     bb.rw.random_walks(attractor_dict,
                        rules,
@@ -529,113 +521,7 @@ if perturbations:
                        on_nodes=[],
                        off_nodes=[],
                        )
-    # save_dir = f"{dir_prefix}/{brcd}/"
-    # radius = 4
-    # iters = 300
-    # max_steps = 500
-    # for k in attractor_dict.keys():
-    #     steady_states = attractor_dict[k]
-    #     for start_idx in steady_states:
-    #         try:
-    #             os.mkdir(op.join(save_dir, "perturbations/%d" % start_idx))
-    #         except FileExistsError:
-    #             pass
-    #
-    #         outfile = open(
-    #             op.join(save_dir, f"perturbations/%d/results.csv" % start_idx),
-    #             "w+",
-    #         )
-    #
-    #         for expt_node in nodes:
-    #             # Arrays of # steps when activating or knocking out
-    #             n_steps_activate = []
-    #             n_steps_knockout = []
-    #             prog = 0
-    #
-    #             expt = "%s_activate" % expt_node
-    #             for iter_ in range(iters):
-    #                 if iter_ % 100 == 0:
-    #                     prog = iter_ / 10
-    #                     print("Progress: ", prog)
-    #                 # To perturb more than one node, add to on_nodes or off_nodes
-    #                 (
-    #                     walk_on,
-    #                     counts_on,
-    #                     switches_on,
-    #                     distances_on,
-    #                 ) = bb.rw.random_walk_until_leave_basin(
-    #                     start_idx,
-    #                     rules,
-    #                     regulators_dict,
-    #                     nodes,
-    #                     radius,
-    #                     max_steps=max_steps,
-    #                     on_nodes=[
-    #                         expt_node,
-    #                     ],
-    #                     off_nodes=[],
-    #                 )
-    #
-    #                 n_steps_activate.append(len(distances_on))
-    #
-    #             # mean of non-perturbed vs perturbed: loc_0 and loc_1
-    #             # histogram plots: inverse gaussian?
-    #             loc_0, loc_1, stabilized = bb.plot.plot_histograms(
-    #                 n_steps_to_leave_0,
-    #                 n_steps_activate,
-    #                 expt,
-    #                 bins=60,
-    #                 fname=op.join(
-    #                     save_dir, "perturbations/%d/%s.pdf" % (start_idx, expt)
-    #                 ),
-    #             )
-    #
-    #             outfile.write(
-    #                 op.join(
-    #                     save_dir,
-    #                     "perturbations/%d,%s,%s,activate,%f\n"
-    #                     % (start_idx, k, expt_node, stabilized),
-    #                     )
-    #             )
-    #             expt = "%s_knockdown" % expt_node
-    #             for iter_ in range(iters):
-    #                 (
-    #                     walk_off,
-    #                     counts_off,
-    #                     switches_off,
-    #                     distances_off,
-    #                 ) = random_walk_until_leave_basin(
-    #                     start_idx,
-    #                     rules,
-    #                     regulators_dict,
-    #                     nodes,
-    #                     radius,
-    #                     max_steps=max_steps,
-    #                     on_nodes=[],
-    #                     off_nodes=[
-    #                         expt_node,
-    #                     ],
-    #                 )
-    #
-    #                 n_steps_knockout.append(len(distances_off))
-    #
-    #             loc_0, loc_1, stabilized = plot_histograms(
-    #                 n_steps_to_leave_0,
-    #                 n_steps_knockout,
-    #                 expt,
-    #                 bins=60,
-    #                 fname=op.join(
-    #                     save_dir, "perturbations/%d/%s.pdf" % (start_idx, expt)
-    #                 ),
-    #             )
-    #             outfile.write(
-    #                 op.join(
-    #                     save_dir,
-    #                     "perturbations/%d,%s,%s,knockdown,%f\n"
-    #                     % (start_idx, k, expt_node, stabilized),
-    #                     )
-    #             )
-    #         outfile.close()
+
 if stability:
     ATTRACTOR_DIR = f"{dir_prefix}/{brcd}/attractors/attractors_threshold_0.5"
     # attractor_dict = {}
