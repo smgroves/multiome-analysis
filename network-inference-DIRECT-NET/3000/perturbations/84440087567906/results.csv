@@ -1,98 +1,98 @@
-/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET//3000/perturbations/84440087567906,Club cells_1,ASCL1,activate,-0.566201
-/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET//3000/perturbations/84440087567906,Club cells_1,ASCL1,knockdown,0.000876
-/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET//3000/perturbations/84440087567906,Club cells_1,CREB1,activate,-0.198351
-/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET//3000/perturbations/84440087567906,Club cells_1,CREB1,knockdown,-0.003273
-/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET//3000/perturbations/84440087567906,Club cells_1,CUX1,activate,-0.064947
-/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET//3000/perturbations/84440087567906,Club cells_1,CUX1,knockdown,-0.535079
-/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET//3000/perturbations/84440087567906,Club cells_1,CUX2,activate,-0.474111
-/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET//3000/perturbations/84440087567906,Club cells_1,CUX2,knockdown,-0.034599
-/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET//3000/perturbations/84440087567906,Club cells_1,EGR1,activate,-0.789731
-/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET//3000/perturbations/84440087567906,Club cells_1,EGR1,knockdown,0.012352
-/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET//3000/perturbations/84440087567906,Club cells_1,EHF,activate,0.006172
-/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET//3000/perturbations/84440087567906,Club cells_1,EHF,knockdown,-0.522260
-/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET//3000/perturbations/84440087567906,Club cells_1,ESR1,activate,0.022961
-/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET//3000/perturbations/84440087567906,Club cells_1,ESR1,knockdown,-0.272759
-/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET//3000/perturbations/84440087567906,Club cells_1,ETS1,activate,0.025809
-/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET//3000/perturbations/84440087567906,Club cells_1,ETS1,knockdown,-0.007795
-/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET//3000/perturbations/84440087567906,Club cells_1,FOS,activate,-0.534484
-/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET//3000/perturbations/84440087567906,Club cells_1,FOS,knockdown,-0.011578
-/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET//3000/perturbations/84440087567906,Club cells_1,FOXO3,activate,0.009291
-/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET//3000/perturbations/84440087567906,Club cells_1,FOXO3,knockdown,-0.674391
-/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET//3000/perturbations/84440087567906,Club cells_1,GRHL2,activate,0.032337
-/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET//3000/perturbations/84440087567906,Club cells_1,GRHL2,knockdown,-0.350108
-/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET//3000/perturbations/84440087567906,Club cells_1,HSF2,activate,-0.468704
-/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET//3000/perturbations/84440087567906,Club cells_1,HSF2,knockdown,-0.025333
-/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET//3000/perturbations/84440087567906,Club cells_1,JUN,activate,-0.043567
-/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET//3000/perturbations/84440087567906,Club cells_1,JUN,knockdown,0.005092
-/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET//3000/perturbations/84440087567906,Club cells_1,JUNB,activate,-0.004242
-/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET//3000/perturbations/84440087567906,Club cells_1,JUNB,knockdown,0.287576
-/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET//3000/perturbations/84440087567906,Club cells_1,JUND,activate,0.223700
-/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET//3000/perturbations/84440087567906,Club cells_1,JUND,knockdown,-0.635075
-/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET//3000/perturbations/84440087567906,Club cells_1,KMT2A,activate,0.014052
-/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET//3000/perturbations/84440087567906,Club cells_1,KMT2A,knockdown,-0.027033
-/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET//3000/perturbations/84440087567906,Club cells_1,LMX1B,activate,-0.013125
-/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET//3000/perturbations/84440087567906,Club cells_1,LMX1B,knockdown,0.013967
-/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET//3000/perturbations/84440087567906,Club cells_1,MEIS2,activate,-0.776886
-/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET//3000/perturbations/84440087567906,Club cells_1,MEIS2,knockdown,0.009087
-/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET//3000/perturbations/84440087567906,Club cells_1,NFATC2,activate,-0.567297
-/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET//3000/perturbations/84440087567906,Club cells_1,NFATC2,knockdown,-0.023904
-/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET//3000/perturbations/84440087567906,Club cells_1,NFIA,activate,-0.078327
-/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET//3000/perturbations/84440087567906,Club cells_1,NFIA,knockdown,-0.834616
-/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET//3000/perturbations/84440087567906,Club cells_1,NFIB,activate,-0.026931
-/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET//3000/perturbations/84440087567906,Club cells_1,NFIB,knockdown,-0.003247
-/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET//3000/perturbations/84440087567906,Club cells_1,NFIX,activate,-0.022808
-/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET//3000/perturbations/84440087567906,Club cells_1,NFIX,knockdown,-0.690262
-/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET//3000/perturbations/84440087567906,Club cells_1,NFKB1,activate,0.007685
-/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET//3000/perturbations/84440087567906,Club cells_1,NFKB1,knockdown,-0.034752
-/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET//3000/perturbations/84440087567906,Club cells_1,NR3C2,activate,0.003400
-/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET//3000/perturbations/84440087567906,Club cells_1,NR3C2,knockdown,-0.030195
-/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET//3000/perturbations/84440087567906,Club cells_1,PBX1,activate,-0.010473
-/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET//3000/perturbations/84440087567906,Club cells_1,PBX1,knockdown,-0.124079
-/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET//3000/perturbations/84440087567906,Club cells_1,PKNOX2,activate,-0.520245
-/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET//3000/perturbations/84440087567906,Club cells_1,PKNOX2,knockdown,-0.002312
-/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET//3000/perturbations/84440087567906,Club cells_1,PPARG,activate,0.032210
-/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET//3000/perturbations/84440087567906,Club cells_1,PPARG,knockdown,-0.491869
-/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET//3000/perturbations/84440087567906,Club cells_1,PRDM16,activate,-0.030943
-/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET//3000/perturbations/84440087567906,Club cells_1,PRDM16,knockdown,-0.701636
-/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET//3000/perturbations/84440087567906,Club cells_1,PROX1,activate,-0.393191
-/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET//3000/perturbations/84440087567906,Club cells_1,PROX1,knockdown,0.013474
-/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET//3000/perturbations/84440087567906,Club cells_1,RARB,activate,0.007668
-/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET//3000/perturbations/84440087567906,Club cells_1,RARB,knockdown,-0.212411
-/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET//3000/perturbations/84440087567906,Club cells_1,REST,activate,0.030314
-/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET//3000/perturbations/84440087567906,Club cells_1,REST,knockdown,-0.500548
-/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET//3000/perturbations/84440087567906,Club cells_1,RORA,activate,-0.801768
-/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET//3000/perturbations/84440087567906,Club cells_1,RORA,knockdown,-0.018651
-/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET//3000/perturbations/84440087567906,Club cells_1,RORB,activate,-0.797135
-/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET//3000/perturbations/84440087567906,Club cells_1,RORB,knockdown,0.026599
-/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET//3000/perturbations/84440087567906,Club cells_1,RUNX1,activate,-0.018940
-/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET//3000/perturbations/84440087567906,Club cells_1,RUNX1,knockdown,-0.028231
-/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET//3000/perturbations/84440087567906,Club cells_1,SIX1,activate,-0.499086
-/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET//3000/perturbations/84440087567906,Club cells_1,SIX1,knockdown,-0.027696
-/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET//3000/perturbations/84440087567906,Club cells_1,SIX4,activate,-0.461861
-/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET//3000/perturbations/84440087567906,Club cells_1,SIX4,knockdown,-0.023513
-/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET//3000/perturbations/84440087567906,Club cells_1,SMAD3,activate,-0.010686
-/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET//3000/perturbations/84440087567906,Club cells_1,SMAD3,knockdown,-0.640728
-/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET//3000/perturbations/84440087567906,Club cells_1,SOX9,activate,0.030085
-/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET//3000/perturbations/84440087567906,Club cells_1,SOX9,knockdown,-0.491010
-/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET//3000/perturbations/84440087567906,Club cells_1,SP100,activate,0.035015
-/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET//3000/perturbations/84440087567906,Club cells_1,SP100,knockdown,-0.417410
-/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET//3000/perturbations/84440087567906,Club cells_1,STAT1,activate,0.127556
-/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET//3000/perturbations/84440087567906,Club cells_1,STAT1,knockdown,-0.734237
-/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET//3000/perturbations/84440087567906,Club cells_1,TBX15,activate,-0.610983
-/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET//3000/perturbations/84440087567906,Club cells_1,TBX15,knockdown,0.018311
-/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET//3000/perturbations/84440087567906,Club cells_1,TCF12,activate,0.002933
-/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET//3000/perturbations/84440087567906,Club cells_1,TCF12,knockdown,-0.018277
-/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET//3000/perturbations/84440087567906,Club cells_1,TCF4,activate,-0.666103
-/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET//3000/perturbations/84440087567906,Club cells_1,TCF4,knockdown,0.056837
-/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET//3000/perturbations/84440087567906,Club cells_1,TCF7L2,activate,-0.030790
-/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET//3000/perturbations/84440087567906,Club cells_1,TCF7L2,knockdown,-0.863221
-/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET//3000/perturbations/84440087567906,Club cells_1,TEAD1,activate,-0.017061
-/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET//3000/perturbations/84440087567906,Club cells_1,TEAD1,knockdown,0.021728
-/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET//3000/perturbations/84440087567906,Club cells_1,ZBTB18,activate,-0.084329
-/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET//3000/perturbations/84440087567906,Club cells_1,ZBTB18,knockdown,-0.034735
-/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET//3000/perturbations/84440087567906,Club cells_1,ZBTB20,activate,-0.005849
-/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET//3000/perturbations/84440087567906,Club cells_1,ZBTB20,knockdown,-0.005118
-/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET//3000/perturbations/84440087567906,Club cells_1,ZBTB7A,activate,0.028478
-/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET//3000/perturbations/84440087567906,Club cells_1,ZBTB7A,knockdown,-0.205135
-/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET//3000/perturbations/84440087567906,Club cells_1,ZEB1,activate,-0.647681
-/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET//3000/perturbations/84440087567906,Club cells_1,ZEB1,knockdown,0.000417
+/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET//3000/perturbations/84440087567906,AT2 cells_Club cells_2,ASCL1,activate,-0.555793
+/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET//3000/perturbations/84440087567906,AT2 cells_Club cells_2,ASCL1,knockdown,-0.053016
+/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET//3000/perturbations/84440087567906,AT2 cells_Club cells_2,CREB1,activate,-0.224968
+/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET//3000/perturbations/84440087567906,AT2 cells_Club cells_2,CREB1,knockdown,0.061241
+/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET//3000/perturbations/84440087567906,AT2 cells_Club cells_2,CUX1,activate,-0.001885
+/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET//3000/perturbations/84440087567906,AT2 cells_Club cells_2,CUX1,knockdown,-0.544889
+/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET//3000/perturbations/84440087567906,AT2 cells_Club cells_2,CUX2,activate,-0.463204
+/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET//3000/perturbations/84440087567906,AT2 cells_Club cells_2,CUX2,knockdown,-0.011838
+/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET//3000/perturbations/84440087567906,AT2 cells_Club cells_2,EGR1,activate,-0.781390
+/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET//3000/perturbations/84440087567906,AT2 cells_Club cells_2,EGR1,knockdown,-0.052230
+/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET//3000/perturbations/84440087567906,AT2 cells_Club cells_2,EHF,activate,-0.055562
+/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET//3000/perturbations/84440087567906,AT2 cells_Club cells_2,EHF,knockdown,-0.541781
+/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET//3000/perturbations/84440087567906,AT2 cells_Club cells_2,ESR1,activate,-0.048775
+/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET//3000/perturbations/84440087567906,AT2 cells_Club cells_2,ESR1,knockdown,-0.322939
+/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET//3000/perturbations/84440087567906,AT2 cells_Club cells_2,ETS1,activate,-0.007043
+/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET//3000/perturbations/84440087567906,AT2 cells_Club cells_2,ETS1,knockdown,-0.089026
+/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET//3000/perturbations/84440087567906,AT2 cells_Club cells_2,FOS,activate,-0.543682
+/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET//3000/perturbations/84440087567906,AT2 cells_Club cells_2,FOS,knockdown,0.001422
+/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET//3000/perturbations/84440087567906,AT2 cells_Club cells_2,FOXO3,activate,-0.065152
+/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET//3000/perturbations/84440087567906,AT2 cells_Club cells_2,FOXO3,knockdown,-0.685270
+/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET//3000/perturbations/84440087567906,AT2 cells_Club cells_2,GRHL2,activate,-0.030588
+/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET//3000/perturbations/84440087567906,AT2 cells_Club cells_2,GRHL2,knockdown,-0.350286
+/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET//3000/perturbations/84440087567906,AT2 cells_Club cells_2,HSF2,activate,-0.461517
+/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET//3000/perturbations/84440087567906,AT2 cells_Club cells_2,HSF2,knockdown,-0.088555
+/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET//3000/perturbations/84440087567906,AT2 cells_Club cells_2,JUN,activate,-0.023387
+/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET//3000/perturbations/84440087567906,AT2 cells_Club cells_2,JUN,knockdown,-0.034804
+/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET//3000/perturbations/84440087567906,AT2 cells_Club cells_2,JUNB,activate,0.001414
+/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET//3000/perturbations/84440087567906,AT2 cells_Club cells_2,JUNB,knockdown,0.264566
+/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET//3000/perturbations/84440087567906,AT2 cells_Club cells_2,JUND,activate,0.163189
+/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET//3000/perturbations/84440087567906,AT2 cells_Club cells_2,JUND,knockdown,-0.628848
+/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET//3000/perturbations/84440087567906,AT2 cells_Club cells_2,KMT2A,activate,-0.040384
+/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET//3000/perturbations/84440087567906,AT2 cells_Club cells_2,KMT2A,knockdown,-0.040764
+/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET//3000/perturbations/84440087567906,AT2 cells_Club cells_2,LMX1B,activate,-0.041723
+/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET//3000/perturbations/84440087567906,AT2 cells_Club cells_2,LMX1B,knockdown,0.015467
+/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET//3000/perturbations/84440087567906,AT2 cells_Club cells_2,MEIS2,activate,-0.772618
+/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET//3000/perturbations/84440087567906,AT2 cells_Club cells_2,MEIS2,knockdown,-0.058009
+/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET//3000/perturbations/84440087567906,AT2 cells_Club cells_2,NFATC2,activate,-0.617514
+/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET//3000/perturbations/84440087567906,AT2 cells_Club cells_2,NFATC2,knockdown,-0.009466
+/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET//3000/perturbations/84440087567906,AT2 cells_Club cells_2,NFIA,activate,-0.033961
+/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET//3000/perturbations/84440087567906,AT2 cells_Club cells_2,NFIA,knockdown,-0.832735
+/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET//3000/perturbations/84440087567906,AT2 cells_Club cells_2,NFIB,activate,0.021139
+/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET//3000/perturbations/84440087567906,AT2 cells_Club cells_2,NFIB,knockdown,-0.056232
+/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET//3000/perturbations/84440087567906,AT2 cells_Club cells_2,NFIX,activate,-0.056943
+/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET//3000/perturbations/84440087567906,AT2 cells_Club cells_2,NFIX,knockdown,-0.693504
+/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET//3000/perturbations/84440087567906,AT2 cells_Club cells_2,NFKB1,activate,-0.025933
+/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET//3000/perturbations/84440087567906,AT2 cells_Club cells_2,NFKB1,knockdown,-0.095061
+/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET//3000/perturbations/84440087567906,AT2 cells_Club cells_2,NR3C2,activate,-0.071840
+/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET//3000/perturbations/84440087567906,AT2 cells_Club cells_2,NR3C2,knockdown,-0.067690
+/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET//3000/perturbations/84440087567906,AT2 cells_Club cells_2,PBX1,activate,-0.039607
+/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET//3000/perturbations/84440087567906,AT2 cells_Club cells_2,PBX1,knockdown,-0.130973
+/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET//3000/perturbations/84440087567906,AT2 cells_Club cells_2,PKNOX2,activate,-0.549742
+/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET//3000/perturbations/84440087567906,AT2 cells_Club cells_2,PKNOX2,knockdown,-0.052131
+/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET//3000/perturbations/84440087567906,AT2 cells_Club cells_2,PPARG,activate,-0.051577
+/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET//3000/perturbations/84440087567906,AT2 cells_Club cells_2,PPARG,knockdown,-0.482780
+/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET//3000/perturbations/84440087567906,AT2 cells_Club cells_2,PRDM16,activate,-0.046187
+/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET//3000/perturbations/84440087567906,AT2 cells_Club cells_2,PRDM16,knockdown,-0.687775
+/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET//3000/perturbations/84440087567906,AT2 cells_Club cells_2,PROX1,activate,-0.392968
+/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET//3000/perturbations/84440087567906,AT2 cells_Club cells_2,PROX1,knockdown,-0.034986
+/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET//3000/perturbations/84440087567906,AT2 cells_Club cells_2,RARB,activate,-0.078685
+/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET//3000/perturbations/84440087567906,AT2 cells_Club cells_2,RARB,knockdown,-0.228010
+/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET//3000/perturbations/84440087567906,AT2 cells_Club cells_2,REST,activate,0.032464
+/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET//3000/perturbations/84440087567906,AT2 cells_Club cells_2,REST,knockdown,-0.531175
+/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET//3000/perturbations/84440087567906,AT2 cells_Club cells_2,RORA,activate,-0.817656
+/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET//3000/perturbations/84440087567906,AT2 cells_Club cells_2,RORA,knockdown,0.007267
+/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET//3000/perturbations/84440087567906,AT2 cells_Club cells_2,RORB,activate,-0.792269
+/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET//3000/perturbations/84440087567906,AT2 cells_Club cells_2,RORB,knockdown,-0.009656
+/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET//3000/perturbations/84440087567906,AT2 cells_Club cells_2,RUNX1,activate,-0.011177
+/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET//3000/perturbations/84440087567906,AT2 cells_Club cells_2,RUNX1,knockdown,-0.073848
+/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET//3000/perturbations/84440087567906,AT2 cells_Club cells_2,SIX1,activate,-0.543881
+/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET//3000/perturbations/84440087567906,AT2 cells_Club cells_2,SIX1,knockdown,-0.083628
+/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET//3000/perturbations/84440087567906,AT2 cells_Club cells_2,SIX4,activate,-0.476481
+/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET//3000/perturbations/84440087567906,AT2 cells_Club cells_2,SIX4,knockdown,-0.028959
+/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET//3000/perturbations/84440087567906,AT2 cells_Club cells_2,SMAD3,activate,-0.060935
+/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET//3000/perturbations/84440087567906,AT2 cells_Club cells_2,SMAD3,knockdown,-0.656708
+/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET//3000/perturbations/84440087567906,AT2 cells_Club cells_2,SOX9,activate,-0.004257
+/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET//3000/perturbations/84440087567906,AT2 cells_Club cells_2,SOX9,knockdown,-0.521221
+/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET//3000/perturbations/84440087567906,AT2 cells_Club cells_2,SP100,activate,-0.026347
+/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET//3000/perturbations/84440087567906,AT2 cells_Club cells_2,SP100,knockdown,-0.394101
+/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET//3000/perturbations/84440087567906,AT2 cells_Club cells_2,STAT1,activate,0.026429
+/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET//3000/perturbations/84440087567906,AT2 cells_Club cells_2,STAT1,knockdown,-0.727803
+/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET//3000/perturbations/84440087567906,AT2 cells_Club cells_2,TBX15,activate,-0.643952
+/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET//3000/perturbations/84440087567906,AT2 cells_Club cells_2,TBX15,knockdown,-0.037838
+/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET//3000/perturbations/84440087567906,AT2 cells_Club cells_2,TCF12,activate,0.002125
+/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET//3000/perturbations/84440087567906,AT2 cells_Club cells_2,TCF12,knockdown,-0.008565
+/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET//3000/perturbations/84440087567906,AT2 cells_Club cells_2,TCF4,activate,-0.681112
+/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET//3000/perturbations/84440087567906,AT2 cells_Club cells_2,TCF4,knockdown,0.012624
+/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET//3000/perturbations/84440087567906,AT2 cells_Club cells_2,TCF7L2,activate,-0.050577
+/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET//3000/perturbations/84440087567906,AT2 cells_Club cells_2,TCF7L2,knockdown,-0.866018
+/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET//3000/perturbations/84440087567906,AT2 cells_Club cells_2,TEAD1,activate,-0.064160
+/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET//3000/perturbations/84440087567906,AT2 cells_Club cells_2,TEAD1,knockdown,0.014988
+/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET//3000/perturbations/84440087567906,AT2 cells_Club cells_2,ZBTB18,activate,-0.155658
+/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET//3000/perturbations/84440087567906,AT2 cells_Club cells_2,ZBTB18,knockdown,-0.060621
+/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET//3000/perturbations/84440087567906,AT2 cells_Club cells_2,ZBTB20,activate,-0.078503
+/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET//3000/perturbations/84440087567906,AT2 cells_Club cells_2,ZBTB20,knockdown,-0.054000
+/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET//3000/perturbations/84440087567906,AT2 cells_Club cells_2,ZBTB7A,activate,-0.067136
+/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET//3000/perturbations/84440087567906,AT2 cells_Club cells_2,ZBTB7A,knockdown,-0.173440
+/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET//3000/perturbations/84440087567906,AT2 cells_Club cells_2,ZEB1,activate,-0.631593
+/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET//3000/perturbations/84440087567906,AT2 cells_Club cells_2,ZEB1,knockdown,-0.094937
