@@ -32,7 +32,7 @@ find_attractors = False
 tf_basin = 2 # if -1, use average distance between clusters for search basin for attractors.
 # otherwise use the same size basin for all phenotypes. For single cell data, there may be so many samples that average distance is small.
 filter_attractors = False
-perturbations = True
+perturbations = False
 stability = False
 on_nodes = []
 off_nodes = []
@@ -47,7 +47,7 @@ node_threshold = 0  # don't remove any parents
 transpose = True
 validation_fname = 'validation_set'
 fname = 'M2'
-notes_for_log = "Attractors with threshold 0.5 for pruning STG"
+notes_for_log = "Plotting perturbations for attractors 0.5"
 
 ## Set paths
 dir_prefix = '/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET'
@@ -313,8 +313,8 @@ if validation_averages:
     aucs = pd.read_csv(f'{VAL_DIR}/aucs.csv', header=None, index_col=0)
     print("AUC means: ",aucs.mean())
 
-    bb.plot.plot_aucs(aucs, save=True, save_dir=VAL_DIR, show_plot=True)
-    # bb.plot.plot_aucs(VAL_DIR, save=True, show_plot=True) #once BB > 0.0.7, change to this line
+    # bb.plot.plot_aucs(aucs, save=True, save_dir=VAL_DIR, show_plot=True)
+    bb.plot.plot_aucs(VAL_DIR, save=True, show_plot=True) #once BB > 0.0.7, change to this line
 
 
     bb.plot.plot_validation_avgs(fprs_all, tprs_all, len(nodes), area_all, save=True, save_dir=VAL_DIR, show_plot=True)
@@ -490,9 +490,7 @@ else:
 # will make plots for each perturbation for each starting state
 
 dir_prefix_walks = op.join(dir_prefix, brcd)
-# radius = 4
 
-# attractor_dict = {'A2': [32136863904], 'P': [], 'A': [21349304528], 'uncl': [1446933], 'Y': [14897871719], 'N': [15703179135,17045356415]} #walks from original attractors
 
 if perturbations:
     ATTRACTOR_DIR = f"{dir_prefix}/{brcd}/attractors/attractors_threshold_0.5"
@@ -521,6 +519,141 @@ if perturbations:
                        on_nodes=[],
                        off_nodes=[],
                        )
+    perturbations_dir = f"{dir_prefix}/{brcd}/perturbations"
+
+    #when bb version > 0.1.2, uncomment this code
+    # bb.plot.plot_destabilization_scores(attractor_dict, perturbations_dir, show = False, save = True)
+
+
+#perturbation summary plots. In future, merge this chunk with perturbations chunk above
+
+## plot barplot of destabilization scores for each TF for all attractors
+## one plot per perturbation type and per cluster type
+
+
+def plot_destabilization_scores(attractor_dict, perturbations_dir, show = False, save = True, clustered = True):
+    for k in attractor_dict.keys():
+        print(k)
+        if clustered:
+            try:
+                os.mkdir(f"{perturbations_dir}/clustered_perturb_plots")
+            except FileExistsError:
+                pass
+            results = pd.DataFrame(columns = ['attr','gene','perturb','score'])
+            for attr in attractor_dict[k]:
+                tmp = pd.read_csv(f"{perturbations_dir}/{attr}/results.csv", header = None, index_col = None)
+                tmp.columns = ["attractor_dir","cluster","gene","perturb","score"]
+                for i,r in tmp.iterrows():
+                    results = results.append(pd.Series([attr, r['gene'],r['perturb'],r['score']],
+                                                       index = ['attr','gene','perturb','score']), ignore_index=True)
+            results_act = results.loc[results["perturb"] == 'activate']
+            plt.figure()
+            # my_order = results_act.sort_values(by = 'score')['gene'].values
+            my_order = results_act.groupby(by=["gene"]).median().sort_values(by = 'score').index.values
+            plt.axhline(y = 0, linestyle = "--", color = 'lightgrey')
+
+            if len(attractor_dict[k]) == 1:
+                sns.barplot(data = results_act, x = 'gene', y = 'score', order = my_order)
+            else:
+                sns.boxplot(data = results_act, x = 'gene', y = 'score', order = my_order)
+            plt.xticks(rotation = 90, fontsize = 8)
+            plt.xlabel("Gene")
+            plt.ylabel("Stabilization Score")
+            plt.title(f"Destabilization by TF Activation for {k} Attractors \n {len(attractor_dict[k])} Attractors")
+            plt.legend([],[], frameon=False)
+            plt.tight_layout()
+            if show:
+                plt.show()
+            if save:
+                plt.savefig(f"{perturbations_dir}/clustered_perturb_plots/{k}_activation_scores.pdf")
+                plt.close()
+                results_act = results.loc[results["perturb"] == 'activate']
+
+            results_kd = results.loc[results["perturb"] == 'knockdown']
+
+            plt.figure()
+            # my_order = results_act.sort_values(by = 'score')['gene'].values
+            my_order = results_kd.groupby(by=["gene"]).median().sort_values(by = 'score').index.values
+            plt.axhline(y = 0, linestyle = "--", color = 'lightgrey')
+            if len(attractor_dict[k]) == 1:
+                sns.barplot(data = results_kd, x = 'gene', y = 'score', order = my_order)
+            else:
+                sns.boxplot(data = results_kd, x = 'gene', y = 'score', order = my_order)
+            plt.xticks(rotation = 90, fontsize = 8)
+            plt.xlabel("Gene")
+            plt.ylabel("Stabilization Score")
+            plt.title(f"Destabilization by TF Knockdown for {k} Attractors \n {len(attractor_dict[k])} Attractors")
+            plt.legend([],[], frameon=False)
+            plt.tight_layout()
+            if show:
+                plt.show()
+            if save:
+                plt.savefig(f"{perturbations_dir}/clustered_perturb_plots/{k}_knockdown_scores.pdf")
+                plt.close()
+        else:
+            for attr in attractor_dict[k]:
+                results = pd.read_csv(f"{perturbations_dir}/{attr}/results.csv", header = None, index_col = None)
+                results.columns = ["attractor_dir","cluster","gene","perturb","score"]
+                #activation plot
+                results_act = results.loc[results["perturb"] == 'activate']
+                colormat=list(np.where(results_act['score']>0, 'g','r'))
+                results_act['color'] = colormat
+
+                plt.figure()
+                my_order = results_act.sort_values(by = 'score')['gene'].values
+                sns.barplot(data = results_act, x = 'gene', y = 'score', order = my_order,
+                            palette = ['r','g'], hue = 'color')
+                plt.xticks(rotation = 90, fontsize = 8)
+                plt.xlabel("Gene")
+                plt.ylabel("Stabilization Score")
+                plt.title("Destabilization by TF Activation")
+                plt.legend([],[], frameon=False)
+                plt.tight_layout()
+                if show:
+                    plt.show()
+                if save:
+                    plt.savefig(f"{perturbations_dir}/{attr}/activation_scores.pdf")
+                    plt.close()
+
+                #knockdown plot
+                results_kd = results.loc[results["perturb"] == 'knockdown']
+                colormat=list(np.where(results_kd['score']>0, 'g','r'))
+                results_kd['color'] = colormat
+
+                plt.figure()
+                my_order = results_kd.sort_values(by = 'score')['gene'].values
+                sns.barplot(data = results_kd, x = 'gene', y = 'score', order = my_order,
+                            palette = ['r','g'], hue = 'color')
+                plt.xticks(rotation = 90, fontsize = 8)
+                plt.xlabel("Gene")
+                plt.ylabel("Stabilization Score")
+                plt.title("Destabilization by TF Knockdown")
+                plt.legend([],[], frameon=False)
+                plt.tight_layout()
+                if show:
+                    plt.show()
+                if save:
+                    plt.savefig(f"{perturbations_dir}/{attr}/knockdown_scores.pdf")
+                    plt.close()
+
+
+if True:
+    ATTRACTOR_DIR = f"{dir_prefix}/{brcd}/attractors/attractors_threshold_0.5"
+
+    attractor_dict = {}
+    attr_filtered = pd.read_csv(f'{ATTRACTOR_DIR}/attractors_filtered.txt', sep = ',', header = 0, index_col = 0)
+    for i,r in attr_filtered.iterrows():
+        attractor_dict[i] = []
+
+    for i,r in attr_filtered.iterrows():
+        attractor_dict[i].append(bb.utils.state_bool2idx(list(r)))
+
+    perturbations_dir = f"{dir_prefix}/{brcd}/perturbations"
+
+    plot_destabilization_scores(attractor_dict, perturbations_dir, show = False, save = True, clustered = True)
+
+
+
 
 if stability:
     ATTRACTOR_DIR = f"{dir_prefix}/{brcd}/attractors/attractors_threshold_0.5"
@@ -601,5 +734,5 @@ print("Time for job: ", time_for_job)
 log_job(dir_prefix, brcd, random_state, network_path, data_path, data_t1_path, cellID_table, node_normalization,
         node_threshold, split_train_test, write_binarized_data,fit_rules,run_validation,validation_averages,
         find_average_states,find_attractors,tf_basin,filter_attractors,on_nodes,off_nodes,perturbations, stability,
-        time = None, job_barcode= job_brcd,
+        time = time_for_job, job_barcode= job_brcd,
         notes_for_job=notes_for_log)

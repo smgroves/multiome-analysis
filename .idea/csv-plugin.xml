@@ -10,6 +10,13 @@
             </Attribute>
           </value>
         </entry>
+        <entry key="/network-inference-DIRECT-NET/3000/perturbations/83890063318570/results.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
         <entry key="/network-inference-DIRECT-NET/35468/data_split/test_t0_M2.csv">
           <value>
             <Attribute>
@@ -109,6 +116,13 @@
           </value>
         </entry>
         <entry key="/network-inference-DIRECT-NET/networks/DIRECT-NET_network_with_FIGR_threshold_0.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="/network-inference-DIRECT-NET/networks/DIRECT-NET_network_with_FIGR_threshold_0_no_NEUROG2_top8regs_NO_sinks.csv">
           <value>
             <Attribute>
               <option name="separator" value="," />
