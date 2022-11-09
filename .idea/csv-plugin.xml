@@ -17,6 +17,13 @@
             </Attribute>
           </value>
         </entry>
+        <entry key="/network-inference-DIRECT-NET/3000/perturbations/clustered_perturb_plots/perturbations.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
         <entry key="/network-inference-DIRECT-NET/35468/data_split/test_t0_M2.csv">
           <value>
             <Attribute>

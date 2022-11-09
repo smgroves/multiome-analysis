@@ -524,12 +524,15 @@ if perturbations:
     #when bb version > 0.1.2, uncomment this code
     # bb.plot.plot_destabilization_scores(attractor_dict, perturbations_dir, show = False, save = True)
 
+    ## to make plots for each attractor:
+    ## bb.plot.plot_destabilization_scores(attractor_dict, perturbations_dir, show = False, save = True, clustered = False)
+
+
 
 #perturbation summary plots. In future, merge this chunk with perturbations chunk above
 
 ## plot barplot of destabilization scores for each TF for all attractors
 ## one plot per perturbation type and per cluster type
-
 
 def plot_destabilization_scores(attractor_dict, perturbations_dir, show = False, save = True, clustered = True):
     for k in attractor_dict.keys():
@@ -636,6 +639,94 @@ def plot_destabilization_scores(attractor_dict, perturbations_dir, show = False,
                     plt.savefig(f"{perturbations_dir}/{attr}/knockdown_scores.pdf")
                     plt.close()
 
+import math
+
+def get_ci_sig(results, gene_col = 'gene', score_col = 'score', mean_threshold = -0.3):
+    stats = results.groupby([gene_col])[score_col].agg(['mean', 'count', 'std'])
+    ci95_hi = []
+    ci95_lo = []
+    sig = []
+    mean_sig = []
+    for i in stats.index:
+        m, c, s = stats.loc[i]
+        ci95_hi.append(m + 1.96*s/math.sqrt(c))
+        ci95_lo.append(m - 1.96*s/math.sqrt(c))
+        if m < mean_threshold:
+            mean_sig.append("yes")
+        else:
+            mean_sig.append('no')
+        if m + 1.96*s/math.sqrt(c) < 0:
+            sig.append('Master destabilizer')
+        else:
+            sig.append("Not significant")
+
+    stats['ci95_hi'] = ci95_hi
+    stats['ci95_lo'] = ci95_lo
+    stats['sig'] = sig
+    stats['mean_sig'] = mean_sig
+    return stats
+
+def get_perturbation_dict(attractor_dict, perturbations_dir, significance = 'ci'):
+    perturb_dict = {}
+    full_results = pd.DataFrame(columns = ['cluster','attr','gene','perturb','score'])
+
+    for k in attractor_dict.keys():
+        print(k)
+        results = pd.DataFrame(columns = ['attr','gene','perturb','score'])
+        for attr in attractor_dict[k]:
+            tmp = pd.read_csv(f"{perturbations_dir}/{attr}/results.csv", header = None, index_col = None)
+            tmp.columns = ["attractor_dir","cluster","gene","perturb","score"]
+            for i,r in tmp.iterrows():
+                results = results.append(pd.Series([attr, r['gene'],r['perturb'],r['score']],
+                                                   index = ['attr','gene','perturb','score']), ignore_index=True)
+                full_results = full_results.append(pd.Series([k, attr, r['gene'],r['perturb'],r['score']],
+                                                   index = ['cluster','attr','gene','perturb','score']), ignore_index=True)
+        results_act = results.loc[results["perturb"] == 'activate']
+        stats_act = get_ci_sig(results_act)
+
+        results_kd = results.loc[results["perturb"] == 'knockdown']
+        stats_kd = get_ci_sig(results_kd)
+
+        if significance == 'ci':
+            act_l = []
+            for i,r in stats_act.iterrows():
+                if r['sig'] != "Not significant":
+                    act_l.append(i)
+
+            kd_l = []
+            for i,r in stats_kd.iterrows():
+                if r['sig'] != "Not significant":
+                    kd_l.append(i)
+        elif significance == 'mean':
+            act_l = []
+            for i,r in stats_act.iterrows():
+                if r['mean_sig'] == "yes":
+                    act_l.append(i)
+
+            kd_l = []
+            for i,r in stats_kd.iterrows():
+                if r['mean_sig'] == "yes":
+                    kd_l.append(i)
+        else:
+            print("significance must be one of {'ci','mean'}")
+        perturb_dict[k] = {"Regulators":kd_l, "Destabilizers":act_l}
+
+    full_results.to_csv(f"{perturbations_dir}/clustered_perturb_plots/perturbations.csv")
+
+    return perturb_dict, full_results
+
+def reverse_dictionary(dictionary):
+    return  {v: k for k, v in dictionary.items()}
+
+def reverse_perturb_dictionary(dictionary):
+    reverse_dict = {}
+    for k,v in dictionary.items():
+        # v is a dictionary too
+        for reg_type, gene in v.items():
+            if gene not in reverse_dict.keys():
+                reverse_dict[gene] = {"Regulators":[], "Destabilizers":[]}
+            reverse_dict[gene][reg_type].append(k)
+    return  reverse_dict
 
 if True:
     ATTRACTOR_DIR = f"{dir_prefix}/{brcd}/attractors/attractors_threshold_0.5"
