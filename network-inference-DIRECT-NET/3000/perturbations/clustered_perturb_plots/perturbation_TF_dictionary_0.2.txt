@@ -1,0 +1,34 @@
+ASCL1:{"Regulators": ["NE_4_NE_1", "NE_6_NE_4"], "Destabilizers": ["Club cells_2", "Club cells_1", "AT2 cells_Club cells_2"]}
+CUX1:{"Regulators": ["Club cells_2", "Club cells_1", "AT2 cells_Club cells_2"], "Destabilizers": []}
+CUX2:{"Regulators": [], "Destabilizers": ["Club cells_2", "Club cells_1", "AT2 cells_Club cells_2"]}
+EGR1:{"Regulators": ["NE_7", "NE_5", "NE_2", "NE_9", "NE_4_NE_1", "NE_6_NE_4"], "Destabilizers": ["Club cells_2", "Club cells_1", "NE_11", "AT2 cells_Club cells_2"]}
+EHF:{"Regulators": ["Club cells_2", "Club cells_1", "AT2 cells_Club cells_2"], "Destabilizers": []}
+ESR1:{"Regulators": ["Club cells_2", "Club cells_1", "AT2 cells_Club cells_2"], "Destabilizers": []}
+FOS:{"Regulators": ["NE_7", "NE_2", "NE_4_NE_1", "NE_6_NE_4"], "Destabilizers": ["Club cells_2", "Club cells_1", "AT2 cells_Club cells_2"]}
+FOXO3:{"Regulators": ["Club cells_2", "Club cells_1", "AT2 cells_Club cells_2"], "Destabilizers": ["NE_7", "NE_2", "NE_4_NE_1", "NE_6_NE_4"]}
+GRHL2:{"Regulators": ["Club cells_2", "Club cells_1", "AT2 cells_Club cells_2"], "Destabilizers": []}
+HSF2:{"Regulators": ["NE_11"], "Destabilizers": ["Club cells_2", "Club cells_1", "AT2 cells_Club cells_2"]}
+JUNB:{"Regulators": ["NE_7", "NE_2", "NE_4_NE_1", "NE_6_NE_4"], "Destabilizers": ["NE_11"]}
+JUND:{"Regulators": ["Club cells_2", "Club cells_1", "AT2 cells_Club cells_2"], "Destabilizers": []}
+MEIS2:{"Regulators": ["NE_1", "NE_7", "NE_4", "NE_6", "NE_5", "NE_9", "NE_4_NE_1", "NE_6_NE_4"], "Destabilizers": ["Club cells_2", "Club cells_1", "NE_11", "AT2 cells_Club cells_2"]}
+NFATC2:{"Regulators": [], "Destabilizers": ["Club cells_2", "Club cells_1", "AT2 cells_Club cells_2"]}
+NFIA:{"Regulators": ["Club cells_2", "Club cells_1", "AT2 cells_Club cells_2"], "Destabilizers": ["NE_4", "NE_5", "NE_9", "NE_11", "NE_4_NE_1", "NE_6_NE_4"]}
+NFIX:{"Regulators": ["Club cells_2", "Club cells_1", "AT2 cells_Club cells_2"], "Destabilizers": []}
+PKNOX2:{"Regulators": [], "Destabilizers": ["Club cells_2", "Club cells_1", "AT2 cells_Club cells_2"]}
+PPARG:{"Regulators": ["Club cells_2", "Club cells_1", "AT2 cells_Club cells_2"], "Destabilizers": []}
+PRDM16:{"Regulators": ["Club cells_2", "Club cells_1", "AT2 cells_Club cells_2"], "Destabilizers": []}
+PROX1:{"Regulators": [], "Destabilizers": ["Club cells_2", "Club cells_1", "AT2 cells_Club cells_2"]}
+REST:{"Regulators": ["Club cells_2", "Club cells_1", "AT2 cells_Club cells_2"], "Destabilizers": []}
+RORA:{"Regulators": ["NE_1", "NE_11"], "Destabilizers": ["Club cells_2", "Club cells_1", "AT2 cells_Club cells_2"]}
+RORB:{"Regulators": ["NE_1", "NE_7", "NE_4", "NE_6", "NE_5", "NE_9", "NE_4_NE_1", "NE_6_NE_4"], "Destabilizers": ["Club cells_2", "Club cells_1", "NE_11", "AT2 cells_Club cells_2"]}
+SIX1:{"Regulators": [], "Destabilizers": ["Club cells_2", "Club cells_1", "AT2 cells_Club cells_2"]}
+SIX4:{"Regulators": [], "Destabilizers": ["Club cells_2", "Club cells_1", "AT2 cells_Club cells_2"]}
+SMAD3:{"Regulators": ["Club cells_2", "Club cells_1", "AT2 cells_Club cells_2"], "Destabilizers": []}
+SOX9:{"Regulators": ["Club cells_2", "Club cells_1", "AT2 cells_Club cells_2"], "Destabilizers": []}
+SP100:{"Regulators": ["Club cells_2", "Club cells_1", "AT2 cells_Club cells_2"], "Destabilizers": []}
+STAT1:{"Regulators": ["Club cells_2", "Club cells_1", "AT2 cells_Club cells_2"], "Destabilizers": []}
+TBX15:{"Regulators": ["NE_7", "NE_4_NE_1"], "Destabilizers": ["Club cells_2", "Club cells_1", "AT2 cells_Club cells_2"]}
+TCF4:{"Regulators": ["NE_1", "NE_4", "NE_9", "NE_4_NE_1", "NE_6_NE_4"], "Destabilizers": ["Club cells_2", "Club cells_1", "AT2 cells_Club cells_2"]}
+TCF7L2:{"Regulators": ["Club cells_2", "Club cells_1", "AT2 cells_Club cells_2"], "Destabilizers": ["NE_1", "NE_7", "NE_4", "NE_6", "NE_5", "NE_2", "NE_9", "NE_11", "NE_4_NE_1", "NE_6_NE_4"]}
+ZBTB18:{"Regulators": ["NE_11"], "Destabilizers": []}
+ZEB1:{"Regulators": ["NE_1", "NE_7", "NE_4", "NE_6", "NE_5", "NE_2", "NE_9", "NE_4_NE_1", "NE_6_NE_4"], "Destabilizers": ["Club cells_2", "Club cells_1", "NE_11", "AT2 cells_Club cells_2"]}

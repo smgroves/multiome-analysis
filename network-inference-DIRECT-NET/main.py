@@ -1,5 +1,7 @@
 import random
 import time
+
+import numpy as np
 import seaborn as sns
 import booleabayes as bb
 import os
@@ -656,17 +658,18 @@ def get_ci_sig(results, group_cols = ['gene'], score_col = 'score', mean_thresho
         else:
             mean_sig.append('no')
         if m + 1.96*s/math.sqrt(c) < 0:
-            sig.append('Master destabilizer')
+            sig.append('yes')
         else:
-            sig.append("Not significant")
+            sig.append("no")
 
     stats['ci95_hi'] = ci95_hi
     stats['ci95_lo'] = ci95_lo
-    stats['sig'] = sig
+    stats['ci_sig'] = sig
     stats['mean_sig'] = mean_sig
     return stats
 
-def get_perturbation_dict(attractor_dict, perturbations_dir, significance = 'ci', save_full = False):
+def get_perturbation_dict(attractor_dict, perturbations_dir, significance = 'both', save_full = False, save_dir = "clustered_perturb_plots",
+                          mean_threshold = -0.3):
     perturb_dict = {}
     full_results = pd.DataFrame(columns = ['cluster','attr','gene','perturb','score'])
 
@@ -682,22 +685,22 @@ def get_perturbation_dict(attractor_dict, perturbations_dir, significance = 'ci'
                 full_results = full_results.append(pd.Series([k, attr, r['gene'],r['perturb'],r['score']],
                                                    index = ['cluster','attr','gene','perturb','score']), ignore_index=True)
         results_act = results.loc[results["perturb"] == 'activate']
-        stats_act = get_ci_sig(results_act)
+        stats_act = get_ci_sig(results_act, mean_threshold=mean_threshold)
 
         results_kd = results.loc[results["perturb"] == 'knockdown']
-        stats_kd = get_ci_sig(results_kd)
+        stats_kd = get_ci_sig(results_kd, mean_threshold=mean_threshold)
 
         if significance == 'ci':
             #activation is significantly destabilizing = destabilizer
             act_l = []
             for i,r in stats_act.iterrows():
-                if r['sig'] != "Not significant":
+                if r['ci_sig'] == "yes":
                     act_l.append(i)
 
             #knockdown is significantly destabilizing = destabilizer
             kd_l = []
             for i,r in stats_kd.iterrows():
-                if r['sig'] != "Not significant":
+                if r['ci_sig'] == "yes":
                     kd_l.append(i)
         elif significance == 'mean':
             act_l = []
@@ -709,12 +712,35 @@ def get_perturbation_dict(attractor_dict, perturbations_dir, significance = 'ci'
             for i,r in stats_kd.iterrows():
                 if r['mean_sig'] == "yes":
                     kd_l.append(i)
+        elif significance == 'both':
+            #activation is significantly destabilizing = destabilizer
+            act_l = []
+            for i,r in stats_act.iterrows():
+                if r['ci_sig'] == "yes":
+                    if r['mean_sig'] == "yes":
+                        act_l.append(i)
+                elif len(attractor_dict[k]) == 1: #ci of single attractor DNE
+                    if r['mean_sig'] == "yes":
+                        act_l.append(i)
+            #knockdown is significantly destabilizing = destabilizer
+            kd_l = []
+            for i,r in stats_kd.iterrows():
+                if r['ci_sig'] == "yes":
+                    if r['mean_sig'] == "yes":
+                        kd_l.append(i)
+                elif len(attractor_dict[k]) == 1: #ci of single attractor DNE
+                    if r['mean_sig'] == "yes":
+                        kd_l.append(i)
         else:
-            print("significance must be one of {'ci','mean'}")
+            print("significance must be one of {'ci','mean', 'both'}")
         perturb_dict[k] = {"Regulators":kd_l, "Destabilizers":act_l}
 
     if save_full:
-        full_results.to_csv(f"{perturbations_dir}/clustered_perturb_plots/perturbations.csv")
+        try:
+            os.mkdir(f"{perturbations_dir}/{save_dir}")
+        except FileExistsError:
+            pass
+        full_results.to_csv(f"{perturbations_dir}/{save_dir}/perturbations.csv")
 
     return perturb_dict, full_results
 
@@ -732,6 +758,52 @@ def reverse_perturb_dictionary(dictionary):
                 reverse_dict[gene][reg_type].append(k)
     return  reverse_dict
 
+import json
+
+def write_dict_of_dicts(dictionary, file):
+    with open(file, 'w') as convert_file:
+        for k in sorted(dictionary.keys()):
+            convert_file.write(f"{k}:")
+            convert_file.write(json.dumps(dictionary[k]))
+            convert_file.write("\n")
+
+def plot_perturb_gene_dictionary(p_dict, full,perturbations_dir,show = False, save = True, ncols = 5, fname = ""):
+    ncols = ncols
+    nrows = int(np.ceil(len(p_dict.keys())/ncols))
+    # fig = plt.Figure(figsize = (8,8))
+    fig, axs = plt.subplots(ncols = ncols, nrows= nrows, figsize=(20, 30))
+
+    for x, k in enumerate(p_dict.keys()):
+        print(k)
+        #for each gene, for associated clusters that are destabilized, make a df of scores to be used for plotting
+        plot_df = pd.DataFrame(columns = ["cluster","attr","gene","perturb","score"])
+        for cluster in p_dict[k]["Regulators"]:
+            tmp = full.loc[(full['cluster']==cluster)&(full['gene']==k)&(full["perturb"]=="knockdown")]
+            for i,r in tmp.iterrows():
+                plot_df = plot_df.append(r, ignore_index=True)
+        for cluster in p_dict[k]["Destabilizers"]:
+            tmp = full.loc[(full['cluster']==cluster)&(full['gene']==k)&(full["perturb"]=="activate")]
+            for i,r in tmp.iterrows():
+                plot_df = plot_df.append(r, ignore_index=True)
+
+        # fig.add_subplot(ncols, nrows,x+1)
+        my_order = plot_df.groupby(by=["cluster"]).median().sort_values(by = 'score').index.values
+        col = int(np.floor(x/nrows))
+        row = int(x%nrows)
+        sns.barplot(data= plot_df, x = "cluster",y = "score", hue = "perturb", order = my_order,
+                    ax = axs[row,col])
+        axs[row,col].set_title(f"{k} Perturbations")
+        axs[row,col].set_xticklabels(labels = my_order,rotation = 45, fontsize = 8, ha = 'right')
+    plt.tight_layout()
+    if save:
+        plt.savefig(f"{perturbations_dir}/destabilizing_tfs{fname}.pdf")
+    if show:
+        plt.show()
+
+
+
+
+
 if True:
     ATTRACTOR_DIR = f"{dir_prefix}/{brcd}/attractors/attractors_threshold_0.5"
 
@@ -745,13 +817,29 @@ if True:
 
     perturbations_dir = f"{dir_prefix}/{brcd}/perturbations"
 
+
     plot_destabilization_scores(attractor_dict, perturbations_dir, show = False, save = True, clustered = True)
 
-    perturb_dict_ci, full = get_perturbation_dict(attractor_dict, perturbations_dir, significance = 'ci', save_full=True)
-    perturb_dict_mean, _ = get_perturbation_dict(attractor_dict, perturbations_dir, significance = 'mean')
-    perturb_gene_dict_ci = reverse_perturb_dictionary(perturb_dict_ci)
-    perturb_gene_dict_mean = reverse_perturb_dictionary(perturb_dict_mean)
+    perturb_dict, full = get_perturbation_dict(attractor_dict, perturbations_dir, significance = 'both', save_full=False,
+                                               )
+    perturb_gene_dict = reverse_perturb_dictionary(perturb_dict)
+    write_dict_of_dicts(perturb_gene_dict, file = f"{perturbations_dir}/clustered_perturb_plots/perturbation_TF_dictionary.txt")
 
+    full_sig = get_ci_sig(full, group_cols=['cluster','gene','perturb'])
+    full_sig.to_csv(f"{perturbations_dir}/clustered_perturb_plots/perturbation_stats.csv")
+
+    plot_perturb_gene_dictionary(perturb_gene_dict, full,perturbations_dir,show = False, save = True, ncols = 5)
+
+
+    perturb_dict, full = get_perturbation_dict(attractor_dict, perturbations_dir, significance = 'both', save_full=False,
+                                               mean_threshold=-0.2)
+    perturb_gene_dict = reverse_perturb_dictionary(perturb_dict)
+
+    plot_perturb_gene_dictionary(perturb_gene_dict, full,perturbations_dir,show = False, save = True, ncols = 5, fname = "_0.2")
+
+    ## bb version > 0.1.2, the below line replaces above code and functions
+    # bb.tl.perturbations_summary(attractor_dict,perturbations_dir, show = False, save = True, plot_by_attractor = False,
+    #                             save_dir = "clustered_perturb_plots", save_full = True, significance = 'both')
 
 if stability:
     ATTRACTOR_DIR = f"{dir_prefix}/{brcd}/attractors/attractors_threshold_0.5"
