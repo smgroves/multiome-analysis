@@ -641,8 +641,8 @@ def plot_destabilization_scores(attractor_dict, perturbations_dir, show = False,
 
 import math
 
-def get_ci_sig(results, gene_col = 'gene', score_col = 'score', mean_threshold = -0.3):
-    stats = results.groupby([gene_col])[score_col].agg(['mean', 'count', 'std'])
+def get_ci_sig(results, group_cols = ['gene'], score_col = 'score', mean_threshold = -0.3):
+    stats = results.groupby(group_cols)[score_col].agg(['mean', 'count', 'std'])
     ci95_hi = []
     ci95_lo = []
     sig = []
@@ -666,7 +666,7 @@ def get_ci_sig(results, gene_col = 'gene', score_col = 'score', mean_threshold =
     stats['mean_sig'] = mean_sig
     return stats
 
-def get_perturbation_dict(attractor_dict, perturbations_dir, significance = 'ci'):
+def get_perturbation_dict(attractor_dict, perturbations_dir, significance = 'ci', save_full = False):
     perturb_dict = {}
     full_results = pd.DataFrame(columns = ['cluster','attr','gene','perturb','score'])
 
@@ -688,11 +688,13 @@ def get_perturbation_dict(attractor_dict, perturbations_dir, significance = 'ci'
         stats_kd = get_ci_sig(results_kd)
 
         if significance == 'ci':
+            #activation is significantly destabilizing = destabilizer
             act_l = []
             for i,r in stats_act.iterrows():
                 if r['sig'] != "Not significant":
                     act_l.append(i)
 
+            #knockdown is significantly destabilizing = destabilizer
             kd_l = []
             for i,r in stats_kd.iterrows():
                 if r['sig'] != "Not significant":
@@ -711,7 +713,8 @@ def get_perturbation_dict(attractor_dict, perturbations_dir, significance = 'ci'
             print("significance must be one of {'ci','mean'}")
         perturb_dict[k] = {"Regulators":kd_l, "Destabilizers":act_l}
 
-    full_results.to_csv(f"{perturbations_dir}/clustered_perturb_plots/perturbations.csv")
+    if save_full:
+        full_results.to_csv(f"{perturbations_dir}/clustered_perturb_plots/perturbations.csv")
 
     return perturb_dict, full_results
 
@@ -722,10 +725,11 @@ def reverse_perturb_dictionary(dictionary):
     reverse_dict = {}
     for k,v in dictionary.items():
         # v is a dictionary too
-        for reg_type, gene in v.items():
-            if gene not in reverse_dict.keys():
-                reverse_dict[gene] = {"Regulators":[], "Destabilizers":[]}
-            reverse_dict[gene][reg_type].append(k)
+        for reg_type, genes in v.items():
+            for gene in genes:
+                if gene not in reverse_dict.keys():
+                    reverse_dict[gene] = {"Regulators":[], "Destabilizers":[]}
+                reverse_dict[gene][reg_type].append(k)
     return  reverse_dict
 
 if True:
@@ -743,7 +747,10 @@ if True:
 
     plot_destabilization_scores(attractor_dict, perturbations_dir, show = False, save = True, clustered = True)
 
-
+    perturb_dict_ci, full = get_perturbation_dict(attractor_dict, perturbations_dir, significance = 'ci', save_full=True)
+    perturb_dict_mean, _ = get_perturbation_dict(attractor_dict, perturbations_dir, significance = 'mean')
+    perturb_gene_dict_ci = reverse_perturb_dictionary(perturb_dict_ci)
+    perturb_gene_dict_mean = reverse_perturb_dictionary(perturb_dict_mean)
 
 
 if stability:
