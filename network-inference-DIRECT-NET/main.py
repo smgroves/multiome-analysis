@@ -15,6 +15,7 @@ from bb_utils import *
 import sys
 from datetime import timedelta
 import glob
+import json
 
 customPalette = sns.color_palette('tab10')
 
@@ -35,7 +36,7 @@ tf_basin = 2 # if -1, use average distance between clusters for search basin for
 # otherwise use the same size basin for all phenotypes. For single cell data, there may be so many samples that average distance is small.
 filter_attractors = False
 perturbations = False
-stability = True
+stability = False
 on_nodes = []
 off_nodes = []
 
@@ -482,6 +483,9 @@ if filter_attractors:
     plt.tight_layout()
     plt.savefig(f"{ATTRACTOR_DIR}/attractors_filtered_clustered_x.pdf", bbox_extra_artists=(lgd,), bbox_inches='tight')
 
+    with open(f"{dir_prefix}/{brcd}/attractors/attractors_threshold_0.5/attractor_dict.txt", 'w') as convert_file:
+        convert_file.write(json.dumps(attractor_dict))
+
 else:
     print("Skipping filtering attractors...")
 # =============================================================================
@@ -563,13 +567,22 @@ if stability:
                        on_nodes=[],
                        off_nodes=[],
                        )
+else:
+    print("Skipping stability...")
 
-    bb.rw.random_walks(attractor_dict_edit,
+# =============================================================================
+# Calculate and plot stability of each attractor
+# =============================================================================
+if True:
+    ATTRACTOR_DIR = f"{dir_prefix}/{brcd}/attractors/attractors_threshold_0.5"
+    attractor_dict = bb.utils.get_attractor_dict(ATTRACTOR_DIR, filtered = True)
+
+    bb.rw.random_walks(attractor_dict,
                        rules,
                        regulators_dict,
                        nodes,
                        save_dir = f"{dir_prefix}/{brcd}/",
-                       radius=[2,4],
+                       radius=[2,3,4,5,6],
                        perturbations=False,
                        iters=500,
                        max_steps=500,
@@ -582,13 +595,6 @@ if stability:
                        )
 
 
-
-# =============================================================================
-# Calculate and plot stability of each attractor
-# =============================================================================
-if True:
-    ATTRACTOR_DIR = f"{dir_prefix}/{brcd}/attractors/attractors_threshold_0.5"
-    attractor_dict = bb.utils.get_attractor_dict(ATTRACTOR_DIR, filtered = True)
     walks_dir = f"{dir_prefix}/{brcd}/walks"
     bb.plot.plot_stability(attractor_dict, walks_dir, palette = sns.color_palette("tab20"), rescaled = True,
                    show = False, save = True)
