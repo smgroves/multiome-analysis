@@ -5,7 +5,11 @@ import numpy as np
 from graph_tool import all as gt
 import booleabayes as bb
 from graph_tool import GraphView
-
+import matplotlib.pyplot as plt
+import seaborn as sns
+import os.path as op
+import scipy.stats as ss
+import glob
 
 def log_job(dir_prefix, brcd, random_state, network_path, data_path, data_t1_path, cellID_table, node_normalization,
             node_threshold, split_train_test, write_binarized_data,fit_rules,validation,validation_averages,
@@ -143,5 +147,80 @@ def draw_grn(G, gene2vertex, rules, regulators_dict, fname, gene2group=None, gen
     else:
         gt.graph_draw(G, pos=pos, output=fname, vprops=vprops, eprops=eprops, output_size=(1000, 1000))
     return G, edge_weight_df, edge_binary_df
+
+def plot_stability(attractor_dict, walks_dir, palette = sns.color_palette("tab20"), rescaled = True,
+                   show = False, save = True):
+
+    df = pd.DataFrame(
+        columns=["cluster", "attr","radius", "mean", "median", "std"]
+    )
+
+    colormap = {i:c for i,c in zip(sorted(attractor_dict.keys()), palette)}
+    # folders = glob.glob(f"{walks_dir}/[0-9]*")
+
+    for k in sorted(attractor_dict.keys()):
+        print(k)
+        for attr in attractor_dict[k]:
+            folders = glob.glob(f"{walks_dir}/{attr}/len_walks_[0-9]*")
+            for f in folders:
+                radius = int(f.split("_")[-1].split(".")[0])
+                try:
+                    lengths = pd.read_csv(f, header = None, index_col = None)
+                except pd.errors.EmptyDataError: continue
+                df = df.append(pd.Series([k,attr, radius, np.mean(lengths[0]), np.median(lengths[0]), np.std(lengths[0])],
+                                         index=["cluster", "attr","radius","mean", "median", "std"]),
+                                             ignore_index=True)
+
+    ## add walk lengths from random control states to df
+    if os.path.exists(f"{walks_dir}/random/"):
+        colormap['random'] = 'lightgrey'
+        random_starts = os.listdir(f"{walks_dir}/random/")
+        for state in random_starts:
+            folders = glob.glob(f"{walks_dir}/random/{state}/len_walks_[0-9]*")
+            for f in folders:
+                radius = int(f.split("_")[-1].split(".")[0])
+                try:
+                    lengths = pd.read_csv(f, header = None, index_col = None)
+                except pd.errors.EmptyDataError: continue
+                df = df.append(pd.Series(["random",state, radius, np.mean(lengths[0]), np.median(lengths[0]), np.std(lengths[0])],
+                                         index=["cluster", "attr","radius","mean", "median", "std"]),
+                               ignore_index=True)
+        if rescaled:
+            norm_df = df.copy()[['cluster', 'attr', 'radius', 'mean']]
+            df_agg = df.groupby(['cluster','radius']).agg('mean')
+            norm = df_agg.xs('random', level = 'cluster')
+            for i,r in norm.iterrows():
+                norm_df.loc[norm_df['radius']==i,'mean'] = norm_df.loc[norm_df['radius']==i,'mean']/r["mean"]
+            norm_df = norm_df.sort_values(by = "cluster")
+            sns.lineplot(x = 'radius',y = 'mean',err_style='bars',hue = 'cluster', palette=colormap,
+                         data = norm_df, markers = True)
+            plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left', borderaxespad=0, title = "Attractor Subtypes")
+
+            plt.xticks(list(np.unique(norm_df['radius'])))
+            plt.xlabel("Radius of Basin")
+            plt.ylabel("Scaled Mean number of steps to leave basin (Fold-change from control mean)")
+            plt.title("Scaled Stability of Attractors by Subtype")
+            plt.tight_layout()
+            if show:
+                plt.show()
+            if save:
+                plt.savefig(f"{walks_dir}/scaled_stability_plot.pdf")
+
+    df = df.sort_values(by = "cluster")
+    sns.lineplot(x = 'radius',y = 'mean',err_style='bars',hue = 'cluster', palette=colormap,
+                      data = df, markers = True)
+    plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left', borderaxespad=0, title = "Attractor Subtypes")
+
+    plt.xticks(list(np.unique(df['radius'])))
+    plt.xlabel("Radius of Basin")
+    plt.ylabel("Mean number of steps to leave basin")
+    plt.title("Stability of Attractors by Subtype")
+    plt.tight_layout()
+    if show:
+        plt.show()
+    if save:
+        plt.savefig(f"{walks_dir}/stability_plot.pdf")
+
+
 
 

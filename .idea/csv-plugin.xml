@@ -3,13 +3,6 @@
   <component name="CsvFileAttributes">
     <option name="attributeMap">
       <map>
-        <entry key="/network-inference-DIRECT-NET/3000/attractors/attractors_filtered copy.csv">
-          <value>
-            <Attribute>
-              <option name="separator" value="," />
-            </Attribute>
-          </value>
-        </entry>
         <entry key="/network-inference-DIRECT-NET/3000/perturbations/83890063318570/results.csv">
           <value>
             <Attribute>
@@ -25,6 +18,13 @@
           </value>
         </entry>
         <entry key="/network-inference-DIRECT-NET/3000/perturbations/clustered_perturb_plots/perturbations.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="/network-inference-DIRECT-NET/3000/walks/478545047675871/len_walks_2.csv">
           <value>
             <Attribute>
               <option name="separator" value="," />
