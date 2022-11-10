@@ -523,20 +523,19 @@ if perturbations:
                        )
     perturbations_dir = f"{dir_prefix}/{brcd}/perturbations"
 
-    #when bb version > 0.1.2, uncomment this code
-    # bb.plot.plot_destabilization_scores(attractor_dict, perturbations_dir, show = False, save = True)
+    # the code below should replicate the if False section immediately below this one.
+    bb.tl.perturbations_summary(attractor_dict,perturbations_dir, show = False, save = True, plot_by_attractor = True,
+                                save_dir = "clustered_perturb_plots", save_full = True, significance = 'both', fname = "",
+                                ncols = 5, mean_threshold = -0.3)
+    ## gene dict and plots with threshold = -0.2
+    perturb_dict, full = bb.utils.get_perturbation_dict(attractor_dict, perturbations_dir, significance = 'both', save_full=False,
+                                               mean_threshold=-0.2)
+    perturb_gene_dict = bb.utils.reverse_perturb_dictionary(perturb_dict)
+    bb.plot.plot_perturb_gene_dictionary(perturb_gene_dict, full,perturbations_dir,show = False, save = True, ncols = 5, fname = "_0.2")
 
-    ## to make plots for each attractor:
-    ## bb.plot.plot_destabilization_scores(attractor_dict, perturbations_dir, show = False, save = True, clustered = False)
 
-
-
-#perturbation summary plots. In future, merge this chunk with perturbations chunk above
-
-## plot barplot of destabilization scores for each TF for all attractors
-## one plot per perturbation type and per cluster type
-
-def plot_destabilization_scores(attractor_dict, perturbations_dir, show = False, save = True, clustered = True):
+def plot_destabilization_scores(attractor_dict, perturbations_dir, show = False, save = True, clustered = True,
+                                act_kd_together = False):
     for k in attractor_dict.keys():
         print(k)
         if clustered:
@@ -551,50 +550,72 @@ def plot_destabilization_scores(attractor_dict, perturbations_dir, show = False,
                 for i,r in tmp.iterrows():
                     results = results.append(pd.Series([attr, r['gene'],r['perturb'],r['score']],
                                                        index = ['attr','gene','perturb','score']), ignore_index=True)
-            results_act = results.loc[results["perturb"] == 'activate']
-            plt.figure()
-            # my_order = results_act.sort_values(by = 'score')['gene'].values
-            my_order = results_act.groupby(by=["gene"]).median().sort_values(by = 'score').index.values
-            plt.axhline(y = 0, linestyle = "--", color = 'lightgrey')
+            if act_kd_together:
+                plt.figure()
+                my_order = sorted(np.unique(results['gene']))
+                plt.axhline(y = 0, linestyle = "--", color = 'lightgrey')
 
-            if len(attractor_dict[k]) == 1:
-                sns.barplot(data = results_act, x = 'gene', y = 'score', order = my_order)
+                if len(attractor_dict[k]) == 1:
+                    sns.barplot(data = results, x = 'gene', y = 'score', hue = 'perturb', order = my_order,
+                                palette = {"activate":sns.color_palette("tab10")[0], "knockdown":sns.color_palette("tab10")[1]})
+                else:
+                    sns.boxplot(data = results, x = 'gene', y = 'score',hue = 'perturb', order = my_order,
+                                palette = {"activate":sns.color_palette("tab10")[0], "knockdown":sns.color_palette("tab10")[1]})
+                plt.xticks(rotation = 90, fontsize = 8)
+                plt.xlabel("Gene")
+                plt.ylabel("Stabilization Score")
+                plt.title(f"Destabilization by TF Perturbation for {k} Attractors \n {len(attractor_dict[k])} Attractors")
+                plt.tight_layout()
+                if show:
+                    plt.show()
+                if save:
+                    plt.savefig(f"{perturbations_dir}/clustered_perturb_plots/{k}_scores.pdf")
+                    plt.close()
             else:
-                sns.boxplot(data = results_act, x = 'gene', y = 'score', order = my_order)
-            plt.xticks(rotation = 90, fontsize = 8)
-            plt.xlabel("Gene")
-            plt.ylabel("Stabilization Score")
-            plt.title(f"Destabilization by TF Activation for {k} Attractors \n {len(attractor_dict[k])} Attractors")
-            plt.legend([],[], frameon=False)
-            plt.tight_layout()
-            if show:
-                plt.show()
-            if save:
-                plt.savefig(f"{perturbations_dir}/clustered_perturb_plots/{k}_activation_scores.pdf")
-                plt.close()
                 results_act = results.loc[results["perturb"] == 'activate']
+                plt.figure()
+                # my_order = results_act.sort_values(by = 'score')['gene'].values
+                my_order = results_act.groupby(by=["gene"]).median().sort_values(by = 'score').index.values
+                plt.axhline(y = 0, linestyle = "--", color = 'lightgrey')
 
-            results_kd = results.loc[results["perturb"] == 'knockdown']
+                if len(attractor_dict[k]) == 1:
+                    sns.barplot(data = results_act, x = 'gene', y = 'score', order = my_order)
+                else:
+                    sns.boxplot(data = results_act, x = 'gene', y = 'score', order = my_order)
+                plt.xticks(rotation = 90, fontsize = 8)
+                plt.xlabel("Gene")
+                plt.ylabel("Stabilization Score")
+                plt.title(f"Destabilization by TF Activation for {k} Attractors \n {len(attractor_dict[k])} Attractors")
+                plt.legend([],[], frameon=False)
+                plt.tight_layout()
+                if show:
+                    plt.show()
+                if save:
+                    plt.savefig(f"{perturbations_dir}/clustered_perturb_plots/{k}_activation_scores.pdf")
+                    plt.close()
 
-            plt.figure()
-            # my_order = results_act.sort_values(by = 'score')['gene'].values
-            my_order = results_kd.groupby(by=["gene"]).median().sort_values(by = 'score').index.values
-            plt.axhline(y = 0, linestyle = "--", color = 'lightgrey')
-            if len(attractor_dict[k]) == 1:
-                sns.barplot(data = results_kd, x = 'gene', y = 'score', order = my_order)
-            else:
-                sns.boxplot(data = results_kd, x = 'gene', y = 'score', order = my_order)
-            plt.xticks(rotation = 90, fontsize = 8)
-            plt.xlabel("Gene")
-            plt.ylabel("Stabilization Score")
-            plt.title(f"Destabilization by TF Knockdown for {k} Attractors \n {len(attractor_dict[k])} Attractors")
-            plt.legend([],[], frameon=False)
-            plt.tight_layout()
-            if show:
-                plt.show()
-            if save:
-                plt.savefig(f"{perturbations_dir}/clustered_perturb_plots/{k}_knockdown_scores.pdf")
-                plt.close()
+                results_kd = results.loc[results["perturb"] == 'knockdown']
+
+                plt.figure()
+                # my_order = results_act.sort_values(by = 'score')['gene'].values
+                my_order = results_kd.groupby(by=["gene"]).median().sort_values(by = 'score').index.values
+                plt.axhline(y = 0, linestyle = "--", color = 'lightgrey')
+                if len(attractor_dict[k]) == 1:
+                    sns.barplot(data = results_kd, x = 'gene', y = 'score', order = my_order)
+                else:
+                    sns.boxplot(data = results_kd, x = 'gene', y = 'score', order = my_order)
+                plt.xticks(rotation = 90, fontsize = 8)
+                plt.xlabel("Gene")
+                plt.ylabel("Stabilization Score")
+                plt.title(f"Destabilization by TF Knockdown for {k} Attractors \n {len(attractor_dict[k])} Attractors")
+                plt.legend([],[], frameon=False)
+                plt.tight_layout()
+                if show:
+                    plt.show()
+                if save:
+                    plt.savefig(f"{perturbations_dir}/clustered_perturb_plots/{k}_knockdown_scores.pdf")
+                    plt.close()
+
         else:
             for attr in attractor_dict[k]:
                 results = pd.read_csv(f"{perturbations_dir}/{attr}/results.csv", header = None, index_col = None)
@@ -640,9 +661,7 @@ def plot_destabilization_scores(attractor_dict, perturbations_dir, show = False,
                 if save:
                     plt.savefig(f"{perturbations_dir}/{attr}/knockdown_scores.pdf")
                     plt.close()
-
 import math
-
 def get_ci_sig(results, group_cols = ['gene'], score_col = 'score', mean_threshold = -0.3):
     stats = results.groupby(group_cols)[score_col].agg(['mean', 'count', 'std'])
     ci95_hi = []
@@ -667,7 +686,6 @@ def get_ci_sig(results, group_cols = ['gene'], score_col = 'score', mean_thresho
     stats['ci_sig'] = sig
     stats['mean_sig'] = mean_sig
     return stats
-
 def get_perturbation_dict(attractor_dict, perturbations_dir, significance = 'both', save_full = False, save_dir = "clustered_perturb_plots",
                           mean_threshold = -0.3):
     perturb_dict = {}
@@ -743,10 +761,8 @@ def get_perturbation_dict(attractor_dict, perturbations_dir, significance = 'bot
         full_results.to_csv(f"{perturbations_dir}/{save_dir}/perturbations.csv")
 
     return perturb_dict, full_results
-
 def reverse_dictionary(dictionary):
     return  {v: k for k, v in dictionary.items()}
-
 def reverse_perturb_dictionary(dictionary):
     reverse_dict = {}
     for k,v in dictionary.items():
@@ -757,23 +773,21 @@ def reverse_perturb_dictionary(dictionary):
                     reverse_dict[gene] = {"Regulators":[], "Destabilizers":[]}
                 reverse_dict[gene][reg_type].append(k)
     return  reverse_dict
-
 import json
-
 def write_dict_of_dicts(dictionary, file):
     with open(file, 'w') as convert_file:
         for k in sorted(dictionary.keys()):
             convert_file.write(f"{k}:")
             convert_file.write(json.dumps(dictionary[k]))
             convert_file.write("\n")
-
-def plot_perturb_gene_dictionary(p_dict, full,perturbations_dir,show = False, save = True, ncols = 5, fname = ""):
+def plot_perturb_gene_dictionary(p_dict, full,perturbations_dir,show = False, save = True, ncols = 5, fname = "",
+                                 palette = {"activate":sns.color_palette("tab10")[0], "knockdown":sns.color_palette("tab10")[1]}):
     ncols = ncols
     nrows = int(np.ceil(len(p_dict.keys())/ncols))
     # fig = plt.Figure(figsize = (8,8))
     fig, axs = plt.subplots(ncols = ncols, nrows= nrows, figsize=(20, 30))
 
-    for x, k in enumerate(p_dict.keys()):
+    for x, k in enumerate(sorted(p_dict.keys())):
         print(k)
         #for each gene, for associated clusters that are destabilized, make a df of scores to be used for plotting
         plot_df = pd.DataFrame(columns = ["cluster","attr","gene","perturb","score"])
@@ -791,7 +805,7 @@ def plot_perturb_gene_dictionary(p_dict, full,perturbations_dir,show = False, sa
         col = int(np.floor(x/nrows))
         row = int(x%nrows)
         sns.barplot(data= plot_df, x = "cluster",y = "score", hue = "perturb", order = my_order,
-                    ax = axs[row,col])
+                    ax = axs[row,col], palette = palette, dodge = False)
         axs[row,col].set_title(f"{k} Perturbations")
         axs[row,col].set_xticklabels(labels = my_order,rotation = 45, fontsize = 8, ha = 'right')
     plt.tight_layout()
@@ -799,12 +813,7 @@ def plot_perturb_gene_dictionary(p_dict, full,perturbations_dir,show = False, sa
         plt.savefig(f"{perturbations_dir}/destabilizing_tfs{fname}.pdf")
     if show:
         plt.show()
-
-
-
-
-
-if True:
+if False:
     ATTRACTOR_DIR = f"{dir_prefix}/{brcd}/attractors/attractors_threshold_0.5"
 
     attractor_dict = {}
@@ -818,28 +827,25 @@ if True:
     perturbations_dir = f"{dir_prefix}/{brcd}/perturbations"
 
 
-    plot_destabilization_scores(attractor_dict, perturbations_dir, show = False, save = True, clustered = True)
+    plot_destabilization_scores(attractor_dict, perturbations_dir, show = False, save = True, clustered = True,
+                                act_kd_together = True)
 
-    perturb_dict, full = get_perturbation_dict(attractor_dict, perturbations_dir, significance = 'both', save_full=False,
-                                               )
+    perturb_dict, full = get_perturbation_dict(attractor_dict, perturbations_dir, significance = 'both', save_full=False)
     perturb_gene_dict = reverse_perturb_dictionary(perturb_dict)
     write_dict_of_dicts(perturb_gene_dict, file = f"{perturbations_dir}/clustered_perturb_plots/perturbation_TF_dictionary.txt")
+    plot_perturb_gene_dictionary(perturb_gene_dict, full,perturbations_dir,show = False, save = True, ncols = 5)
 
     full_sig = get_ci_sig(full, group_cols=['cluster','gene','perturb'])
     full_sig.to_csv(f"{perturbations_dir}/clustered_perturb_plots/perturbation_stats.csv")
 
-    plot_perturb_gene_dictionary(perturb_gene_dict, full,perturbations_dir,show = False, save = True, ncols = 5)
 
 
-    perturb_dict, full = get_perturbation_dict(attractor_dict, perturbations_dir, significance = 'both', save_full=False,
+    ## gene dict and plots with threshold = -0.2
+    perturb_dict_2, full = get_perturbation_dict(attractor_dict, perturbations_dir, significance = 'both', save_full=False,
                                                mean_threshold=-0.2)
-    perturb_gene_dict = reverse_perturb_dictionary(perturb_dict)
+    perturb_gene_dict_2 = reverse_perturb_dictionary(perturb_dict_2)
+    plot_perturb_gene_dictionary(perturb_gene_dict_2, full,perturbations_dir,show = False, save = True, ncols = 5, fname = "_0.2")
 
-    plot_perturb_gene_dictionary(perturb_gene_dict, full,perturbations_dir,show = False, save = True, ncols = 5, fname = "_0.2")
-
-    ## bb version > 0.1.2, the below line replaces above code and functions
-    # bb.tl.perturbations_summary(attractor_dict,perturbations_dir, show = False, save = True, plot_by_attractor = False,
-    #                             save_dir = "clustered_perturb_plots", save_full = True, significance = 'both')
 
 if stability:
     ATTRACTOR_DIR = f"{dir_prefix}/{brcd}/attractors/attractors_threshold_0.5"
