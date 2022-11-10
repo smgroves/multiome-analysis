@@ -10,6 +10,83 @@ import seaborn as sns
 import os.path as op
 import scipy.stats as ss
 import glob
+from sklearn.metrics import *
+
+def plot_sklearn_metrics(VAL_DIR, show = False, save = True):
+    summary_stats = pd.read_csv(f"{VAL_DIR}/summary_stats.csv", header = 0, index_col=0)
+    if save:
+        try:
+            os.mkdir(f"{VAL_DIR}/summary_plots")
+        except FileExistsError:
+            pass
+    metric_dict = {'accuracy':{"Best":'1', "Worst":'0'},
+                   'balanced_accuracy_score':{"Best":'1', "Worst":'0'},
+                   'f1':{"Best":'1', "Worst":'0'},
+                   'roc_auc_score':{"Best":'1', "Worst":'0'},
+                   "precision":{"Best":'1', "Worst":'0'},
+                   "recall":{"Best":'1', "Worst":'0'},
+                   "explained_variance":{"Best":'1', "Worst":'0'},
+                   'max_error':{"Best":'0', "Worst":"High"},
+                   'r2':{"Best":'1', "Worst":'0'},
+                   'log-loss':{"Best":"Low", "Worst":"High"}}
+    for c in sorted(list(set(summary_stats.columns).difference({'gene'}))):
+        print(c)
+        plt.figure(figsize = (20,8))
+        my_order = summary_stats.sort_values(c)['gene'].values
+        sns.barplot(data = summary_stats, x = 'gene', y = c, order = my_order)
+        plt.xticks(rotation = 90, fontsize = 8)
+        plt.ylabel(f"{c.capitalize()} (Best: {metric_dict[c]['Best']}, Worst: {metric_dict[c]['Worst']})")
+        plt.title(c.capitalize())
+        if show:
+            plt.show()
+        if save:
+            plt.savefig(f"{VAL_DIR}/summary_plots/{c}.pdf")
+            plt.close()
+
+def get_sklearn_metrics(VAL_DIR, plot_cm = True, show = False, save = True, save_stats = True):
+    files = glob.glob(f"{VAL_DIR}/accuracy_plots/*.csv")
+    summary_stats = pd.DataFrame(columns = ['gene','accuracy','balanced_accuracy_score','f1','roc_auc_score', "precision",
+                                            "recall", "explained_variance", 'max_error', 'r2','log-loss'])
+    for f in files:
+        val_df = pd.read_csv(f, header = 0, index_col=0)
+        val_df['actual_binary'] = [{True:1, False:0}[x] for x in val_df['actual']> 0.5]
+        val_df['predicted_binary'] = [{True:1, False:0}[x] for x in val_df['predicted']> 0.5]
+        gene = f.split("/")[-1].split("_")[0]
+
+        #classification stats
+        acc = accuracy_score(val_df['actual_binary'], val_df['predicted_binary'])
+        bal_acc = balanced_accuracy_score(val_df['actual_binary'], val_df['predicted_binary'])
+
+        # roc stats
+        f1 = f1_score(val_df['actual_binary'], val_df['predicted_binary'])
+        roc_auc = roc_auc_score(val_df['actual_binary'], val_df['predicted']) #use prediction probability instead of binary class
+        prec = precision_score(val_df['actual_binary'], val_df['predicted_binary'])
+        rec = recall_score(val_df['actual_binary'], val_df['predicted_binary'])
+
+        #regression stats
+        expl_var = explained_variance_score(val_df['actual'], val_df['predicted'])
+        max_err = max_error(val_df['actual'], val_df['predicted'])
+        r2 = r2_score(val_df['actual'], val_df['predicted'])
+        ll = log_loss(val_df['actual_binary'], val_df['predicted'])
+
+        summary_stats = summary_stats.append(pd.Series([gene, acc, bal_acc,f1,roc_auc,prec,rec,expl_var,max_err,r2,ll],
+                                                       index=summary_stats.columns),ignore_index=True)
+        if plot_cm:
+            plt.figure()
+            cm = confusion_matrix(val_df['actual_binary'], val_df['predicted_binary'])
+            disp = ConfusionMatrixDisplay(confusion_matrix=cm)
+            disp.plot(cmap = "Blues")
+            plt.title(gene)
+            if show:
+                plt.show()
+            if save:
+                plt.savefig(f"{VAL_DIR}/accuracy_plots/{gene}_confusion_matrix.pdf")
+                plt.close()
+
+    summary_stats = summary_stats.sort_values('gene').reset_index().drop("index",axis = 1)
+    if save_stats:
+        summary_stats.to_csv(f"{VAL_DIR}/summary_stats.csv")
+    return summary_stats
 
 def log_job(dir_prefix, brcd, random_state, network_path, data_path, data_t1_path, cellID_table, node_normalization,
             node_threshold, split_train_test, write_binarized_data,fit_rules,validation,validation_averages,
@@ -56,7 +133,9 @@ def log_job(dir_prefix, brcd, random_state, network_path, data_path, data_t1_pat
             T.to_csv(f, header=False)
 
 
-def print_graph_info(graph, nodes, fname, brcd = "", dir_prefix = "", plot = True):
+def print_graph_info(graph, vertex_dict, nodes, fname, brcd = "", dir_prefix = "", plot = True,
+                     fillcolor = 'lightcyan', gene2color = None, layout = None, add_edge_weights = True,
+                     ew_df = None):
     print("==================================")
     print("Graph properties")
     print("==================================")
@@ -69,8 +148,8 @@ def print_graph_info(graph, nodes, fname, brcd = "", dir_prefix = "", plot = Tru
     for i in range(len(nodes)):
         if graph.vp.source[i] == 1: sources.append(graph.vp.name[i])
         if graph.vp.sink[i] == 1: sinks.append(graph.vp.name[i])
-    print("Sources: ", sources)
-    print("Sinks: ", sinks)
+    print("Sources: ", len(sources), sources)
+    print("Sinks: ",len(sinks), sinks)
 
     #treat network as if it is undirected to ensure largest component includes all nodes and edges
     u = gt.extract_largest_component(graph, directed=False)
@@ -82,8 +161,46 @@ def print_graph_info(graph, nodes, fname, brcd = "", dir_prefix = "", plot = Tru
     print("==================================")
 
     if plot:
-        pos = gt.sfdp_layout(graph, mu = 1,  max_iter=1000)
-        gt.graph_draw(graph, pos=pos, output=f"{dir_prefix}/{brcd}/{fname}_simple_network.pdf", output_size=(1000, 1000))
+        vertex2gene = graph.vertex_properties['name']
+        vertex_colors = fillcolor
+        if gene2color is not None:
+            vertex_colors = graph.new_vertex_property("string")
+            for gene in gene2color.keys():
+                vertex_colors[vertex_dict[gene]] = gene2color[gene]
+        edge_weights = graph.new_edge_property("float")
+        edge_color = graph.new_edge_property("vector<float>")
+
+        for edge in graph.edges():
+            edge_weights[edge] = 0.2
+            edge_color[edge] = [0,0,0,1]
+
+        if add_edge_weights:
+            min_ew = np.min(ew_df['score'])
+            max_ew = np.max(ew_df['score'])
+
+            for edge in graph.edges():
+                vs, vt = edge.source(), edge.target()
+                source = vertex2gene[vs]
+                target = vertex2gene[vt]
+                w = float(2*(np.mean(ew_df.loc[(ew_df['source']==source)&(ew_df['target']==target)]['score'].values)-min_ew)/max_ew+0.2)
+                if np.isnan(w):
+                    edge_weights[edge] = .2
+                    edge_color[edge] = [0,0,0,.1]
+                else:
+                    edge_weights[edge] = w
+                    edge_color[edge] = [0,0,0,(w-0.2)/2]
+
+        graph.edge_properties["edge_weights"] = edge_weights
+        graph.edge_properties["edge_color"] = edge_color
+        vprops = {"text": vertex2gene, "shape": "circle", "size": 20, "pen_width": 1, 'fill_color': vertex_colors}
+        eprops = {"color": edge_color}
+
+        if layout == 'circle':
+            state = gt.minimize_nested_blockmodel_dl(graph, B_min = 10)
+            state.draw(vprops=vprops,output=f"{dir_prefix}/{brcd}/{fname}_simple_circle_network.pdf", output_size=(1000, 1000))  # mplfig=ax[0,1])
+        else:
+            pos = gt.sfdp_layout(graph, mu = 1, eweight=edge_weights, max_iter=1000)
+            gt.graph_draw(graph, pos=pos, vprops = vprops, eprops = eprops, edge_pen_width = edge_weights, output=f"{dir_prefix}/{brcd}/{fname}_simple_network.pdf", output_size=(1000, 1000))
 
 
 def draw_grn(G, gene2vertex, rules, regulators_dict, fname, gene2group=None, gene2color=None, type = "", B_min = 5,

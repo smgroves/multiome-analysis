@@ -147,7 +147,7 @@ graph, vertex_dict = bb.load.load_network(f'{dir_prefix}/{network_path}', remove
 v_names, nodes = bb.utils.get_nodes(vertex_dict, graph)
 
 if print_graph_information:
-    print_graph_info(graph, nodes,  fname, brcd = brcd, dir_prefix = dir_prefix,plot = False)
+    print_graph_info(graph, vertex_dict, nodes,  fname, brcd = brcd, dir_prefix = dir_prefix,plot = False)
 
 # =============================================================================
 # Load the data and clusters

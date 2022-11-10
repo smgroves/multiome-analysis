@@ -59,6 +59,20 @@
             </Attribute>
           </value>
         </entry>
+        <entry key="/network-inference-DIRECT-NET/55476/validation_set/accuracy_plots/AHR_validation.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="/network-inference-DIRECT-NET/55476/validation_set/summary_stats.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
         <entry key="/network-inference-DIRECT-NET/DIRECT-NET-FILES/Direct_net.csv">
           <value>
             <Attribute>
