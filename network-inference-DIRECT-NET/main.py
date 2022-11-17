@@ -302,6 +302,13 @@ if run_validation:
     # Saves auc values for each gene (node) in the passed directory as 'aucs.csv'
     bb.tl.save_auc_by_gene(area_all, nodes, VAL_DIR)
 
+    ## bb version > 0.1.7
+    # summary_stats = bb.tl.get_sklearn_metrics(VAL_DIR)
+    # bb.plot.plot_sklearn_metrics(VAL_DIR)
+    ## bb.plot.plot_sklearn_summ_stats(summary_stats.drop("max_error", axis = 1), VAL_DIR, fname = "2")
+
+
+
 else:
     print("Skipping validation step...")
 
@@ -469,7 +476,7 @@ if filter_attractors:
     att = pd.read_table(f"{ATTRACTOR_DIR}/attractors_filtered.txt", sep=',', header=0, index_col=0)
     att = att.transpose()
     plt.figure(figsize=(20, 12))
-    clust = att.columns.unique()
+    clust = sorted(att.columns.unique())
     lut = dict(zip(clust, sns.color_palette("tab20")))
     column_series = pd.Series(att.columns)
     row_colors = column_series.map(lut)

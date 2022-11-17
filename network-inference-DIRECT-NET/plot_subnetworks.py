@@ -84,6 +84,6 @@ def plot_subgraph(keep_nodes, network_file, nodes, edge_weights, keep_parents = 
     if save:
         plt.savefig(f"{save_dir}/subnetwork{name_plot}_{arrows}.pdf")
 
-plot_subgraph(['ASCL1','MEIS2'], network_file, nodes, edge_weights, keep_parents = True, keep_children = True,
-              save_dir = "", arrows = "straight", show = True, save = False, off_node_arrows_gray=True,
+plot_subgraph(['JUND'], network_file, nodes, edge_weights, keep_parents = True, keep_children = True,
+              save_dir = f"{dir_prefix}/{brcd}", arrows = "straight", show = False, save = True, off_node_arrows_gray=True,
               weight = 3)

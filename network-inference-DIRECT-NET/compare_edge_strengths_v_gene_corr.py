@@ -87,3 +87,37 @@ def plot_ew_gene_corr(edge_weights, gene_correlations, nodes, dir_prefix = "", b
             plt.savefig(f"{dir_prefix}/{brcd}/rules/strength_plots/{node}_ew_gc.png")
             plt.close()
 
+df = pd.DataFrame(columns = ['parent','child','ew','gc'])
+for node in nodes:
+    if node in gene_correlations.index:
+        print(node)
+        ew = edge_weights.loc[node].dropna()
+        gc = gene_correlations.loc[node]
+
+        overlap = list(set(ew.index).intersection(set(gc.index)))
+
+        ew = ew.loc[overlap].sort_index()
+        gc = gc.loc[overlap].sort_index()
+        for i in ew.index:
+            df = df.append(pd.Series([i,node,ew.loc[i],gc.loc[i]], index = df.columns), ignore_index=True)
+fig = plt.figure()
+sns.lmplot(data = df, x = 'ew', y= 'gc', hue = 'child', scatter = False, ci = None,legend = False)
+           #truncate = False)
+plt.ylabel(f"Gene Correlation")
+plt.xlabel(f"Edge Weights")
+plt.axhline(y = 0, linestyle = "--", color = 'grey')
+plt.axvline(x = 0, linestyle = "--", color = 'grey')
+plt.tight_layout()
+plt.savefig(f"{dir_prefix}/{brcd}/rules/strength_plots/all_ew_gc.png")
+plt.close()
+
+fig = plt.figure()
+sns.lmplot(data = df, x = 'ew', y= 'gc', scatter = True,legend = False)
+#truncate = False)
+plt.ylabel(f"Gene Correlation")
+plt.xlabel(f"Edge Weights")
+plt.axhline(y = 0, linestyle = "--", color = 'grey')
+plt.axvline(x = 0, linestyle = "--", color = 'grey')
+plt.tight_layout()
+plt.savefig(f"{dir_prefix}/{brcd}/rules/strength_plots/all_ew_gc2.png")
+plt.close()

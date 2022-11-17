@@ -12,6 +12,29 @@ import scipy.stats as ss
 import glob
 from sklearn.metrics import *
 
+def plot_sklearn_summ_stats(summary_stats, VAL_DIR, fname = ""):
+    df = pd.melt(summary_stats, id_vars='gene')
+    df = df.astype({'variable':'string'})
+    q1 = df.groupby(df.variable).quantile(0.25)['value']
+    q3 = df.groupby(df.variable).quantile(0.75)['value']
+    outlier_top_lim = q3 + 1.5 * (q3 - q1)
+    outlier_bottom_lim = q1 - 1.5 * (q3 - q1)
+    plt.figure()
+    sns.boxplot(x="variable", y="value", data=pd.melt(summary_stats.drop('gene', axis = 1)))
+    col_dict = {i:j for i,j in zip(summary_stats.drop('gene', axis = 1).columns,range(len(summary_stats.columns)-1))}
+    for row in df.itertuples():
+        variable = row.variable
+        val = row.value
+        if (val > outlier_top_lim[variable]) or (val < outlier_bottom_lim[variable]):
+            print(val, row.gene)
+            plt.annotate(s = row.gene, xy = (col_dict[variable]+0.1,val), fontsize = 8)
+    plt.xticks(rotation = 45, ha = 'right')
+    plt.xlabel("Model Metric")
+    plt.ylabel("Score")
+    plt.title("Metrics for BooleaBayes Rule Fitting across All TFs")
+    plt.tight_layout()
+    plt.savefig(f"{VAL_DIR}/summary_stats_boxplot{fname}.pdf")
+
 def plot_sklearn_metrics(VAL_DIR, show = False, save = True):
     summary_stats = pd.read_csv(f"{VAL_DIR}/summary_stats.csv", header = 0, index_col=0)
     if save:
@@ -79,6 +102,7 @@ def get_sklearn_metrics(VAL_DIR, plot_cm = True, show = False, save = True, save
             plt.title(gene)
             if show:
                 plt.show()
+                plt.close()
             if save:
                 plt.savefig(f"{VAL_DIR}/accuracy_plots/{gene}_confusion_matrix.pdf")
                 plt.close()
