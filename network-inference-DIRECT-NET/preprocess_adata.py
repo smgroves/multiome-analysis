@@ -34,8 +34,8 @@ print(len(tfs))
 overlap = (list(set(tfs).intersection(set([i.upper() for i in adata.var_names]))))
 print(list(set(tfs).difference(set([i.upper() for i in adata.var_names]))))
 
-# adata_net = adata[:,[i.capitalize() for i in overlap]]
-# print(adata_net)
-# print(adata_net.layers["imputed"][0:10,0:10])
-# adata_imputed = pd.DataFrame(adata_net.layers["imputed"], index=adata_net.obs_names, columns=adata_net.var_names)
-# adata_imputed.to_csv("./data/adata_04_nodubs_imputed_M2.csv")
+adata_net = adata[:,[i.capitalize() for i in overlap]]
+print(adata_net)
+print(adata_net.layers["imputed"][0:10,0:10])
+adata_imputed = pd.DataFrame(adata_net.layers["imputed"], index=adata_net.obs_names, columns=adata_net.var_names)
+adata_imputed.to_csv("./data/adata_04_nodubs_imputed_M2.csv")
