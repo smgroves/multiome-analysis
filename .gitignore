@@ -59,3 +59,6 @@ data/M1/magic_imputed_no_ciliated.csv
 notebooks/ParetoTI/integrated-corrected-data.csv
 network-inference-DIRECT-NET/data/Cytotrace_DGE_1_SCT.csv
 network-inference-DIRECT-NET/data/Cytotrace_DGE_2_SCT.csv
+*.h5Seurat
+figures-slides/Labmeet 3.pptx
+archetype-plasticity-notebooks/ParetoTI/integrated-corrected-data.csv

@@ -31,6 +31,13 @@
             </Attribute>
           </value>
         </entry>
+        <entry key="/network-inference-DIRECT-NET/3000/walks/random/466425011629914/len_walks_2.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
         <entry key="/network-inference-DIRECT-NET/35468/data_split/test_t0_M2.csv">
           <value>
             <Attribute>
