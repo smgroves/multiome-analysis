@@ -1,10 +1,9 @@
 ---
-title: "Single Cell SCLC M2 Archetypes"
+title: "Single Cell SCLC Archetypes for Full Dataset"
 output:
   html_document:
     df_print: paged
 ---
-The purpose of the notebook is to apply PCHA to the single cell cell line data. 
 
 ```{r include = FALSE}
 library(reticulate)
@@ -36,7 +35,7 @@ Reading in preprocessed (MAGIC imputed) data from from `2-PDX_cell_lines_scPCHA.
 ```{r message = FALSE}
 # file = "../data/M2/X_magic_for_R.h5ad"
 # Convert(file, dest = "h5seurat", overwrite = TRUE)
-data <- LoadH5Seurat("../data/M2/X_magic_for_R.h5seurat")
+data <- readRDS("/Users/smgroves/Box/multiome_data/TKO_final.rds") #loaded from Debbie's RDS file in Box
 
 ElbowPlot(data) #this plot indicates  the top 8 are important
 DimPlot(data, reduction = "pca", label = TRUE)
@@ -48,38 +47,28 @@ cumu <- cumsum(pct)
 # Determine which PC exhibits cumulative percent greater than 90% and % variation associated with the PC is less than 5
 co1 <- which(cumu > 90 & pct < 5)[1]
 
-print(co1) #31
+print(co1) #43
 # Determine the difference between variation of PC and subsequent PC
 co2 <- sort(which((pct[1:length(pct) - 1] - pct[2:length(pct)]) > 0.1), decreasing = T)[1] + 1
 
 # last point where change of % of variation is more than 0.1%.
-print(co2) #15
+print(co2) #13
 
-data <- FindNeighbors(data, dims = 1:10)
-data <- FindClusters(data, resolution = 0.5)
-data <- RunUMAP(data, dims = 1:10)
+
+DimPlot(data, reduction = "wnn.umap")
+
 DimPlot(data, reduction = "umap")
-
 ```
 
+# Reductions from Debbie
+```{r reductions}
+data@reductions$wnn.umap
+data@reductions$harmony_1
+data@reductions$harmony_2
 
-# Plot important SCLC Genes and add tumor labels
-
-```{r}
-data[["louvain"]] <- Idents(object = data) #store louvain Idents
-
-DimPlot(data, label = TRUE) 
-VlnPlot(data, features = c("Ascl1", "Yap1", "Pou2f3", 'Calca','Neurod1', 'Myc'), combine = FALSE)
 ```
 
 # Plotting the data
-
-```{r include=FALSE}
-# 
-# library(dplyr)
-# data.markers <- FindAllMarkers(data, only.pos = TRUE, min.pct = 0.25, logfc.threshold = 0.25)
-# data.markers.top <- data.markers %>% group_by(cluster) %>% top_n(n = 30, wt = avg_log2FC)
-```
 
 ```{r pca-umap-plots}
 
@@ -89,60 +78,41 @@ VlnPlot(data, features = c("Ascl1", "Yap1", "Pou2f3", 'Calca','Neurod1', 'Myc'),
 library(plotly)
 
 # Extract tSNE information from Seurat Object
-pca_1 <- data[["pca"]]@cell.embeddings[,1]
-pca_2 <- data[["pca"]]@cell.embeddings[,2]
-pca_3 <- data[["pca"]]@cell.embeddings[,3]
+pca_1 <- data[["harmony_2"]]@cell.embeddings[,1]
+pca_2 <- data[["harmony_2"]]@cell.embeddings[,2]
+pca_3 <- data[["harmony_2"]]@cell.embeddings[,3]
 
 # Visualize what headings are called so that you can extract them to form a dataframe
-# Embeddings(object = data, reduction = "pca")
-plot.data <- FetchData(object = data, vars = c("PC_1", "PC_2", "PC_3", "louvain"))
+# Embeddings(object = data, reduction = "harmony_2")
+plot.data <- FetchData(object = data, vars = c("harmony2_1", "harmony2_2", "harmony2_3", "identity"))
 plot.data$label <- paste(rownames(plot.data))
 plot_ly(data = plot.data, 
-        x = ~PC_1, y = ~PC_2, z = ~PC_3, 
-        color = ~louvain, 
-        colors = c("lightseagreen",
-                   "green",
-                   "red",
-                   "orange1",
-                   "royalblue1",
-                   "lightcyan3",
-                   "peachpuff3",
-                   "darkorchid1",
-                   "turquoise",
-                   "darkmagenta"),
+        x = ~harmony2_1, y = ~harmony2_2, z = ~harmony2_3, 
+        color = ~identity, 
+        colors = hsv(seq(0,1 - 1/14,length.out = 14), 0.5 , 1),
+        # colors = c("lightseagreen",
+        #            "green",
+        #            "red",
+        #            "orange1",
+        #            "royalblue1",
+        #            "lightcyan3",
+        #            "peachpuff3",
+        #            "darkorchid1",
+        #            "turquoise",
+        #            "darkmagenta"),
         type = "scatter3d", 
         mode = "markers", 
         marker = list(size = 5, width=2), # controls size of points
         text=~label, #This is that extra column we made earlier for which we will use for cell ID
         hoverinfo="text") #When you visualize your plotly object, hovering your mouse pointer over a point shows cell names
 
-VizDimLoadings(data, dims = 1:3, reduction = "pca")
+VizDimLoadings(data, dims = 1:3, reduction = "harmony_2")
 
-```
-
-## Save files
-```{r include = FALSE}
-
-save(data, file="./ParetoTI/X_magic_for_ParetoTI.Robj")
-
-write.csv(data[["RNA"]]@scale.data, './ParetoTI/integrated-corrected-data.csv')
-write.csv(data[['pca']]@cell.embeddings, './ParetoTI/pca_embedding.csv')
-write.csv(data[['pca']]@feature.loadings, './ParetoTI/pca_feature_loadings.csv')
-
-data <- ProjectDim(data, reduction = 'pca')
-write.csv(data[['pca']]@feature.loadings.projected, './ParetoTI/pca_feature_loadings_projected.csv')
-
-# devtools::install_github(repo = 'hhoeflin/hdf5r')
-# devtools::install_github(repo = 'mojaveazure/loomR', ref = 'develop')
-# devtools::install_github(repo = 'satijalab/seurat', ref = 'loom')
-# library(loomR)
-# 
-# data.loom <- as.loom(data, filename = "X_magic_for_ParetoTI.loom", verbose = FALSE)
 ```
 
 # Archetypal Analysis
 
-We will now apply the archetype analysis to the single cell data. Since we've reduced the PCs to 10, we have gotten rid of a lot of the noise and still captured a large proportion of the variance. 
+We will now apply the archetype analysis to the scRNAseq data. We will use harmony_2, which was run on the SCT assay (transformed RNA counts), instead of PCA. We'll call the data `x_harmony`.
 
 ## Choosing number of archetypes
 
@@ -159,20 +129,19 @@ library(ggfortify)
 library(cluster)
 # install.packages("data.table")
 ##################################
-load(file="./ParetoTI/X_magic_for_ParetoTI.Robj")
 
-x <- data[["RNA"]]@scale.data
+x_harmony <- Embeddings(object = data, reduction = "harmony_2")
+x_harmony <- t(x_harmony)
 
-x_pca <- read.csv('./ParetoTI/pca_embedding.csv',header = TRUE,row.names = 1)
-x_pca <- t(x_pca)
+write.csv(x_harmony, file="./ParetoTI/x_harmony2.csv")
 
-x_pca <- x_pca[1:15,] #keep only top 22 PCs [from above, change < 0.1% in EV]
-loadings<- read.csv('./ParetoTI/pca_feature_loadings.csv', header = TRUE, row.names = 1)
-loadings <- as.matrix(loadings)
+
+#x_harmony <- x_harmony[1:15,] #use all harmony components
+
 ```
 
 ``` {r}
-arc_ks = k_fit_pch(x_pca, ks = 2:8, check_installed = T,
+arc_ks = k_fit_pch(x_harmony, ks = 2:8, check_installed = T,
                    bootstrap = T, bootstrap_N = 200, maxiter = 1000,
                    bootstrap_type = "m", seed = 2543, 
                    volume_ratio = "t_ratio", # set to "none" if too slow
@@ -188,33 +157,15 @@ plot_arc_var(arc_ks, type = "total_var", point_size = 2, line_size = 1.5) +
 plot_arc_var(arc_ks, type = "t_ratio", point_size = 2, line_size = 1.5) + theme_bw()
 
 ```
-<!-- Only keeping top 8 components, which is the elbow in the EV plot -->
-<!-- ``` {r} -->
-<!-- arc_ks_8 = k_fit_pch(x_pca[1:15,], ks = 2:8, check_installed = T, -->
-<!--                    bootstrap = T, bootstrap_N = 200, maxiter = 1000, -->
-<!--                    bootstrap_type = "m", seed = 2543,  -->
-<!--                    volume_ratio = "t_ratio", # set to "none" if too slow -->
-<!--                    delta=0, conv_crit = 1e-04, order_type = "align", -->
-<!--                    sample_prop = 0.75) -->
-
-<!-- # Show variance explained by a polytope with each k (cumulative) -->
-<!-- plot_arc_var(arc_ks_8, type = "varexpl", point_size = 2, line_size = 1.5) + theme_bw() -->
-<!-- plot_arc_var(arc_ks_8, type = "res_varexpl", point_size = 2, line_size = 1.5) + theme_bw() -->
-<!-- plot_arc_var(arc_ks_8, type = "total_var", point_size = 2, line_size = 1.5) + -->
-<!--   theme_bw() + -->
-<!--   ylab("Mean variance in position of vertices") -->
-<!-- plot_arc_var(arc_ks_8, type = "t_ratio", point_size = 2, line_size = 1.5) + theme_bw() -->
-
-<!-- ``` -->
 
 ## T-ratio tests
 
 ```{r}
 i = 6
-arc <- fit_pch(x_pca, noc = i, delta = 0, conv_crit = 1e-04, maxiter = 500)
+arc <- fit_pch(x_harmony, noc = i, delta = 0, conv_crit = 1e-04, maxiter = 500)
 
 start = Sys.time()
-pch_rand = randomise_fit_pch(x_pca, arc_data = arc,
+pch_rand = randomise_fit_pch(x_harmony, arc_data = arc,
                              n_rand = 1000,
                              replace = FALSE, bootstrap_N = NA,
                              volume_ratio = "t_ratio",
@@ -232,21 +183,11 @@ dev.off()
   # This analysis took:
 print(Sys.time() - start)
 
-# $obs_dist
-#    k  var_name   var_obs p_value
-# 1: 4   varexpl 0.8362490   0.547
-# 2: 4   t_ratio 0.1071702   0.935
-# 3: 4 total_var        NA     NaN
-# $obs_dist
-#    k  var_name   var_obs p_value
-# 1: 5   varexpl 0.8857267   0.001
-# 2: 5   t_ratio 0.1096109   0.001
-# 3: 5 total_var        NA     NaN
-# $obs_dist
-#    k  var_name    var_obs p_value
-# 1: 6   varexpl 0.89913251   0.001
-# 2: 6   t_ratio 0.01887308   0.001
-# 3: 6 total_var         NA     NaN
+
+#   k  var_name      var_obs p_value
+# 1: 6   varexpl 0.4995413491   0.001
+# 2: 6   t_ratio 0.0003385489   0.105
+# 3: 6 total_var           NA     NaN
 ```
 
 # Fitting archetypes using PCHA
@@ -254,12 +195,17 @@ print(Sys.time() - start)
 We'll start by fitting 5 archetypes and finding the enriched genes and gene sets for each.
 
 ``` {r}
-arc <- fit_pch(x_pca, noc = 5, delta = 0, conv_crit = 1e-04, maxiter = 500)
+arc <- fit_pch(x_harmony, noc = 6, delta = 0, conv_crit = 1e-04, maxiter = 500)
 
+cols <- hsv(seq(0,1 - 1/16,length.out = 16), 0.5 , 1)
+
+plot_arc(arc_data = arc, data = x_harmony,
+                   which_dimensions = 1:2,colors = cols,
+                  data_lab = as.character(Idents(data))) + theme_bw()
 ##################################
 
 # Fit 5 archetypes with bootstrapping for robustness 
-arc_rob = fit_pch_bootstrap(x_pca, n = 200, sample_prop = .8, seed = 2543, delta = 1, noc = 5)
+arc_rob = fit_pch_bootstrap(x_harmony, n = 200, sample_prop = .8, seed = 2543, delta = 1, noc = 5)
 arc_ave <- average_pch_fits(arc_rob)
 save(arc, file="./ParetoTI/arc.Robj")
 save(arc_rob, file="./ParetoTI/arc_rob.Robj")
@@ -274,7 +220,7 @@ reconstruct_from_pca <- function(x, loadings, arc_XC, nComp = 15){
     Xhat = arc_XC[,1:nComp] %*% t(loadings[,1:nComp])
     Xhat = scale(Xhat, center = -mu, scale = FALSE)
     return(Xhat)}
-x_recon <- reconstruct_from_pca(x, loadings, x_pca)
+x_recon <- reconstruct_from_pca(x, loadings, x_harmony)
 arc_genespace <- reconstruct_from_pca(x = x, loadings = loadings, arc_XC = t(arc_ave$XC))
 write.csv(t(arc_genespace), './ParetoTI/arc_gene-space.csv')
 
@@ -292,18 +238,18 @@ write.csv(arc$S, './ParetoTI/S.csv')
 
 cols <- c(brewer.pal(12, "Paired"),'grey')
 
-plot_arc(arc_data = arc, data = x_pca,
+plot_arc(arc_data = arc, data = x_harmony,
                    which_dimensions = 1:2,colors = cols,
                   data_lab = as.character(Idents(data))) + theme_bw()
-p_pca = plot_arc(arc_data = arc, data = x_pca, 
+p_pca = plot_arc(arc_data = arc, data = x_harmony, 
                  which_dimensions = 1:3, line_size = 1.5,
                  colors = cols,
                   data_lab = as.character(Idents(data)),
                  text_size = 60, data_size = 2) 
-plotly::layout(p_pca, title = "Archetypes for Top 10 PCs")
-htmlwidgets::saveWidget(p_pca, "./ParetoTI/robust_archetypes.html")
+plotly::layout(p_pca, title = "Archetypes for Harmony Data")
+htmlwidgets::saveWidget(p_pca, "./ParetoTI/archetypes.html")
 # 
-# p_pca = plot_arc(arc_data = arc_ave, data = x_pca,
+# p_pca = plot_arc(arc_data = arc_ave, data = x_harmony,
 #                  which_dimensions = 1:3, line_size = 1.5,
 #                  data_lab = as.numeric(data[['RNA']]@scale.data['Neurod2',]),
 #                  text_size = 60, data_size = 3)
@@ -311,21 +257,21 @@ htmlwidgets::saveWidget(p_pca, "./ParetoTI/robust_archetypes.html")
 # htmlwidgets::saveWidget(p_pca, "../../figures/ParetoTI/RPM-time-series/NEUROD2.HTML")
 
 # 
-# p_pca = plot_arc(arc_data = arc_ave, data = x_pca,
+# p_pca = plot_arc(arc_data = arc_ave, data = x_harmony,
 #                  which_dimensions = 1:3, line_size = 1.5,
 #                  data_lab = as.numeric(data[['RNA']]@data['Pou2f3',]),
 #                  text_size = 60, data_size = 3)
 # plotly::layout(p_pca, title = "Expression of POU2F3 in PCA")
 # htmlwidgets::saveWidget(p_pca, "../../figures/ParetoTI/RPM-time-series/POU2F3.html")
 
-p_pca = plot_arc(arc_data = arc_ave, data = x_pca, 
+p_pca = plot_arc(arc_data = arc_ave, data = x_harmony, 
                  which_dimensions = 1:3, line_size = 1.5,
                  data_lab = as.numeric(data[['RNA']]@data['Ascl1',]),
                  text_size = 60, data_size = 3) 
 plotly::layout(p_pca, title = "Expression of ASCL1 in PCA")
 htmlwidgets::saveWidget(p_pca, "./ParetoTI/ASCL1.html")
 # 
-# p_pca = plot_arc(arc_data = arc_ave, data = x_pca, 
+# p_pca = plot_arc(arc_data = arc_ave, data = x_harmony, 
 #                  which_dimensions = 1:3, line_size = 1.5,
 #                  data_lab = as.numeric(data[['RNA']]@data['Myc',]),
 #                  text_size = 60, data_size = 3) 
@@ -336,7 +282,7 @@ htmlwidgets::saveWidget(p_pca, "./ParetoTI/ASCL1.html")
 ```{r}
 # arc_labeled = annotate_archetypes(arc, PY = 1, X = 2,Y_cycle = 3, A2 = 4, AN = 5, Y_noncycle = 6)
 
-arc_umap = arch_to_umap(arc, x_pca, which_dimensions = 1:2)
+arc_umap = arch_to_umap(arc, x_harmony, which_dimensions = 1:2)
 
 
 plot_arc(arc_data = arc_umap$arc_data, data = arc_umap$data,
@@ -385,7 +331,7 @@ save(activ_pi, file="./ParetoTI/activ_pi.Robj")
 # `poly_A_+_mRNA_export_from_nucleus`))
 
 
-data_attr = merge_arch_dist(arc_data = arc_ave, data = x_pca, 
+data_attr = merge_arch_dist(arc_data = arc_ave, data = x_harmony, 
                             feature_data = as.matrix(data[['RNA']]@scale.data),
                             colData = activ_pi, 
                             dist_metric = c("euclidean", "arch_weights")[1],
