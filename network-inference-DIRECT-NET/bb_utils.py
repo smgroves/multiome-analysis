@@ -12,6 +12,20 @@ import scipy.stats as ss
 import glob
 from sklearn.metrics import *
 
+# function to plot 5 plots in one row using matplotlib
+def plot_five_plots(df, title, xlabel, ylabel, save = False, show = False, fname = ""):
+    fig, axs = plt.subplots(1,5, figsize = (20,4))
+    fig.suptitle(title)
+    for i in range(5):
+        axs[i].plot(df.iloc[:,i])
+        axs[i].set_xlabel(xlabel)
+        axs[i].set_ylabel(ylabel)
+        axs[i].set_title(df.columns[i])
+    if save:
+        plt.savefig(fname)
+    if show:
+        plt.show()
+    plt.close()
 def plot_sklearn_summ_stats(summary_stats, VAL_DIR, fname = ""):
     df = pd.melt(summary_stats, id_vars='gene')
     df = df.astype({'variable':'string'})

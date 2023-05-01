@@ -7,7 +7,8 @@ import numpy as np
 
 DIRECT_NET_INDIR = "./DIRECT-NET-FILES/"
 
-adata = cr.read('../data/M2/adata_04_nodub.h5ad')
+# adata = cr.read('../data/M2/adata_04_nodub.h5ad')
+adata = cr.read('../data/combined/adata_02_filtered.h5ad')
 
 direct_net = pd.read_csv(os.path.join(DIRECT_NET_INDIR,"Direct_net.csv"), header = 0, index_col = 0)
 direct_net['Target_gene'] = [i.upper() for i in direct_net['Target_gene']]
@@ -38,4 +39,4 @@ adata_net = adata[:,[i.capitalize() for i in overlap]]
 print(adata_net)
 print(adata_net.layers["imputed"][0:10,0:10])
 adata_imputed = pd.DataFrame(adata_net.layers["imputed"], index=adata_net.obs_names, columns=adata_net.var_names)
-adata_imputed.to_csv("./data/adata_04_nodubs_imputed_M2.csv")
+adata_imputed.to_csv("./data/adata_imputed_combined.csv")
