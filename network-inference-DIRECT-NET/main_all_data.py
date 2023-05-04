@@ -25,11 +25,11 @@ customPalette = sns.color_palette('tab10')
 # =============================================================================
 print_graph_information = True #whether to print graph info to {brcd}.txt
 
-split_train_test = False
-write_binarized_data = False
-fit_rules = False
-run_validation = False
-validation_averages = False
+split_train_test = True
+write_binarized_data = True
+fit_rules = True
+run_validation = True
+validation_averages = True
 find_average_states = False
 find_attractors = False
 tf_basin = 2 # if -1, use average distance between clusters for search basin for attractors.
@@ -49,8 +49,8 @@ node_normalization = 0.3
 node_threshold = 0  # don't remove any parents
 transpose = True
 validation_fname = 'validation_set'
-fname = 'M2'
-notes_for_log = "Plotting perturbations for attractors 0.5"
+fname = 'combined'
+notes_for_log = "Fitting rules for all data"
 
 ## Set paths
 dir_prefix = '/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET'

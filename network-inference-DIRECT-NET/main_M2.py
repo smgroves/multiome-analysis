@@ -26,15 +26,15 @@ customPalette = sns.color_palette('tab10')
 print_graph_information = True #whether to print graph info to {brcd}.txt
 
 split_train_test = False
-write_binarized_data = False
+write_binarized_data = True
 fit_rules = False
 run_validation = False
-validation_averages = True
-find_average_states = False
-find_attractors = False
+validation_averages = False
+find_average_states = True
+find_attractors = True
 tf_basin = 2 # if -1, use average distance between clusters for search basin for attractors.
 # otherwise use the same size basin for all phenotypes. For single cell data, there may be so many samples that average distance is small.
-filter_attractors = False
+filter_attractors = True
 perturbations = False
 stability = False
 on_nodes = []
@@ -48,19 +48,19 @@ remove_sources=False
 node_normalization = 0.3
 node_threshold = 0  # don't remove any parents
 transpose = True
-validation_fname = 'external_M1'
-fname = 'M1'
-notes_for_log = "External validation on M1 data"
+validation_fname = None
+fname = 'M2'
+notes_for_log = "Archetype labels for attractors"
 
 ## Set paths
 dir_prefix = '/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET'
 network_path = 'networks/DIRECT-NET_network_with_FIGR_threshold_0_no_NEUROG2_top8regs_NO_sinks.csv'
-data_path = 'data/adata_imputed_M1.csv'
+data_path = 'data/adata_04_nodubs_imputed_M2.csv'
 t1 = False
 data_t1_path = None #if no T1 (i.e. single timepoint dataset), replace with None
 
 ## Set metadata information
-cellID_table = 'data/M1_clusters.csv'
+cellID_table = 'data/AA_clusters_M2.csv'
 # Assign headers to cluster csv, with one called "class"
 # cluster_header_list = ['class']
 
@@ -82,13 +82,13 @@ brcd = str(3000)
 print(brcd)
 # if rerunning a brcd and data has already been split into training and testing sets, use the below code
 # Otherwise, these settings are ignored
-# data_train_t0_path = f'{brcd}/data_split/train_t0_{fname}.csv'
+data_train_t0_path = f'{brcd}/data_split/train_t0_{fname}.csv'
 data_train_t1_path = None #if no T1, replace with None
-# data_test_t0_path = f'{brcd}/data_split/test_t0_{fname}.csv'
+data_test_t0_path = f'{brcd}/data_split/test_t0_{fname}.csv'
 data_test_t1_path = None #if no T1, replace with None
 
-data_train_t0_path = data_path
-data_test_t0_path = data_path
+# data_train_t0_path = data_path
+# data_test_t0_path = data_path
 ## Set job barcode and random_state
 # temp = sys.stdout
 
@@ -311,10 +311,10 @@ else:
 if validation_averages:
     VAL_DIR = f"{dir_prefix}/{brcd}/{validation_fname}"
 
-    # if run_validation == False:
+    if run_validation == False:
         # Function to calculate roc and tpr, fpr, area from saved validation files
         # if validation == False, read in values from files instead of from above
-        # tprs_all, fprs_all, area_all = bb.tl.roc_from_file(f'{VAL_DIR}/accuracy_plots', nodes, save=True, save_dir=VAL_DIR)
+        tprs_all, fprs_all, area_all = bb.tl.roc_from_file(f'{VAL_DIR}/accuracy_plots', nodes, save=True, save_dir=VAL_DIR)
 
     aucs = pd.read_csv(f'{VAL_DIR}/aucs.csv', header=None, index_col=0)
     print("AUC means: ",aucs.mean())
@@ -322,7 +322,7 @@ if validation_averages:
     bb.plot.plot_aucs(VAL_DIR, save=True, show_plot=True) #once BB > 0.0.7, change to this line
 
 
-    # bb.plot.plot_validation_avgs(fprs_all, tprs_all, len(nodes), area_all, save=True, save_dir=VAL_DIR, show_plot=True)
+    bb.plot.plot_validation_avgs(fprs_all, tprs_all, len(nodes), area_all, save=True, save_dir=VAL_DIR, show_plot=True)
 
 
     ## bb version > 0.1.7
@@ -391,7 +391,7 @@ else:
     print("Skipping finding average states...")
 
 if find_attractors:
-    ATTRACTOR_DIR = f"{dir_prefix}/{brcd}/attractors/attractors_threshold_0.7"
+    ATTRACTOR_DIR = f"{dir_prefix}/{brcd}/attractors/attractors_threshold_0.5"
     try:
         os.mkdir(ATTRACTOR_DIR)
     except FileExistsError:
@@ -414,7 +414,7 @@ else:
     print("Skipping finding attractors...")
 
 if filter_attractors:
-    ATTRACTOR_DIR = f"{dir_prefix}/{brcd}/attractors/attractors_threshold_0.7"
+    ATTRACTOR_DIR = f"{dir_prefix}/{brcd}/attractors/attractors_threshold_0.5"
     AVE_STATES_DIR = f"{dir_prefix}/{brcd}/attractors/"
 
     average_states = {}
