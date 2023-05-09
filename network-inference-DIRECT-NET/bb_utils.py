@@ -278,7 +278,7 @@ def draw_grn(G, gene2vertex, rules, regulators_dict, fname, gene2group=None, gen
             n = 2 ** len(regulators)
 
             rule = rules[target]
-            off_leaves, on_leaves = bb.tl.get_leaves_of_regulator(n, i)
+            off_leaves, on_leaves = bb.utils.get_leaves_of_regulator(n, i)
             if rule[off_leaves].mean() < rule[on_leaves].mean():  # The regulator is an activator
                 edge_colors[edge] = [0., 0.3, 0., 0.8]
                 edge_binary_df.loc[target,source] = 1

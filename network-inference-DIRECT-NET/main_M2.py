@@ -30,7 +30,7 @@ write_binarized_data = True
 fit_rules = False
 run_validation = False
 validation_averages = False
-find_average_states = True
+find_average_states = False
 find_attractors = True
 tf_basin = 2 # if -1, use average distance between clusters for search basin for attractors.
 # otherwise use the same size basin for all phenotypes. For single cell data, there may be so many samples that average distance is small.
@@ -45,6 +45,7 @@ remove_sinks=False
 remove_selfloops=False
 remove_sources=False
 
+walk_threshold = 0.5
 node_normalization = 0.3
 node_threshold = 0  # don't remove any parents
 transpose = True
@@ -399,7 +400,7 @@ if find_attractors:
 
     start = time.time()
 
-    attractor_dict = bb.tl.find_attractors(binarized_data_t0, rules, nodes, regulators_dict, tf_basin=tf_basin,threshold=.7,
+    attractor_dict = bb.tl.find_attractors(binarized_data_t0, rules, nodes, regulators_dict, tf_basin=tf_basin,threshold=walk_threshold,
                                     save_dir=ATTRACTOR_DIR, on_nodes=on_nodes, off_nodes=off_nodes)
     end = time.time()
     print('Time to find attractors: ', str(timedelta(seconds=end-start)))
@@ -493,8 +494,8 @@ if filter_attractors:
     plt.tight_layout()
     plt.savefig(f"{ATTRACTOR_DIR}/attractors_filtered_clustered_x.pdf", bbox_extra_artists=(lgd,), bbox_inches='tight')
 
-    with open(f"{dir_prefix}/{brcd}/attractors/attractors_threshold_0.5/attractor_dict.txt", 'w') as convert_file:
-        convert_file.write(json.dumps(attractor_dict))
+    # with open(f"{dir_prefix}/{brcd}/attractors/attractors_threshold_0.5/attractor_dict.txt", 'w') as convert_file:
+    #     convert_file.write(json.dumps(attractor_dict))
 
 else:
     print("Skipping filtering attractors...")

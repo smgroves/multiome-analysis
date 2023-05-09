@@ -27,15 +27,15 @@ print_graph_information = True #whether to print graph info to {brcd}.txt
 
 split_train_test = True
 write_binarized_data = True
-fit_rules = True
-run_validation = True
+fit_rules = False
+run_validation = False
 validation_averages = True
 find_average_states = False
-find_attractors = False
+find_attractors = True
 tf_basin = 2 # if -1, use average distance between clusters for search basin for attractors.
 # otherwise use the same size basin for all phenotypes. For single cell data, there may be so many samples that average distance is small.
-filter_attractors = False
-perturbations = False
+filter_attractors = True
+perturbations = True
 stability = False
 on_nodes = []
 off_nodes = []
@@ -54,13 +54,13 @@ notes_for_log = "Fitting rules for all data"
 
 ## Set paths
 dir_prefix = '/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET'
-network_path = 'networks/DIRECT-NET_network_with_FIGR_threshold_0_no_NEUROG2_top8regs_NO_sinks.csv'
-data_path = 'data/adata_04_nodubs_imputed_M2.csv'
+network_path = 'networks/DIRECT-NET_network_with_FIGR_threshold_0_no_NEUROG2_top8regs_NO_sinks_NOCD24_expanded.csv'
+data_path = 'data/adata_imputed_combined.csv'
 t1 = False
 data_t1_path = None #if no T1 (i.e. single dataset), replace with None
 
 ## Set metadata information
-cellID_table = 'data/M2_clusters.csv'
+cellID_table = 'data/AA_clusters.csv'
 # Assign headers to cluster csv, with one called "class"
 # cluster_header_list = ['class']
 
@@ -78,7 +78,7 @@ cluster_header_list = ["class"]
 
 ## Set brcd and train/test data if rerun
 # brcd = str(random.randint(0,99999))
-brcd = str(3000)
+brcd = str(9999)
 print(brcd)
 # if rerunning a brcd and data has already been split into training and testing sets, use the below code
 # Otherwise, these settings are ignored
@@ -177,7 +177,7 @@ if split_train_test:
         os.makedirs(f"{dir_prefix}/{brcd}/data_split")
 
     data_train_t0, data_test_t0, data_train_t1, data_test_t1, clusters_train, clusters_test =  bb.utils.split_train_test(data_t0, data_t1, clusters,
-                                                                                                        f"{dir_prefix}/{brcd}/data_split", fname='M2')
+                                                                                                        f"{dir_prefix}/{brcd}/data_split", fname=fname)
                                                                                                         # random_state = random_state)
 else: #load the data
     data_train_t0 = bb.load.load_data(f'{dir_prefix}/{data_train_t0_path}', nodes, norm=node_normalization, delimiter=',',
@@ -260,35 +260,15 @@ if fit_rules:
 else:
     print("Reading in pre-generated rules...")
     rules, regulators_dict = bb.load.load_rules(fname=f"{dir_prefix}/{brcd}/rules/rules_{brcd}.txt")
-#
-# colors = ["windows blue", "amber", "greyish", "faded green", "dusty purple"]
-# color_palette = sns.xkcd_palette(colors)
-# attract = pd.read_csv(op.join(dir_prefix, f'{brcd}/attractors_filtered.txt'), sep = ',', header = 0, index_col = 0)
-# gene2color = {}
-# vertex_group = {}
-# for g in attract:
-#     print(g)
-#     if attract.loc['10AMutant'][g] == 1:
-#         print('Mutant')
-#         gene2color[g] = [0.21568627450980393, 0.47058823529411764, 0.7490196078431373, 1]
-#         vertex_group[g] = 0
-#     elif attract.loc['10AParental'][g] == 0:
-#         print('Control')
-#         gene2color[g] = [0.6588235294117647, 0.6431372549019608, 0.5843137254901961,1]
-#         vertex_group[g] = 1
-#     else:
-#         gene2color[g] = [0.5098039215686274, 0.37254901960784315, 0.5294117647058824, 1]
-#         vertex_group[g] = 1
-# # print(gene2color)
 
-
-
-
+    draw_grn(graph,vertex_dict,rules, regulators_dict,f"{dir_prefix}/{brcd}/{fname}_network.pdf", save_edge_weights=True,
+             edge_weights_fname=f"{dir_prefix}/{brcd}/rules/edge_weights.csv")#, gene2color = gene2color)
 # =============================================================================
 # Calculate AUC for test dataset for a true error calculation
 # =============================================================================
 
 if run_validation:
+    print("Running validation step...")
     VAL_DIR = f"{dir_prefix}/{brcd}/{validation_fname}"
     try:
         os.mkdir(VAL_DIR)
@@ -302,17 +282,12 @@ if run_validation:
     # Saves auc values for each gene (node) in the passed directory as 'aucs.csv'
     bb.tl.save_auc_by_gene(area_all, nodes, VAL_DIR)
 
-    ## bb version > 0.1.7
-    # summary_stats = bb.tl.get_sklearn_metrics(VAL_DIR)
-    # bb.plot.plot_sklearn_metrics(VAL_DIR)
-    ## bb.plot.plot_sklearn_summ_stats(summary_stats.drop("max_error", axis = 1), VAL_DIR, fname = "2")
-
-
 
 else:
     print("Skipping validation step...")
 
 if validation_averages:
+    print("Calculating validation averages...")
     VAL_DIR = f"{dir_prefix}/{brcd}/{validation_fname}"
 
     if run_validation == False:
@@ -328,41 +303,13 @@ if validation_averages:
 
 
     bb.plot.plot_validation_avgs(fprs_all, tprs_all, len(nodes), area_all, save=True, save_dir=VAL_DIR, show_plot=True)
-    # n = len(nodes)-2
-    # aucs = pd.read_csv(f"{dir_prefix}{brcd}/{validation_fname}/auc_2364_0.csv", header = None, index_col=0)
-    # print(aucs.mean(axis = 1))
-    # aucs.columns = ['auc']
-    # plt.figure()
-    # plt.bar(height=aucs['auc'], x = aucs.index)
-    # plt.xticks(rotation = 90)
-    # plt.savefig(f"{dir_prefix}/{brcd}/aucs.pdf")
-    #
-    # ind = [i for i in np.linspace(0, 1, 50)]
-    # tpr_all = pd.DataFrame(index=ind)
-    # fpr_all = pd.DataFrame(index=ind)
-    # area_all = []
-    #
-    # for g in nodes:
-    #     if g in ['NEUROD1','SIX5']: continue
-    #     validation = pd.read_csv(
-    #         f'{dir_prefix}{brcd}/{validation_fname}/{g}_validation.csv',
-    #         index_col=0, header=0)
-    #     tprs, fprs, area = bb.utils.roc(validation, g, n_thresholds=50, save_plots='', save = False, plot = False)
-    #     tpr_all[g] = tprs
-    #     fpr_all[g] = fprs
-    #     area_all.append(area)
-    # print(area_all)
-    #
-    # plt.figure()
-    # ax = plt.subplot()
-    # plt.plot(fpr_all.sum(axis=1) / n, tpr_all.sum(axis=1) / n, '-o')
-    # ax.plot(ax.get_xlim(), ax.get_ylim(), ls="--", c=".3")
-    # plt.xlim(0, 1)
-    # plt.ylim(0, 1)
-    # plt.ylabel("True Positive Rate")
-    # plt.xlabel("False Positive Rate")
-    # plt.title(f"ROC Curve Data \n {np.sum(area_all) / n}")
-    # plt.savefig(f'{dir_prefix}/{brcd}/{validation_fname}/ROC_AUC_average.pdf')
+
+
+    ## bb version > 0.1.7
+    summary_stats = bb.tl.get_sklearn_metrics(VAL_DIR)
+    bb.plot.plot_sklearn_metrics(VAL_DIR)
+    bb.plot.plot_sklearn_summ_stats(summary_stats.drop("max_error", axis = 1), VAL_DIR, fname = "")
+
 else:
     print("Skipping validation averaging...")
 # =============================================================================
@@ -372,6 +319,7 @@ n = len(nodes)
 n_states = 2 ** n
 
 if find_average_states:
+    print("Finding average states...")
     ATTRACTOR_DIR = f"{dir_prefix}{brcd}/attractors"
     try:
         os.mkdir(ATTRACTOR_DIR)
@@ -388,7 +336,8 @@ else:
     print("Skipping finding average states...")
 
 if find_attractors:
-    ATTRACTOR_DIR = f"{dir_prefix}/{brcd}/attractors/attractors_threshold_0.7"
+    print("Finding attractors...")
+    ATTRACTOR_DIR = f"{dir_prefix}/{brcd}/attractors/attractors_threshold_0.5"
     try:
         os.mkdir(ATTRACTOR_DIR)
     except FileExistsError:
@@ -396,7 +345,7 @@ if find_attractors:
 
     start = time.time()
 
-    attractor_dict = bb.tl.find_attractors(binarized_data_t0, rules, nodes, regulators_dict, tf_basin=tf_basin,threshold=.7,
+    attractor_dict = bb.tl.find_attractors(binarized_data_t0, rules, nodes, regulators_dict, tf_basin=tf_basin,threshold=.5,
                                     save_dir=ATTRACTOR_DIR, on_nodes=on_nodes, off_nodes=off_nodes)
     end = time.time()
     print('Time to find attractors: ', str(timedelta(seconds=end-start)))
@@ -411,7 +360,8 @@ else:
     print("Skipping finding attractors...")
 
 if filter_attractors:
-    ATTRACTOR_DIR = f"{dir_prefix}/{brcd}/attractors/attractors_threshold_0.7"
+    print("Filtering attractors...")
+    ATTRACTOR_DIR = f"{dir_prefix}/{brcd}/attractors/attractors_threshold_0.5"
     AVE_STATES_DIR = f"{dir_prefix}/{brcd}/attractors/"
 
     average_states = {}
@@ -490,8 +440,8 @@ if filter_attractors:
     plt.tight_layout()
     plt.savefig(f"{ATTRACTOR_DIR}/attractors_filtered_clustered_x.pdf", bbox_extra_artists=(lgd,), bbox_inches='tight')
 
-    with open(f"{dir_prefix}/{brcd}/attractors/attractors_threshold_0.5/attractor_dict.txt", 'w') as convert_file:
-        convert_file.write(json.dumps(attractor_dict))
+    # with open(f"{dir_prefix}/{brcd}/attractors/attractors_threshold_0.5/attractor_dict.txt", 'w') as convert_file:
+    #     convert_file.write(json.dumps(attractor_dict))
 
 else:
     print("Skipping filtering attractors...")
@@ -506,6 +456,7 @@ dir_prefix_walks = op.join(dir_prefix, brcd)
 
 
 if perturbations:
+    print("Running TF perturbations...")
     ATTRACTOR_DIR = f"{dir_prefix}/{brcd}/attractors/attractors_threshold_0.5"
 
     attractor_dict = {}
@@ -516,7 +467,6 @@ if perturbations:
     for i,r in attr_filtered.iterrows():
         attractor_dict[i].append(bb.utils.state_bool2idx(list(r)))
 
-    print("Running TF perturbations")
     bb.rw.random_walks(attractor_dict,
                        rules,
                        regulators_dict,
@@ -547,6 +497,7 @@ else:
     "Skipping perturbations..."
 
 if stability:
+    print("Running stability...")
     ATTRACTOR_DIR = f"{dir_prefix}/{brcd}/attractors/attractors_threshold_0.5"
     attractor_dict = {}
     attr_filtered = pd.read_csv(f'{ATTRACTOR_DIR}/attractors_filtered.txt', sep = ',', header = 0, index_col = 0)
@@ -558,7 +509,6 @@ if stability:
     subset = set(attractor_dict.keys()).difference({'NE_1','Club cells_2'})
     attractor_dict_edit = {k:v for k,v in attractor_dict.items() if k in subset}
 
-    print("Stability...")
     bb.rw.random_walks(attractor_dict_edit,
                        rules,
                        regulators_dict,
@@ -580,7 +530,7 @@ else:
 # =============================================================================
 # Calculate and plot stability of each attractor
 # =============================================================================
-if True:
+if False:
     ATTRACTOR_DIR = f"{dir_prefix}/{brcd}/attractors/attractors_threshold_0.5"
     attractor_dict = bb.utils.get_attractor_dict(ATTRACTOR_DIR, filtered = True)
 
