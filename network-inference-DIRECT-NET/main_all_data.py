@@ -28,14 +28,14 @@ print_graph_information = True #whether to print graph info to {brcd}.txt
 split_train_test = True
 write_binarized_data = False
 fit_rules = False
-run_validation = False
-validation_averages = False
+run_validation = True
+validation_averages = True
 find_average_states = False
 find_attractors = False
 tf_basin = 2 # if -1, use average distance between clusters for search basin for attractors.
 # otherwise use the same size basin for all phenotypes. For single cell data, there may be so many samples that average distance is small.
 filter_attractors = False
-perturbations = True
+perturbations = False
 stability = False
 on_nodes = []
 off_nodes = []
@@ -48,19 +48,20 @@ remove_sources=False
 node_normalization = 0.3
 node_threshold = 0  # don't remove any parents
 transpose = True
-validation_fname = 'validation_set'
-fname = 'combined'
-notes_for_log = "Fitting rules for all data"
+validation_fname = 'allograft_validation'
+fname = 'allografts'
+notes_for_log = "Validation on allograft data"
 
 ## Set paths
 dir_prefix = '/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET'
 network_path = 'networks/DIRECT-NET_network_with_FIGR_threshold_0_no_NEUROG2_top8regs_NO_sinks_NOCD24_expanded.csv'
-data_path = 'data/adata_imputed_combined.csv'
+data_path = 'data/adata_allografts.csv'
 t1 = False
 data_t1_path = None #if no T1 (i.e. single dataset), replace with None
 
 ## Set metadata information
-cellID_table = 'data/AA_clusters.csv'
+# cellID_table = 'data/AA_clusters.csv'
+cellID_table = 'data/allograft_clusters.csv'
 # Assign headers to cluster csv, with one called "class"
 # cluster_header_list = ['class']
 
@@ -87,6 +88,8 @@ data_train_t1_path = None #if no T1, replace with None
 data_test_t0_path = f'{brcd}/data_split/test_t0_{fname}.csv'
 data_test_t1_path = None #if no T1, replace with None
 
+# data_train_t0_path = data_path
+# data_test_t0_path = data_path
 
 ## Set job barcode and random_state
 # temp = sys.stdout

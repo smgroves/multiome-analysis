@@ -45,5 +45,8 @@ def preprocess_adata(adata, DIRECT_NET_INDIR, outfile_name = "adata_imputed.csv"
 # adata = cr.read('../data/M2/adata_04_nodub.h5ad')
 # preprocess_adata(adata, DIRECT_NET_INDIR, outfile_name = "adata_04_nodubs_imputed_M2.csv")
 
-adata = cr.read('../data/combined/adata_02_filtered.h5ad')
-preprocess_adata(adata, DIRECT_NET_INDIR, outfile_name = "adata_imputed_combined.csv", extra_genes=['CD24', 'CD44', 'EPCAM', 'ICAM1', 'NCAM1'])
+# adata = cr.read('../data/combined/adata_02_filtered.h5ad')
+# preprocess_adata(adata, DIRECT_NET_INDIR, outfile_name = "adata_imputed_combined.csv", extra_genes=['CD24', 'CD44', 'EPCAM', 'ICAM1', 'NCAM1'])
+
+adata = cr.read("../data/external_validation_looms/allografts.h5ad")
+preprocess_adata(adata, DIRECT_NET_INDIR, outfile_name = "adata_allografts.csv", extra_genes=['CD24', 'CD44', 'EPCAM', 'ICAM1', 'NCAM1'])
