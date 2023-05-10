@@ -26,16 +26,16 @@ customPalette = sns.color_palette('tab10')
 print_graph_information = True #whether to print graph info to {brcd}.txt
 
 split_train_test = False
-write_binarized_data = True
+write_binarized_data = False
 fit_rules = False
 run_validation = False
 validation_averages = False
 find_average_states = False
-find_attractors = True
+find_attractors = False
 tf_basin = 2 # if -1, use average distance between clusters for search basin for attractors.
 # otherwise use the same size basin for all phenotypes. For single cell data, there may be so many samples that average distance is small.
-filter_attractors = True
-perturbations = False
+filter_attractors = False
+perturbations = True
 stability = False
 on_nodes = []
 off_nodes = []
@@ -77,16 +77,16 @@ cluster_header_list = ["class"]
 #                        "class","non.NE_score1","comb.score","S.Score","G2M.Score","Phase","old.ident","wsnn_res.0.5"
 #                        ]
 
-## Set brcd and train/test data if rerun
+# Set brcd and train/test data if rerun
 # brcd = str(random.randint(0,99999))
 brcd = str(3000)
 print(brcd)
 # if rerunning a brcd and data has already been split into training and testing sets, use the below code
 # Otherwise, these settings are ignored
 data_train_t0_path = f'{brcd}/data_split/train_t0_{fname}.csv'
-data_train_t1_path = None #if no T1, replace with None
+data_train_t1_path = None # if no T1, replace with None
 data_test_t0_path = f'{brcd}/data_split/test_t0_{fname}.csv'
-data_test_t1_path = None #if no T1, replace with None
+data_test_t1_path = None # if no T1, replace with None
 
 # data_train_t0_path = data_path
 # data_test_t0_path = data_path
@@ -520,22 +520,22 @@ if perturbations:
     for i,r in attr_filtered.iterrows():
         attractor_dict[i].append(bb.utils.state_bool2idx(list(r)))
 
-    print("Running TF perturbations")
-    bb.rw.random_walks(attractor_dict,
-                       rules,
-                       regulators_dict,
-                       nodes,
-                       save_dir = f"{dir_prefix}/{brcd}/",
-                       radius=2,
-                       perturbations=True,
-                       iters=500,
-                       max_steps=500,
-                       stability=False,
-                       reach_or_leave="leave",
-                       random_start=False,
-                       on_nodes=[],
-                       off_nodes=[],
-                       )
+    # print("Running TF perturbations")
+    # bb.rw.random_walks(attractor_dict,
+    #                    rules,
+    #                    regulators_dict,
+    #                    nodes,
+    #                    save_dir = f"{dir_prefix}/{brcd}/",
+    #                    radius=2,
+    #                    perturbations=True,
+    #                    iters=500,
+    #                    max_steps=500,
+    #                    stability=False,
+    #                    reach_or_leave="leave",
+    #                    random_start=False,
+    #                    on_nodes=[],
+    #                    off_nodes=[],
+    #                    )
     perturbations_dir = f"{dir_prefix}/{brcd}/perturbations"
 
     bb.tl.perturbations_summary(attractor_dict,perturbations_dir, show = False, save = True, plot_by_attractor = True,

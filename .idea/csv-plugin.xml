@@ -80,6 +80,13 @@
             </Attribute>
           </value>
         </entry>
+        <entry key="/network-inference-DIRECT-NET/9999/rules/edge_weights.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
         <entry key="/network-inference-DIRECT-NET/DIRECT-NET-FILES/Direct_net.csv">
           <value>
             <Attribute>

@@ -26,15 +26,15 @@ customPalette = sns.color_palette('tab10')
 print_graph_information = True #whether to print graph info to {brcd}.txt
 
 split_train_test = True
-write_binarized_data = True
+write_binarized_data = False
 fit_rules = False
 run_validation = False
-validation_averages = True
+validation_averages = False
 find_average_states = False
-find_attractors = True
+find_attractors = False
 tf_basin = 2 # if -1, use average distance between clusters for search basin for attractors.
 # otherwise use the same size basin for all phenotypes. For single cell data, there may be so many samples that average distance is small.
-filter_attractors = True
+filter_attractors = False
 perturbations = True
 stability = False
 on_nodes = []

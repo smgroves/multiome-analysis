@@ -1,34 +1,30 @@
-MEIS2:{"Regulators": ["NE_1", "NE_4", "NE_9", "NE_4_NE_1", "NE_6_NE_4"], "Destabilizers": ["Club cells_2", "Club cells_1", "AT2 cells_Club cells_2"]}
-TCF7L2:{"Regulators": ["Club cells_2", "Club cells_1", "AT2 cells_Club cells_2"], "Destabilizers": ["NE_1", "NE_7", "NE_4", "NE_2", "NE_9", "NE_11", "NE_6_NE_4"]}
-CUX1:{"Regulators": ["Club cells_2", "Club cells_1", "AT2 cells_Club cells_2"], "Destabilizers": []}
-EHF:{"Regulators": ["Club cells_2", "Club cells_1", "AT2 cells_Club cells_2"], "Destabilizers": []}
-FOXO3:{"Regulators": ["Club cells_2", "Club cells_1", "AT2 cells_Club cells_2"], "Destabilizers": []}
-JUND:{"Regulators": ["Club cells_2", "Club cells_1", "AT2 cells_Club cells_2"], "Destabilizers": []}
-NFIA:{"Regulators": ["Club cells_2", "Club cells_1", "AT2 cells_Club cells_2"], "Destabilizers": ["NE_11"]}
-NFIX:{"Regulators": ["Club cells_2", "Club cells_1", "AT2 cells_Club cells_2"], "Destabilizers": []}
-PPARG:{"Regulators": ["Club cells_2", "Club cells_1", "AT2 cells_Club cells_2"], "Destabilizers": []}
-PRDM16:{"Regulators": ["Club cells_2", "Club cells_1", "AT2 cells_Club cells_2"], "Destabilizers": []}
-REST:{"Regulators": ["Club cells_2", "Club cells_1", "AT2 cells_Club cells_2"], "Destabilizers": []}
-SMAD3:{"Regulators": ["Club cells_2", "Club cells_1", "AT2 cells_Club cells_2"], "Destabilizers": []}
-SOX9:{"Regulators": ["Club cells_2", "Club cells_1", "AT2 cells_Club cells_2"], "Destabilizers": []}
-SP100:{"Regulators": ["Club cells_2", "Club cells_1", "AT2 cells_Club cells_2"], "Destabilizers": []}
-STAT1:{"Regulators": ["Club cells_2", "Club cells_1", "AT2 cells_Club cells_2"], "Destabilizers": []}
-ASCL1:{"Regulators": [], "Destabilizers": ["Club cells_2", "Club cells_1", "AT2 cells_Club cells_2"]}
-CUX2:{"Regulators": [], "Destabilizers": ["Club cells_2", "Club cells_1", "AT2 cells_Club cells_2"]}
-EGR1:{"Regulators": ["NE_7", "NE_2", "NE_4_NE_1", "NE_6_NE_4"], "Destabilizers": ["Club cells_2", "Club cells_1", "AT2 cells_Club cells_2"]}
-FOS:{"Regulators": ["NE_6_NE_4"], "Destabilizers": ["Club cells_2", "Club cells_1", "AT2 cells_Club cells_2"]}
-HSF2:{"Regulators": [], "Destabilizers": ["Club cells_2", "Club cells_1", "AT2 cells_Club cells_2"]}
-NFATC2:{"Regulators": [], "Destabilizers": ["Club cells_2", "Club cells_1", "AT2 cells_Club cells_2"]}
-PKNOX2:{"Regulators": [], "Destabilizers": ["Club cells_2", "Club cells_1", "AT2 cells_Club cells_2"]}
-PROX1:{"Regulators": [], "Destabilizers": ["Club cells_2", "Club cells_1", "AT2 cells_Club cells_2"]}
-RORA:{"Regulators": ["NE_11"], "Destabilizers": ["Club cells_2", "Club cells_1", "AT2 cells_Club cells_2"]}
-RORB:{"Regulators": ["NE_7", "NE_9", "NE_4_NE_1", "NE_6_NE_4"], "Destabilizers": ["Club cells_2", "Club cells_1", "NE_11", "AT2 cells_Club cells_2"]}
-SIX1:{"Regulators": [], "Destabilizers": ["Club cells_2", "Club cells_1", "AT2 cells_Club cells_2"]}
-SIX4:{"Regulators": [], "Destabilizers": ["Club cells_2", "Club cells_1", "AT2 cells_Club cells_2"]}
-TBX15:{"Regulators": [], "Destabilizers": ["Club cells_2", "Club cells_1", "AT2 cells_Club cells_2"]}
-TCF4:{"Regulators": [], "Destabilizers": ["Club cells_2", "Club cells_1", "AT2 cells_Club cells_2"]}
-ZEB1:{"Regulators": ["NE_7", "NE_4_NE_1"], "Destabilizers": ["Club cells_2", "Club cells_1", "AT2 cells_Club cells_2"]}
-ESR1:{"Regulators": ["Club cells_1", "AT2 cells_Club cells_2"], "Destabilizers": []}
-ZBTB18:{"Regulators": ["NE_11"], "Destabilizers": []}
-JUNB:{"Regulators": ["NE_6_NE_4"], "Destabilizers": ["NE_11"]}
-GRHL2:{"Regulators": ["AT2 cells_Club cells_2"], "Destabilizers": []}
+ASCL1:{"Regulators": [], "Destabilizers": ["Arc_4", "Arc_1"]}
+CUX1:{"Regulators": ["Arc_4", "Arc_1"], "Destabilizers": []}
+CUX2:{"Regulators": [], "Destabilizers": ["Arc_4"]}
+EGR1:{"Regulators": ["Arc_6"], "Destabilizers": ["Arc_4", "Arc_1"]}
+EHF:{"Regulators": ["Arc_4", "Arc_1"], "Destabilizers": []}
+FOS:{"Regulators": [], "Destabilizers": ["Arc_4", "Arc_1"]}
+FOXO3:{"Regulators": ["Arc_4", "Arc_1"], "Destabilizers": []}
+HSF2:{"Regulators": [], "Destabilizers": ["Arc_4", "Arc_1"]}
+JUND:{"Regulators": ["Arc_4", "Arc_1"], "Destabilizers": []}
+MEIS2:{"Regulators": [], "Destabilizers": ["Arc_4", "Arc_1"]}
+NFATC2:{"Regulators": [], "Destabilizers": ["Arc_4", "Arc_1"]}
+NFIA:{"Regulators": ["Arc_4", "Arc_1"], "Destabilizers": []}
+NFIX:{"Regulators": ["Arc_4", "Arc_1"], "Destabilizers": []}
+PKNOX2:{"Regulators": [], "Destabilizers": ["Arc_4", "Arc_1"]}
+PPARG:{"Regulators": ["Arc_4", "Arc_1"], "Destabilizers": []}
+PRDM16:{"Regulators": ["Arc_4", "Arc_1"], "Destabilizers": []}
+PROX1:{"Regulators": [], "Destabilizers": ["Arc_4", "Arc_1"]}
+REST:{"Regulators": ["Arc_4", "Arc_1"], "Destabilizers": []}
+RORA:{"Regulators": [], "Destabilizers": ["Arc_4", "Arc_1"]}
+RORB:{"Regulators": ["Arc_6"], "Destabilizers": ["Arc_4", "Arc_1"]}
+SIX1:{"Regulators": [], "Destabilizers": ["Arc_4"]}
+SIX4:{"Regulators": [], "Destabilizers": ["Arc_4"]}
+SMAD3:{"Regulators": ["Arc_4", "Arc_1"], "Destabilizers": []}
+SOX9:{"Regulators": ["Arc_4", "Arc_1"], "Destabilizers": []}
+SP100:{"Regulators": ["Arc_4"], "Destabilizers": []}
+STAT1:{"Regulators": ["Arc_4", "Arc_1"], "Destabilizers": []}
+TBX15:{"Regulators": [], "Destabilizers": ["Arc_4", "Arc_1"]}
+TCF4:{"Regulators": [], "Destabilizers": ["Arc_4", "Arc_1"]}
+TCF7L2:{"Regulators": ["Arc_4", "Arc_1"], "Destabilizers": ["Generalist", "Arc_5", "Arc_6", "Arc_5_Generalist"]}
+ZEB1:{"Regulators": [], "Destabilizers": ["Arc_4", "Arc_1"]}
