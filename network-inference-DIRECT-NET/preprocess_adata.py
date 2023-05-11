@@ -7,7 +7,8 @@ import numpy as np
 
 DIRECT_NET_INDIR = "./DIRECT-NET-FILES/"
 
-def preprocess_adata(adata, DIRECT_NET_INDIR, outfile_name = "adata_imputed.csv", extra_genes = None):
+def preprocess_adata(adata, DIRECT_NET_INDIR, outfile_name = "adata_imputed.csv", extra_genes = None, imputed_layer = 'imputed',
+                     species = 'mouse'):
     direct_net = pd.read_csv(os.path.join(DIRECT_NET_INDIR,"Direct_net.csv"), header = 0, index_col = 0)
     direct_net['Target_gene'] = [i.upper() for i in direct_net['Target_gene']]
     # "TF motif" column is parent node, "Target gene" is child node
@@ -27,19 +28,25 @@ def preprocess_adata(adata, DIRECT_NET_INDIR, outfile_name = "adata_imputed.csv"
 
     tfs = list(set(tfs))
 
-    print(tfs)
-    print(len(tfs))
     if extra_genes is not None:
         for g in extra_genes:
             tfs.append(g)
 
+    print(tfs)
+    print(len(tfs))
+
     overlap = (list(set(tfs).intersection(set([i.upper() for i in adata.var_names]))))
     print(list(set(tfs).difference(set([i.upper() for i in adata.var_names]))))
 
-    adata_net = adata[:,[i.capitalize() for i in overlap]]
+    if species == 'mouse':
+        adata_net = adata[:,[i.capitalize() for i in overlap]]
+    elif species == 'human':
+        adata_net = adata[:,[i.upper() for i in overlap]]
+    else:
+        print("Species must be mouse or human.")
     print(adata_net)
-    print(adata_net.layers["imputed"][0:10,0:10])
-    adata_imputed = pd.DataFrame(adata_net.layers["imputed"], index=adata_net.obs_names, columns=adata_net.var_names)
+    print(adata_net.layers[imputed_layer][0:10,0:10])
+    adata_imputed = pd.DataFrame(adata_net.layers[imputed_layer], index=adata_net.obs_names, columns=adata_net.var_names)
     adata_imputed.to_csv(f"./data/{outfile_name}")
 
 # adata = cr.read('../data/M2/adata_04_nodub.h5ad')
@@ -47,6 +54,18 @@ def preprocess_adata(adata, DIRECT_NET_INDIR, outfile_name = "adata_imputed.csv"
 
 # adata = cr.read('../data/combined/adata_02_filtered.h5ad')
 # preprocess_adata(adata, DIRECT_NET_INDIR, outfile_name = "adata_imputed_combined.csv", extra_genes=['CD24', 'CD44', 'EPCAM', 'ICAM1', 'NCAM1'])
+#
+# adata = cr.read("../data/external_validation_looms/allografts.h5ad")
+# preprocess_adata(adata, DIRECT_NET_INDIR, outfile_name = "adata_allografts.csv", extra_genes=['CD24', 'CD44', 'EPCAM', 'ICAM1', 'NCAM1'])
 
-adata = cr.read("../data/external_validation_looms/allografts.h5ad")
-preprocess_adata(adata, DIRECT_NET_INDIR, outfile_name = "adata_allografts.csv", extra_genes=['CD24', 'CD44', 'EPCAM', 'ICAM1', 'NCAM1'])
+
+# adata = cr.read("../data/external_validation_looms/5B_allograftdata.h5ad")
+# preprocess_adata(adata, DIRECT_NET_INDIR, outfile_name = "adata_5B_allografts.csv", extra_genes=['CD24', 'CD44', 'EPCAM', 'ICAM1', 'NCAM1'])
+
+# for allo in ["1L","2L","2LR","3L","5B","TKO-luc","mt2","mt3","mt4","mt4Rf","mt5","mt6"]:
+#     adata = cr.read(f"../data/external_validation_looms/{allo}_allograftdata.h5ad")
+#     preprocess_adata(adata, DIRECT_NET_INDIR, outfile_name = f"adata_{allo}_allografts.csv", extra_genes=['CD24', 'CD44', 'EPCAM', 'ICAM1', 'NCAM1'])
+
+adata = cr.read(f"../data/external_validation_looms/adata.SCLC.010920.h5ad")
+preprocess_adata(adata, DIRECT_NET_INDIR, outfile_name= f"adata_human_tumors_MSK.csv", extra_genes=['CD24', 'CD44', 'EPCAM', 'ICAM1', 'NCAM1'],
+                 imputed_layer="imputed_normalized", species = 'human')

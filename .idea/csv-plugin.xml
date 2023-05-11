@@ -3,7 +3,21 @@
   <component name="CsvFileAttributes">
     <option name="attributeMap">
       <map>
+        <entry key="/data/external_validation_looms/5B_clusters.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
         <entry key="/data/external_validation_looms/allograft_clusters.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="/data/external_validation_looms/tko_clusters.csv">
           <value>
             <Attribute>
               <option name="separator" value="," />
@@ -88,6 +102,13 @@
           </value>
         </entry>
         <entry key="/network-inference-DIRECT-NET/9999/rules/edge_weights.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="/network-inference-DIRECT-NET/9999/validation/1L-allograft-validation/summary_stats.csv">
           <value>
             <Attribute>
               <option name="separator" value="," />

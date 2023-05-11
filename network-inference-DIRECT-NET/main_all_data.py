@@ -24,7 +24,7 @@ customPalette = sns.color_palette('tab10')
 # To modulate which parts of the pipeline need to be computed, use the following variables
 # =============================================================================
 print_graph_information = True #whether to print graph info to {brcd}.txt
-
+plot_network = False
 split_train_test = True
 write_binarized_data = False
 fit_rules = False
@@ -48,20 +48,20 @@ remove_sources=False
 node_normalization = 0.3
 node_threshold = 0  # don't remove any parents
 transpose = True
-validation_fname = 'allograft_validation'
-fname = 'allografts'
-notes_for_log = "Validation on allograft data"
+validation_fname = 'validation/human_tumors_MSK-validation'
+fname = 'human_tumor'
+notes_for_log = "Validation on human tumors from MSK dataset (Chan et al.)"
 
 ## Set paths
 dir_prefix = '/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET'
 network_path = 'networks/DIRECT-NET_network_with_FIGR_threshold_0_no_NEUROG2_top8regs_NO_sinks_NOCD24_expanded.csv'
-data_path = 'data/adata_allografts.csv'
+data_path = 'data/adata_human_tumors_MSK.csv'
 t1 = False
 data_t1_path = None #if no T1 (i.e. single dataset), replace with None
 
 ## Set metadata information
 # cellID_table = 'data/AA_clusters.csv'
-cellID_table = 'data/allograft_clusters.csv'
+cellID_table = 'data/human_tumors_MSK_clusters.csv'
 # Assign headers to cluster csv, with one called "class"
 # cluster_header_list = ['class']
 
@@ -264,7 +264,8 @@ else:
     print("Reading in pre-generated rules...")
     rules, regulators_dict = bb.load.load_rules(fname=f"{dir_prefix}/{brcd}/rules/rules_{brcd}.txt")
 
-    draw_grn(graph,vertex_dict,rules, regulators_dict,f"{dir_prefix}/{brcd}/{fname}_network.pdf", save_edge_weights=True,
+    if plot_network:
+        draw_grn(graph,vertex_dict,rules, regulators_dict,f"{dir_prefix}/{brcd}/{fname}_network.pdf", save_edge_weights=True,
              edge_weights_fname=f"{dir_prefix}/{brcd}/rules/edge_weights.csv")#, gene2color = gene2color)
 # =============================================================================
 # Calculate AUC for test dataset for a true error calculation
@@ -484,6 +485,7 @@ if perturbations:
                        random_start=False,
                        on_nodes=[],
                        off_nodes=[],
+                       overwrite_walks=False
                        )
     perturbations_dir = f"{dir_prefix}/{brcd}/perturbations"
 
