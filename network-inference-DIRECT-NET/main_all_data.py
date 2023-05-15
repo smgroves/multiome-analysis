@@ -48,20 +48,23 @@ remove_sources=False
 node_normalization = 0.3
 node_threshold = 0  # don't remove any parents
 transpose = True
-validation_fname = 'validation/human_tumors_MSK-validation/RU426'
-fname = 'RU426'
+
+sample = sys.argv[1]
+
+validation_fname = f'validation/human_tumors_MSK-validation/{sample}'
+fname = f"{sample}"
 notes_for_log = "Validation on human tumors from MSK dataset (Chan et al.)"
 
 ## Set paths
 dir_prefix = '/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET'
 network_path = 'networks/DIRECT-NET_network_with_FIGR_threshold_0_no_NEUROG2_top8regs_NO_sinks_NOCD24_expanded.csv'
-data_path = 'data/human_tumors/adata_RU426.csv'
+data_path = f'data/human_tumors/adata_{sample}.csv'
 t1 = False
 data_t1_path = None #if no T1 (i.e. single dataset), replace with None
 
 ## Set metadata information
 # cellID_table = 'data/AA_clusters.csv'
-cellID_table = 'data/human_tumors/RU426_clusters.csv'
+cellID_table = f'data/human_tumors/{sample}_clusters.csv'
 # Assign headers to cluster csv, with one called "class"
 # cluster_header_list = ['class']
 
