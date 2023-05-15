@@ -11,6 +11,161 @@ import os.path as op
 import scipy.stats as ss
 import glob
 from sklearn.metrics import *
+import sklearn.model_selection as ms
+import pickle
+from collections import Counter
+
+
+def random_walk_until_reach_any_basin(
+    start_state,
+    rules,
+    regulators_dict,
+    nodes,
+    basin_dict,
+    radius=2,
+    max_steps=10000,
+    on_nodes=[],
+    off_nodes=[],
+):
+    """
+    Parameters
+    ----------
+    start_state :
+        .
+    rules: dictionary
+        Dictionary of probabilistic rules for the regulators
+    regulators_dict : dictionary
+        Dictionary of relevant regulators
+    nodes : list
+        List of nodes in the transcription factor network
+    radius : int
+        Radius to stay within during walk
+    max_steps : int
+        Max number of steps to take in random walks
+    on_nodes : list
+        Define ON nodes of a perturbation
+    off_nodes : list
+        Define OFF nodes of a perturbation
+    basin_dict: dictionary
+        Dictionary of attractors by state index (integer). This may just be the attractor_dict.
+    Returns
+    -------
+    walk : list
+        Path of vertices taken during random walk
+    Counter(walk) :
+    flipped_nodes : list
+
+    distances : list
+        All distances to basin
+    """
+    walk = []
+    n = len(nodes)
+    node_indices = dict(zip(nodes, range(len(nodes))))
+    unperturbed_nodes = [i for i in nodes if not (i in on_nodes + off_nodes)]
+    nu = len(unperturbed_nodes)
+    flipped_nodes = []
+
+    start_bool = [{"0": False, "1": True}[i] for i in bb.utils.idx2binary(start_state, n)]
+    for i, node in enumerate(nodes):
+        if node in on_nodes:
+            start_bool[i] = True
+        elif node in off_nodes:
+            start_bool[i] = False
+
+    next_step = start_bool
+    next_idx = bb.ut.state_bool2idx(start_bool)
+    distance = 0
+    basin = []
+    for cluster in basin_dict.keys():
+        for b in basin_dict[cluster]:
+            basin.append(b)
+    # Random high number to be replaced by actual distances
+    min_dist = 200
+    for i in basin:
+        distance = bb.utils.hamming_idx(start_state, i, len(nodes))
+        if distance < min_dist:
+            min_dist = distance
+    distance = min_dist
+
+    distances = []
+    step_i = 0
+    while distance >= radius and step_i < max_steps:
+        r = np.random.rand()
+        for node_i, node in enumerate(nodes):
+            if node in on_nodes + off_nodes:
+                continue
+            neighbor_idx, flip = bb.utils.update_node(
+                rules, regulators_dict, node, node_i, nodes, node_indices, next_step
+            )
+            r = r - flip**2 / (1.0 * nu)
+            if r <= 0:
+                next_step = [
+                    {"0": False, "1": True}[i] for i in bb.utils.idx2binary(neighbor_idx, n)
+                ]
+                next_idx = neighbor_idx
+                flipped_nodes.append(node)
+
+                # If basin is a list, loop through all attractors and find the distance to the closest one
+                min_dist = 200 # Random high number to be replaced by actual distances
+                for i in basin:
+                    distance = bb.utils.hamming_idx(next_idx, i, len(nodes))
+                    if distance < min_dist:
+                        min_dist = distance
+                distance = min_dist
+
+                break
+        if r > 0:
+            flipped_nodes.append(None)
+        distances.append(distance)
+        walk.append(next_idx)
+        step_i += 1
+    return walk, Counter(walk), flipped_nodes, distances
+
+
+def split_train_test_crossval(data, data_t1, clusters, save_dir, fname=None, random_state=1234):
+    """Split a dataset into testing and training dataset
+
+    :param data: Dataset or first timepoint of temporal dataset to be split into training/testing datasets
+    :type data: Pandas dataframe
+    :param data_t1: Second timepoint of temporal dataset, optional
+    :type data_t1: {Pandas dataframe, None}
+    :param clusters: Cluster assignments for each sample; see ut.get_clusters() to generate
+    :type clusters: Pandas DataFrame
+    :param save_dir: File path for saving training and testing sets
+    :type save_dir: str
+    :param fname: Suffix to add to file names for saving, defaults to None
+    :type fname: str, optional
+    :return: List of dataframes split into training and testing: `data` (training set, t0), test (testing set, t1), data_t1 (training set, t1), test_t (testing set, t1), clusters_train (cluster IDs of training set), clusters_test (cluster IDs of testing set)
+    :rtype: Pandas dataframes
+    """
+    df = list(data.index)
+
+    # print("Splitting into train and test datasets...")
+    kf = ms.StratifiedKFold(n_splits=5, random_state=random_state, shuffle=True)
+
+    idx = 0
+    for train_index, test_index in kf.split(df, clusters.loc[df, 'class']):
+        # train_index, test_index = next(kf.split(df, clusters.loc[df, 'class']))
+
+        T = {'test_cellID': [df[i] for i in test_index], 'test_index': test_index,
+             'train_index': train_index,
+             'train_cellID': [df[i] for i in train_index]}
+
+        with open(f'{save_dir}/test_train_indices_{fname}_{idx}.p', 'wb') as f:
+            pickle.dump(T, f)
+
+        test = data.loc[T['test_cellID']].copy()
+        train = data.loc[T['train_cellID']].copy()
+        test.to_csv(f'{save_dir}/test_t0_{fname}_{idx}.csv')
+        train.to_csv(f'{save_dir}/train_t0_{fname}_{idx}.csv')
+
+        clusters_train = clusters.loc[T['train_cellID']]
+        clusters_test = clusters.loc[T['test_cellID']]
+        clusters_train.to_csv(f'{save_dir}/clusters_train_{fname}_{idx}.csv')
+        clusters_test.to_csv(f'{save_dir}/clusters_test_{fname}_{idx}.csv')
+        idx += 1
+
+    # return data, test, data_t1, test_t1, clusters_train, clusters_test
 
 # function to plot 5 plots in one row using matplotlib
 def plot_five_plots(df, title, xlabel, ylabel, save = False, show = False, fname = ""):

@@ -32,10 +32,11 @@ def get_summary_stats(VAL_DIR, dir_prefix, network_path, remove_sources = True):
                                      "precision", "recall", "explained_variance", "max_error", "r2", "log-loss"])
     for f in subfolders:
         try:
-            if f.split("-")[-1] == 'validation':
-                tmp = pd.read_csv(f"{f}/summary_stats.csv")
-                tmp['dataset'] = f.split("/")[-1].split("-")[0]
-                stats_df = pd.concat([stats_df, tmp])
+            # if f.split("-")[-1] == 'validation':
+            tmp = pd.read_csv(f"{f}/summary_stats.csv")
+            # tmp['dataset'] = f.split("/")[-1].split("-")[0]
+            tmp['dataset'] = f.split("/")[-1]
+            stats_df = pd.concat([stats_df, tmp])
         except FileNotFoundError: pass
 
     stats_df = stats_df.drop('Unnamed: 0', axis = 1)
@@ -102,7 +103,7 @@ def plot_summary_boxplots(stats_df, VAL_DIR, file_name, groupby = 'dataset', hue
     pdf.close()
 
 ## Plots for allograft validation datasets
-validation_folder = "validation/allograft_validation"
+validation_folder = "validation/human_tumors_MSK-validation"
 VAL_DIR = f"{dir_prefix}/{brcd}/{validation_folder}"
 
 stats_df = get_summary_stats(VAL_DIR, dir_prefix, network_path)

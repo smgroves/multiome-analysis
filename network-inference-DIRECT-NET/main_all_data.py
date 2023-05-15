@@ -25,17 +25,17 @@ customPalette = sns.color_palette('tab10')
 # =============================================================================
 print_graph_information = True #whether to print graph info to {brcd}.txt
 plot_network = False
-split_train_test = True
+split_train_test = False
 write_binarized_data = False
 fit_rules = False
-run_validation = True
-validation_averages = True
+run_validation = False
+validation_averages = False
 find_average_states = False
 find_attractors = False
 tf_basin = 2 # if -1, use average distance between clusters for search basin for attractors.
 # otherwise use the same size basin for all phenotypes. For single cell data, there may be so many samples that average distance is small.
 filter_attractors = False
-perturbations = False
+perturbations = True
 stability = False
 on_nodes = []
 off_nodes = []
@@ -49,22 +49,23 @@ node_normalization = 0.3
 node_threshold = 0  # don't remove any parents
 transpose = True
 
-sample = sys.argv[1]
+# sample = sys.argv[1]
 
-validation_fname = f'validation/human_tumors_MSK-validation/{sample}'
-fname = f"{sample}"
-notes_for_log = "Validation on human tumors from MSK dataset (Chan et al.)"
+validation_fname = f'validation/'
+# fname = f"{sample}"
+fname = "combined"
+notes_for_log = "Perturbations on network with self-loops"
 
 ## Set paths
 dir_prefix = '/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET'
 network_path = 'networks/DIRECT-NET_network_with_FIGR_threshold_0_no_NEUROG2_top8regs_NO_sinks_NOCD24_expanded.csv'
-data_path = f'data/human_tumors/adata_{sample}.csv'
+data_path = f'data/adata_imputed_combined.csv'
 t1 = False
 data_t1_path = None #if no T1 (i.e. single dataset), replace with None
 
 ## Set metadata information
-# cellID_table = 'data/AA_clusters.csv'
-cellID_table = f'data/human_tumors/{sample}_clusters.csv'
+cellID_table = 'data/AA_clusters.csv'
+# cellID_table = f'data/human_tumors/{sample}_clusters.csv'
 # Assign headers to cluster csv, with one called "class"
 # cluster_header_list = ['class']
 

@@ -14,7 +14,11 @@ import matplotlib.pyplot as plt
 from bb_utils import draw_grn
 
 dir_prefix = '/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET'
-brcd = str(55476)
+brcd = str(9999)
+
+try:
+    os.makedirs(f"{dir_prefix}/{brcd}/rules/strength_plots/")
+except: pass
 
 strengths = pd.read_csv(f"{dir_prefix}/{brcd}/rules/strengths.csv", header = 0, index_col=0)
 signed_strengths = pd.read_csv(f"{dir_prefix}/{brcd}/rules/signed_strengths.csv", header = 0, index_col=0)
@@ -57,6 +61,7 @@ def plot_strength_ew(strengths, signed_strengths, edge_weights, nodes, dir_prefi
         plt.savefig(f"{dir_prefix}/{brcd}/rules/strength_plots/{node}_s_ss.png")
         plt.close()
 
+plot_strength_ew(strengths, signed_strengths, edge_weights, nodes, dir_prefix=dir_prefix, brcd = brcd)
 
 gene_correlations = pd.read_csv(f"{dir_prefix}/DIRECT-NET-FILES/Dorc_TF_cor.csv", header = 0, index_col=0)
 gene_correlations.index = [i.upper() for i in gene_correlations.index]
@@ -86,6 +91,8 @@ def plot_ew_gene_corr(edge_weights, gene_correlations, nodes, dir_prefix = "", b
             plt.axvline(x = 0, linestyle = "--", color = 'grey')
             plt.savefig(f"{dir_prefix}/{brcd}/rules/strength_plots/{node}_ew_gc.png")
             plt.close()
+
+plot_ew_gene_corr(edge_weights, gene_correlations, nodes, dir_prefix = dir_prefix, brcd = brcd)
 
 df = pd.DataFrame(columns = ['parent','child','ew','gc'])
 for node in nodes:

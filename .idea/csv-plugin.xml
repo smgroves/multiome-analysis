@@ -164,6 +164,13 @@
             </Attribute>
           </value>
         </entry>
+        <entry key="/network-inference-DIRECT-NET/data/human_tumors_MSK_clusters.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
         <entry key="/network-inference-DIRECT-NET/data/metadata_final_nodashes.csv">
           <value>
             <Attribute>

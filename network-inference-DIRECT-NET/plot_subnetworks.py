@@ -9,13 +9,12 @@ import matplotlib.pyplot as plt
 from bb_utils import draw_grn
 
 dir_prefix = '/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET'
-brcd = str(55476)
+brcd = str(9999)
 save_dir = f"{dir_prefix}/{brcd}"
 
 edge_weights = pd.read_csv(f"{dir_prefix}/{brcd}/rules/edge_weights.csv", header = 0, index_col=0)
-network_file = f"{dir_prefix}/networks/DIRECT-NET_network_with_FIGR_threshold_0_no_NEUROG2_top8regs_NO_sinks.csv"
+network_file = f"{dir_prefix}/networks/DIRECT-NET_network_with_FIGR_threshold_0_no_NEUROG2_top8regs_NO_sinks_NOCD24_expanded.csv"
 nodes = edge_weights.index
-keep_nodes = ['ZBTB7A']
 
 def plot_subgraph(keep_nodes, network_file, nodes, edge_weights, keep_parents = True, keep_children = True,
                   save_dir = "", arrows = "straight", show = False, save = True, off_node_arrows_gray = True, weight = 3):
@@ -84,6 +83,8 @@ def plot_subgraph(keep_nodes, network_file, nodes, edge_weights, keep_parents = 
     if save:
         plt.savefig(f"{save_dir}/subnetwork{name_plot}_{arrows}.pdf")
 
-plot_subgraph(['JUND'], network_file, nodes, edge_weights, keep_parents = True, keep_children = True,
-              save_dir = f"{dir_prefix}/{brcd}", arrows = "straight", show = False, save = True, off_node_arrows_gray=True,
+# keep_nodes = ['ZBTB7A']
+
+plot_subgraph(['SMAD3', "TCF7L2"], network_file, nodes, edge_weights, keep_parents = True, keep_children = True,
+              save_dir = f"{dir_prefix}/{brcd}", arrows = "curved", show = False, save = True, off_node_arrows_gray=True,
               weight = 3)
