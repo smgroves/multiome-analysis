@@ -62,3 +62,8 @@ network-inference-DIRECT-NET/data/Cytotrace_DGE_2_SCT.csv
 *.h5Seurat
 figures-slides/Labmeet 3.pptx
 archetype-plasticity-notebooks/ParetoTI/integrated-corrected-data.csv
+data/data_attr_data_imputed-ne.csv
+data/cibersort-ne-cells-clustered.txt
+data/cibersort-ne-cells-closest-to-archetypes.txt
+data/cibersort-ne-cells-closest-to-archetypes.csv
+data/cibersort-ne-cells-closest-to-archetypes copy.txt
