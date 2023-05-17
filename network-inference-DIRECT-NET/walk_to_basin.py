@@ -1,22 +1,8 @@
 # Code copied from main_all_data.py. This script will run random walks from attractors to specific basins.
 
 import random
-# import time
-# import numpy as np
-# import seaborn as sns
-# import booleabayes as bb
-# import os
-# import os.path as op
-# import pandas as pd
-# import networkx as nx
-# import matplotlib.pyplot as plt
-# from graph_tool import all as gt
-# from graph_tool import GraphView
 from bb_utils import *
-# import sys
-# from datetime import timedelta
-# import glob
-# import json
+
 
 customPalette = sns.color_palette('tab10')
 # =============================================================================
@@ -120,66 +106,54 @@ for i,r in attr_filtered.iterrows():
     attractor_dict[i].append(bb.utils.state_bool2idx(list(r)))
 
 print(attractor_dict)
-# bb.rw.random_walks(attractor_dict,
-#                    rules,
-#                    regulators_dict,
-#                    nodes,
-#                    save_dir = f"{dir_prefix}/{brcd}/",
-#                    radius=[2,3,4,5,6],
-#                    perturbations=False,
-#                    iters=500,
-#                    max_steps=500,
-#                    stability=True,
-#                    reach_or_leave="reach",
-#                    random_start=50,
-#                    on_nodes=[],
-#                    off_nodes=[],
-#                    overwrite_walks=False
-#                    )
-#
 
 iters = 1000
 max_steps = 500
 # start_idx = 75109996 #NE
-for start_idx in attractor_dict['Arc_6']:
-    print("Starting state: ",start_idx)
-    for basin_name in ['Arc_5','Arc_1']:
-        print("Basin:", basin_name)
-        basin = attractor_dict[basin_name]
 
-        switch_counts_0 = dict()
-        for node in nodes: switch_counts_0[node] = 0
-        n_steps_to_leave_0 = []
-        try:
-            os.mkdir(f"{dir_prefix}/{brcd}/walks/walk_to_basin/{start_idx}")
-        except FileExistsError: pass
-        outfile = open(f"{dir_prefix}/{brcd}/walks/walk_to_basin/{start_idx}/results_radius_{basin_name}.csv", "w+")
-        out_len = open(f"{dir_prefix}/{brcd}/walks/walk_to_basin/{start_idx}/len_walks_{basin_name}.csv", "w+")
-        outfile_missed = open(f"{dir_prefix}/{brcd}/walks/walk_to_basin/{start_idx}/results_missed_{basin_name}.csv", "w+")
+basin_set = set(attractor_dict.keys()).difference({"Arc_6"})
+knockdowns = ["RORB",'EGR1']
+for perturb in knockdowns:
+    for start_idx in attractor_dict['Arc_6']:
+        print("Starting state: ",start_idx)
+        for basin_name in basin_set:
+            print("Basin:", basin_name)
+            basin = attractor_dict[basin_name]
 
-        # 1000 iterations; print progress of random walk every 10% of the way
-        # counts: histogram of walk; switches: count which TFs flipped; distance = starting state to current state; walk until take max steps or leave basin
-        # no perturbations
-        for iter_ in range(iters):
-            if iter_ % 100 == 0:
-                print(str(iter_/iters*100) + "%")
-            walk, counts, switches, distances = bb.rw.random_walk_until_reach_basin(start_idx, rules,
-                                                                                        regulators_dict, nodes,
-                                                                                        radius = 2,
-                                                                                        max_steps=max_steps,
-                                                                                        basin = basin
-                                                                                        )
-            n_steps_to_leave_0.append(len(distances))
-            for node in switches:
-                if node is not None: switch_counts_0[node] += 1
-            if len(walk) != max_steps:
-                outfile.write(f"{walk}\n")
-                out_len.write(f"{len(walk)}\n")
-            else:
-                outfile_missed.write(f"{walk}\n")
-        outfile.close()
-        out_len.close()
-        outfile_missed.close()
+            switch_counts_0 = dict()
+            for node in nodes: switch_counts_0[node] = 0
+            n_steps_to_leave_0 = []
+            try:
+                os.mkdir(f"{dir_prefix}/{brcd}/walks/walk_to_basin/{start_idx}")
+            except FileExistsError: pass
+            outfile = open(f"{dir_prefix}/{brcd}/walks/walk_to_basin/{start_idx}/results_{basin_name}_{perturb}.csv", "w+")
+            out_len = open(f"{dir_prefix}/{brcd}/walks/walk_to_basin/{start_idx}/len_walks_{basin_name}_{perturb}.csv", "w+")
+            outfile_missed = open(f"{dir_prefix}/{brcd}/walks/walk_to_basin/{start_idx}/results_missed_{basin_name}_{perturb}.csv", "w+")
+
+            # 1000 iterations; print progress of random walk every 10% of the way
+            # counts: histogram of walk; switches: count which TFs flipped; distance = starting state to current state; walk until take max steps or leave basin
+            # no perturbations
+            for iter_ in range(iters):
+                if iter_ % 100 == 0:
+                    print(str(iter_/iters*100) + "%")
+                walk, counts, switches, distances = bb.rw.random_walk_until_reach_basin(start_idx, rules,
+                                                                                            regulators_dict, nodes,
+                                                                                            radius = 2,
+                                                                                            max_steps=max_steps,
+                                                                                            basin = basin,
+                                                                                            off_nodes=[perturb]
+                                                                                            )
+                n_steps_to_leave_0.append(len(distances))
+                for node in switches:
+                    if node is not None: switch_counts_0[node] += 1
+                if len(walk) != max_steps:
+                    outfile.write(f"{walk}\n")
+                    out_len.write(f"{len(walk)}\n")
+                else:
+                    outfile_missed.write(f"{walk}\n")
+            outfile.close()
+            out_len.close()
+            outfile_missed.close()
 
 
 

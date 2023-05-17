@@ -32,7 +32,7 @@ customPalette = sns.color_palette('tab10')
 print_graph_information = False #whether to print graph info to {brcd}.txt
 plot_network = False
 split_train_test = False
-write_binarized_data = True
+write_binarized_data = False
 fit_rules = True
 run_validation = True
 validation_averages = True
@@ -160,13 +160,16 @@ if split_train_test:
 
 # iterate through datasets
 
-for idx in range(5):
-    fname = f"{fname}_{idx}"
+for idx in range(1, 5):
+    # if idx == 0:
+    #     fit_rules = False
+
+    fname = f"human_tumors_{idx}"
     print(fname)
-    validation_fname = f'validation/{fname}_{idx}/'
+    validation_fname = f'validation/{fname}/'
     data_train_t0_path = f'{brcd}/data_split/train_t0_{fname}.csv'
     data_test_t0_path = f'{brcd}/data_split/test_t0_{fname}.csv'
-
+    print(f'{dir_prefix}/{data_train_t0_path}')
     data_train_t0 = bb.load.load_data(f'{dir_prefix}/{data_train_t0_path}', nodes, norm=node_normalization, delimiter=',',
                                  log1p=False, transpose=True, sample_order=False, fillna=0)
 
@@ -251,7 +254,12 @@ for idx in range(5):
 
     if run_validation:
         print("Running validation step...")
-        VAL_DIR = f"{dir_prefix}/{brcd}/{validation_fname}"
+        try:
+            os.mkdir(f"{dir_prefix}{brcd}/validation")
+        except FileExistsError:
+            pass
+
+        VAL_DIR = f"{dir_prefix}{brcd}/{validation_fname}"
         try:
             os.mkdir(VAL_DIR)
         except FileExistsError:
@@ -270,7 +278,7 @@ for idx in range(5):
 
     if validation_averages:
         print("Calculating validation averages...")
-        VAL_DIR = f"{dir_prefix}/{brcd}/{validation_fname}"
+        VAL_DIR = f"{dir_prefix}{brcd}/{validation_fname}"
 
         if run_validation == False:
             # Function to calculate roc and tpr, fpr, area from saved validation files
