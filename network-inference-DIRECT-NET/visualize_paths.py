@@ -13,9 +13,14 @@ np.random.seed(1)
 
 ## Set paths
 dir_prefix = '/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET'
+brcd = str(9999)
 network_path = 'networks/DIRECT-NET_network_with_FIGR_threshold_0_no_NEUROG2_top8regs_NO_sinks_NOCD24_expanded.csv'
 data_path = f'data/adata_imputed_combined.csv'
-brcd = str(9999)
+walk_path = f'{dir_prefix}/{brcd}/walks/long_walks/1000_step_walks'
+attr_color_map = {"Arc_1": "red", "Arc_2": "purple", "Arc_5_Arc_6": "teal", "Arc_4": "orange", "Arc_5": "blue", "Arc_6": "green",
+                  "Generalist":"grey"}
+starting_attractors = 'Arc_6'
+perturb = "RORB_kd"
 
 graph, vertex_dict = bb.load.load_network(f'{dir_prefix}/{network_path}', remove_sinks=False, remove_selfloops=False,
                                               remove_sources=False)
@@ -41,15 +46,212 @@ for i,r in attr_filtered.iterrows():
     attractor_bool_dict[i].append(int(bb.utils.idx2binary(bb.utils.state_bool2idx(list(r)), n)))
     att_list.append(int(bb.utils.idx2binary(bb.utils.state_bool2idx(list(r)), n)))
 
-pca = PCA(n_components=3)
+# for start_idx in attractor_dict[starting_attractors]:
+#
+#     pca = PCA(n_components=2)
+#     att_new = pca.fit_transform(attr_filtered)
+#     data = pd.DataFrame(att_new, columns=['0', '1'])
+#     comp = pd.DataFrame(pca.components_, index=[0, 1], columns=nodes)
+#     comp = comp.T
+#
+#     print("Component 1 max and min: ", comp[0].idxmax(), comp[0].max(), comp[0].idxmin(), comp[0].min())
+#     print("Component 2 max and min: ", comp[1].idxmax(), comp[1].max(), comp[1].idxmin(), comp[1].min())
+#     print("Explained variance: ", pca.explained_variance_ratio_)
+#     print("Explained variance sum: ", pca.explained_variance_ratio_.sum())
+#
+#     data['color'] = [attr_color_map[i] for i in attr_filtered.index]
+#     # sns.scatterplot(data = data, x = '0',y = '1', hue = 'color')
+#     plt.figure(figsize=(12, 10), dpi=600)
+#     plt.scatter(x=data['0'], y=data['1'], c=data['color'], s=100, edgecolors='k', zorder=4)
+#     # sns.scatterplot(data = data, x = '0',y = '2', hue = 'color')
+#     # plt.show()
+#
+#     legend_elements = []
+#
+#     for i in attr_color_map.keys():
+#         legend_elements.append(Patch(facecolor=attr_color_map[i], label=i))
+#
+#     plt.legend(handles=legend_elements, loc='best')
+#
+#     att2_list = att_list.copy()
+#     data_walks = pd.DataFrame(columns=['0', '1'])
+#
+#     num_paths = 20
+#
+#     try:
+#         if perturb is not None:
+#             with open(f"{walk_path}/{start_idx}/results_{perturb}.csv", 'r') as file:
+#                 line = file.readline()
+#                 cnt = 1
+#                 while line:
+#                     if cnt == 1: pass
+#                     walk = line.strip()
+#                     walk = walk.replace('[', '').replace(']', '').split(',')
+#                     walk_states = [bb.utils.idx2binary(int(i), n) for i in walk]
+#                     walk_list = []
+#                     for i in walk_states:
+#                         walk_list.append([int(j) for j in i])
+#                         att2_list.append([int(j) for j in i])
+#                     walk_new = pca.transform(walk_list)
+#                     data_walk = pd.DataFrame(walk_new, columns=['0', '1'])
+#                     data_walks = data_walks.append(data_walk)
+#                     data_walk['color'] = [(len(data_walk.index) - i) / len(data_walk.index) for i in data_walk.index]
+#                     # plt.scatter(x = data_walk['0'], y = data_walk['1'], c = data_walk['color'],
+#                     #             cmap = 'Blues', s = 20, edgecolors='k', zorder = 3)
+#                     sns.lineplot(x=data_walk['0'], y=data_walk['1'], lw=.3, dashes=True, legend=False,
+#                                  alpha=0.4, zorder=2, color = 'black')
+#                     cnt += 1
+#                     line = file.readline()
+#                     if cnt == num_paths: break
+#         else:
+#             with open(f"{walk_path}/{start_idx}/results.csv", 'r') as file:
+#                 line = file.readline()
+#                 cnt = 1
+#                 while line:
+#                     if cnt == 1: pass
+#                     walk = line.strip()
+#                     walk = walk.replace('[', '').replace(']', '').split(',')
+#                     walk_states = [bb.utils.idx2binary(int(i), n) for i in walk]
+#                     walk_list = []
+#                     for i in walk_states:
+#                         walk_list.append([int(j) for j in i])
+#                         att2_list.append([int(j) for j in i])
+#                     walk_new = pca.transform(walk_list)
+#                     data_walk = pd.DataFrame(walk_new, columns=['0', '1'])
+#                     data_walks = data_walks.append(data_walk)
+#                     data_walk['color'] = [(len(data_walk.index) - i) / len(data_walk.index) for i in data_walk.index]
+#                     # plt.scatter(x = data_walk['0'], y = data_walk['1'], c = data_walk['color'],
+#                     #             cmap = 'Blues', s = 20, edgecolors='k', zorder = 3)
+#                     sns.lineplot(x=data_walk['0'], y=data_walk['1'], lw=.3, dashes=True, legend=False,
+#                                  alpha=0.4, zorder=2, color = 'black')
+#                     cnt += 1
+#                     line = file.readline()
+#                     if cnt == num_paths: break
+#
+#     except:
+#         continue
+#
+#     sns.kdeplot(x = data_walks['0'], y = data_walks['1'], shade=True, thresh = 0.05,zorder=1, n_levels=20,cbar = True,
+#                 color = attr_color_map[starting_attractors])
+#     if perturb is not None:
+#         plt.title(f'{num_paths} Walks from {starting_attractors} starting state: {start_idx} /n with perturbation: {perturb}')
+#     else:
+#         plt.title(f'{num_paths} Walks from {starting_attractors} starting state: {start_idx}')
+#     plt.xlim(data['0'].min() - 0.3, data['0'].max() + 0.3)
+#     plt.ylim(data['1'].min() - 0.3, data['1'].max() + 0.3)
+#     plt.xlabel('Component 1')
+#     plt.ylabel('Component 2')
+#     plt.show()
+
+
+pca = PCA(n_components=2)
 att_new = pca.fit_transform(attr_filtered)
-data = pd.DataFrame(att_new, columns=['0', '1','2'])
-comp = pd.DataFrame(pca.components_, index=[0, 1, 2], columns=nodes)
-data['color'] = attr_filtered.index
-sns.scatterplot(data = data, x = '0',y = '1', hue = 'color')
-plt.show()
-sns.scatterplot(data = data, x = '0',y = '2', hue = 'color')
-plt.show()
+data = pd.DataFrame(att_new, columns=['0', '1'])
+comp = pd.DataFrame(pca.components_, index=[0, 1], columns=nodes)
+comp = comp.T
+
+print("Component 1 max and min: ", comp[0].idxmax(), comp[0].max(), comp[0].idxmin(), comp[0].min())
+print("Component 2 max and min: ", comp[1].idxmax(), comp[1].max(), comp[1].idxmin(), comp[1].min())
+print("Explained variance: ", pca.explained_variance_ratio_)
+print("Explained variance sum: ", pca.explained_variance_ratio_.sum())
+
+data['color'] = [attr_color_map[i] for i in attr_filtered.index]
+# sns.scatterplot(data = data, x = '0',y = '1', hue = 'color')
+
+for start_idx in attractor_dict[starting_attractors]:
+
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(24, 10), dpi=600)
+    ax1.scatter(x=data['0'], y=data['1'], c=data['color'], s=100, edgecolors='k', zorder=4)
+    ax2.scatter(x=data['0'], y=data['1'], c=data['color'], s=100, edgecolors='k', zorder=4)
+
+    # sns.scatterplot(data = data, x = '0',y = '2', hue = 'color')
+    # plt.show()
+
+    legend_elements = []
+
+    for i in attr_color_map.keys():
+        legend_elements.append(Patch(facecolor=attr_color_map[i], label=i))
+
+    ax1.legend(handles=legend_elements, loc='best')
+    ax2.legend(handles=legend_elements, loc='best')
+
+    att2_list = att_list.copy()
+    data_walks = pd.DataFrame(columns=['0', '1'])
+    num_paths = 20
+
+    try:
+        with open(f"{walk_path}/{start_idx}/results.csv", 'r') as file:
+            line = file.readline()
+            cnt = 1
+            while line:
+                if cnt == 1: pass
+                walk = line.strip()
+                walk = walk.replace('[', '').replace(']', '').split(',')
+                walk_states = [bb.utils.idx2binary(int(i), n) for i in walk]
+                walk_list = []
+                for i in walk_states:
+                    walk_list.append([int(j) for j in i])
+                    att2_list.append([int(j) for j in i])
+                walk_new = pca.transform(walk_list)
+                data_walk = pd.DataFrame(walk_new, columns=['0', '1'])
+                data_walks = data_walks.append(data_walk)
+                data_walk['color'] = [(len(data_walk.index) - i) / len(data_walk.index) for i in data_walk.index]
+                # plt.scatter(x = data_walk['0'], y = data_walk['1'], c = data_walk['color'],
+                #             cmap = 'Blues', s = 20, edgecolors='k', zorder = 3)
+                sns.lineplot(x=data_walk['0'], y=data_walk['1'], lw=.3, dashes=True, legend=False,
+                             alpha=0.4, zorder=2, color = 'black', ax = ax1)
+                cnt += 1
+                line = file.readline()
+                if cnt == num_paths: break
+        sns.kdeplot(x=data_walks['0'], y=data_walks['1'], shade=True, thresh=0.05, zorder=1, n_levels=20, cbar=True,
+                    color=attr_color_map[starting_attractors], ax = ax1)
+
+        #reset data_walks for second half of plot
+        data_walks = pd.DataFrame(columns=['0', '1'])
+
+        with open(f"{walk_path}/{start_idx}/results_{perturb}.csv", 'r') as file:
+            line = file.readline()
+            cnt = 1
+            while line:
+                if cnt == 1: pass
+                walk = line.strip()
+                walk = walk.replace('[', '').replace(']', '').split(',')
+                walk_states = [bb.utils.idx2binary(int(i), n) for i in walk]
+                walk_list = []
+                for i in walk_states:
+                    walk_list.append([int(j) for j in i])
+                    att2_list.append([int(j) for j in i])
+                walk_new = pca.transform(walk_list)
+                data_walk = pd.DataFrame(walk_new, columns=['0', '1'])
+                data_walks = data_walks.append(data_walk)
+                data_walk['color'] = [(len(data_walk.index) - i) / len(data_walk.index) for i in data_walk.index]
+                # plt.scatter(x = data_walk['0'], y = data_walk['1'], c = data_walk['color'],
+                #             cmap = 'Blues', s = 20, edgecolors='k', zorder = 3)
+                sns.lineplot(x=data_walk['0'], y=data_walk['1'], lw=.3, dashes=True, legend=False,
+                             alpha=0.4, zorder=2, color = 'black', ax = ax2)
+                cnt += 1
+                line = file.readline()
+                if cnt == num_paths: break
+
+        sns.kdeplot(x=data_walks['0'], y=data_walks['1'], shade=True, thresh=0.05, zorder=1, n_levels=20, cbar=True,
+                    color=attr_color_map[starting_attractors], ax = ax2)
+
+    except:
+        continue
+
+    # ax1.title(f'{num_paths} Walks from {starting_attractors} starting state: {start_idx}')
+    # ax2.title(f'{num_paths} Walks from {starting_attractors} starting state: {start_idx} /n with perturbation: {perturb}')
+    # ax1.xlim(data['0'].min() - 0.3, data['0'].max() + 0.3)
+    # ax1.ylim(data['1'].min() - 0.3, data['1'].max() + 0.3)
+    # ax1.xlabel('Component 1')
+    # ax1.ylabel('Component 2')
+    #
+    # ax2.xlim(data['0'].min() - 0.3, data['0'].max() + 0.3)
+    # ax2.ylim(data['1'].min() - 0.3, data['1'].max() + 0.3)
+    # ax2.xlabel('Component 1')
+    # ax2.ylabel('Component 2')
+
+    plt.savefig(f"{walk_path}/{start_idx}/walks_{perturb}_{starting_attractors}.png")
 
 
 def plot_paths(att_list, phenotypes, phenotype_color, radius, start_idx, num_paths = 100, pca_path_reduce = False,
@@ -175,6 +377,12 @@ def plot_paths(att_list, phenotypes, phenotype_color, radius, start_idx, num_pat
                     shade_lowest=False, zorder=1, n_levels = 20, cbar = True)
         plt.show()
 
+
+# for radius in [NEH_attractors, ML_attractors,MLH_attractors]:
+#     for start_idx in NE_attractors:
+#         plot_paths(att_list,phenotypes, phenotype_color, radius, start_idx, walk_to_basin=True)
+
+
 def check_middle_stop(start_idx, basin, check_stops, radius=2):
     with open(op.join(dir_prefix, f"Network/walks/walk_to_basin/MYC_network/{start_idx}/MYC_results_radius_{basin}.csv"),
               'r') as file:
@@ -216,10 +424,6 @@ def check_middle_stop(start_idx, basin, check_stops, radius=2):
 
     return stopped_NE, stopped_NEH, stopped_MLH, stopped_ML
 
-
-# for radius in [NEH_attractors, ML_attractors,MLH_attractors]:
-#     for start_idx in NE_attractors:
-#         plot_paths(att_list,phenotypes, phenotype_color, radius, start_idx, walk_to_basin=True)
 
 
 if False:

@@ -15,6 +15,90 @@ import sklearn.model_selection as ms
 import pickle
 from collections import Counter
 
+def long_random_walk(
+    start_state,
+    rules,
+    regulators_dict,
+    nodes,
+    max_steps=10000,
+    on_nodes=[],
+    off_nodes=[],
+):
+    """
+    Function to perform random walks on a BooleaBayes network out to max_steps
+    The only difference with this function and bb.utils.random_walks_until_leave_basin() is that this function doesn't
+    require a radius parameter, and will just keep walking until max_steps.
+
+    Parameters
+    ----------
+    start_state : int
+        Index of attractor to start walk from
+    rules: dictionary
+        Dictionary of probabilistic rules for the regulators
+    regulators_dict : dictionary
+        Dictionary of relevant regulators
+    nodes : list
+        List of nodes in the transcription factor network
+    max_steps : int
+        Max number of steps to take in random walks
+    on_nodes : list
+        Define ON nodes of a perturbation
+    off_nodes : list
+        Define OFF nodes of a perturbation
+    Returns
+    -------
+    walk : list
+        Path of vertices taken during random walk
+    Counter(walk) :
+        Histogram of walk
+    flipped_nodes : list
+        Transcription factors that flipped during walk
+    distances : list
+        Starting state to next step in walk
+    """
+    walk = []
+    n = len(nodes)
+    node_indices = dict(zip(nodes, range(len(nodes))))
+    unperturbed_nodes = [i for i in nodes if not (i in on_nodes + off_nodes)]
+    nu = len(unperturbed_nodes)
+    flipped_nodes = []
+
+    start_bool = [{"0": False, "1": True}[i] for i in bb.utils.idx2binary(start_state, n)]
+    for i, node in enumerate(nodes):
+        if node in on_nodes:
+            start_bool[i] = True
+        elif node in off_nodes:
+            start_bool[i] = False
+
+    next_step = start_bool
+    next_idx = bb.utils.state_bool2idx(start_bool)
+    distance = 0
+    distances = []
+    step_i = 0
+    while step_i < max_steps:
+        r = np.random.rand()
+        for node_i, node in enumerate(nodes):
+            if node in on_nodes + off_nodes:
+                continue
+            neighbor_idx, flip = bb.utils.update_node(
+                rules, regulators_dict, node, node_i, nodes, node_indices, next_step
+            )
+            r = r - flip**2 / (1.0 * nu)
+            if r <= 0:
+                next_step = [
+                    {"0": False, "1": True}[i] for i in bb.utils.idx2binary(neighbor_idx, n)
+                ]
+                next_idx = neighbor_idx
+                flipped_nodes.append(node)
+                distance = bb.utils.hamming(next_step, start_bool)
+                break
+        if r > 0:
+            flipped_nodes.append(None)
+        distances.append(distance)
+        walk.append(next_idx)
+        step_i += 1
+    return walk, Counter(walk), flipped_nodes, distances
+
 
 def random_walk_until_reach_any_basin(
     start_state,
