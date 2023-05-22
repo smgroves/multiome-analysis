@@ -3,27 +3,6 @@
   <component name="CsvFileAttributes">
     <option name="attributeMap">
       <map>
-        <entry key="/data/external_validation_looms/5B_clusters.csv">
-          <value>
-            <Attribute>
-              <option name="separator" value="," />
-            </Attribute>
-          </value>
-        </entry>
-        <entry key="/data/external_validation_looms/allograft_clusters.csv">
-          <value>
-            <Attribute>
-              <option name="separator" value="," />
-            </Attribute>
-          </value>
-        </entry>
-        <entry key="/data/external_validation_looms/tko_clusters.csv">
-          <value>
-            <Attribute>
-              <option name="separator" value="," />
-            </Attribute>
-          </value>
-        </entry>
         <entry key="/network-inference-DIRECT-NET/3000/perturbations/83890063318570/results.csv">
           <value>
             <Attribute>
@@ -32,13 +11,6 @@
           </value>
         </entry>
         <entry key="/network-inference-DIRECT-NET/3000/perturbations/clustered_perturb_plots/perturbation_stats.csv">
-          <value>
-            <Attribute>
-              <option name="separator" value="," />
-            </Attribute>
-          </value>
-        </entry>
-        <entry key="/network-inference-DIRECT-NET/3000/perturbations/clustered_perturb_plots/perturbations.csv">
           <value>
             <Attribute>
               <option name="separator" value="," />
@@ -102,13 +74,6 @@
           </value>
         </entry>
         <entry key="/network-inference-DIRECT-NET/9999/rules/edge_weights.csv">
-          <value>
-            <Attribute>
-              <option name="separator" value="," />
-            </Attribute>
-          </value>
-        </entry>
-        <entry key="/network-inference-DIRECT-NET/9999/validation/1L-allograft-validation/summary_stats.csv">
           <value>
             <Attribute>
               <option name="separator" value="," />
@@ -228,13 +193,6 @@
           </value>
         </entry>
         <entry key="/network-inference-DIRECT-NET/networks/DIRECT-NET_network_with_FIGR_threshold_0_no_NEUROG2_top8regs_NO_sinks_expanded.csv">
-          <value>
-            <Attribute>
-              <option name="separator" value="," />
-            </Attribute>
-          </value>
-        </entry>
-        <entry key="/network-inference-DIRECT-NET/networks/DIRECT-NET_network_with_FIGR_threshold_0_no_NEUROG2_top8regs_NO_sinks_plus_markers.csv">
           <value>
             <Attribute>
               <option name="separator" value="," />
