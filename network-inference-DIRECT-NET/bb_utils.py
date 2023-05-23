@@ -14,6 +14,52 @@ from sklearn.metrics import *
 import sklearn.model_selection as ms
 import pickle
 from collections import Counter
+from sklearn.metrics import pairwise_distances
+from sklearn.preprocessing import normalize
+from umap import UMAP
+
+# function to make a matplotlib color map from a list of strings and the matplotlib default color palette
+def make_color_map(attractors, palette = 'hls', set_colors = None):
+    """
+    Function to make a matplotlib color map from a list of strings and the matplotlib default color palette
+    Parameters
+    ----------
+    list_of_strings : list
+        List of strings
+    palette : string
+        Matplotlib default color palette
+    set_colors : dictionary
+        Dictionary of colors for each attractor if user wants to specify particular color
+    Returns
+    -------
+    cmap : dictionary
+        Dictionary of colors for each string
+    """
+    # default matplotlib color palette
+    palette = sns.color_palette(palette, n_colors=len(attractors))
+    palette = palette.as_hex()
+    cmap = {}
+    for i, s in enumerate(attractors):
+        if set_colors is not None:
+            if s in set_colors:
+                cmap[s] = set_colors[s]
+            else:
+                cmap[s] = palette[i]
+    return cmap
+
+
+def binarized_umap_transform(binarized_data):
+    """
+    Function to perform dimensionality reduction on binarized data using UMAP
+    :param binarized_data:
+    :return:
+    """
+
+    # Recalculate the UMAP
+    umap = UMAP(n_components=2, metric='jaccard')
+    umap_embedding = umap.fit_transform(binarized_data.values)
+
+    return umap_embedding, umap
 
 def binarized_data_dict_to_binary_df(binarized_data, nodes):
     """
