@@ -15,9 +15,46 @@ import sklearn.model_selection as ms
 import pickle
 from collections import Counter
 from sklearn.metrics import pairwise_distances
-from sklearn.preprocessing import normalize
+import matplotlib as mpl
 from umap import UMAP
+from matplotlib.patches import Patch
 
+
+# NOTE: This function will be integrated into booleabayes version > 0.1.9
+def make_jaccard_heatmap(fname, cmap = 'viridis',
+                         set_color = dict(),
+                         clustered = True,
+                         figsize = (10,10), save = False):
+    """
+    Function to make heatmap of jaccard distance between attractors from dataframe
+    """
+
+    # calculate jaccard distance
+    df = pd.read_csv(fname, sep = ',', header = 0, index_col = 0)
+    jaccard = 1 - pairwise_distances(df.values, metric = 'jaccard')
+    jaccard_df = pd.DataFrame(jaccard, index=df.index, columns=df.index)
+    # plot heatmap
+    plt.figure(figsize = figsize)
+    lut = dict(zip(sorted(df.index.unique()), sns.color_palette("hls", len(df.index.unique()))))
+    lut.update(set_color)
+    row_colors = df.index.map(lut)
+    if clustered:
+        g = sns.clustermap(jaccard_df, row_colors=row_colors, col_colors = row_colors, cmap = cmap,
+                            yticklabels = False, xticklabels = False)
+    else:
+        g = sns.clustermap(jaccard_df, row_colors=row_colors, col_colors = row_colors, cmap = cmap,
+                       row_cluster = False, col_cluster = False,yticklabels = False, xticklabels = False)
+    g.fig.suptitle("Jaccard Similarity Between Attractors")
+    plt.subplots_adjust(top=0.95)
+    handles = [Patch(facecolor=lut[name]) for name in lut]
+    plt.legend(handles, lut, title='Species',
+               bbox_to_anchor=(1, 1), bbox_transform=plt.gcf().transFigure, loc='upper right')
+    if save:
+        plt.savefig(f"{fname[0:-4]}_jaccard.pdf", dpi = 300)
+    else:
+        plt.show()
+
+# NOTE: This function will be integrated into booleabayes version > 0.1.9
 # function to make a matplotlib color map from a list of strings and the matplotlib default color palette
 def make_color_map(attractors, palette = 'hls', set_colors = None):
     """
@@ -47,6 +84,7 @@ def make_color_map(attractors, palette = 'hls', set_colors = None):
                 cmap[s] = palette[i]
     return cmap
 
+# NOTE: This function will be integrated into booleabayes version > 0.1.9
 
 def binarized_umap_transform(binarized_data):
     """
@@ -60,6 +98,8 @@ def binarized_umap_transform(binarized_data):
     umap_embedding = umap.fit_transform(binarized_data.values)
 
     return umap_embedding, umap
+
+# NOTE: This function will be integrated into booleabayes version > 0.1.9
 
 def binarized_data_dict_to_binary_df(binarized_data, nodes):
     """
@@ -83,7 +123,9 @@ def binarized_data_dict_to_binary_df(binarized_data, nodes):
             df = df.append(pd.DataFrame(att_list, index = nodes, columns = [k]).T)
     return df
 
-def long_random_walk(
+# NOTE: This function will be integrated into booleabayes version > 0.1.9
+
+def _long_random_walk(
     start_state,
     rules,
     regulators_dict,

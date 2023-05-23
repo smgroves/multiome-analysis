@@ -2,7 +2,7 @@
 
 import random
 from bb_utils import *
-
+from bb_utils import _long_random_walk
 customPalette = sns.color_palette('tab10')
 # =============================================================================
 # Set variables and csvs
@@ -61,107 +61,120 @@ for i,r in attr_filtered.iterrows():
 
 print(attractor_dict)
 
-iters = 100
-max_steps = 2000
-knockdowns = []
-activations = ["TCF7L2"]
-
-overwrite_walks = False
-
+save_dir = f"{dir_prefix}/{brcd}"
 # New way to do random walks until reach basin. Instead of looking for a specific basin, keep walking some length of steps
-for start_idx in attractor_dict['Arc_6']:
-    print("Starting state: ", start_idx)
+# NOTE: This function will be integrated into booleabayes version > 0.1.9
 
-    switch_counts_0 = dict()
-    for node in nodes: switch_counts_0[node] = 0
-    n_steps_to_leave_0 = []
+def long_random_walks(starting_attractors,attractor_dict, rules,regulators_dict, nodes, save_dir,
+                      on_nodes = [], off_nodes = [], max_steps = 2000, iters = 100, overwrite_walks = False):
     try:
-        os.mkdir(f"{dir_prefix}/{brcd}/walks/long_walks/{max_steps}_step_walks/")
+        os.mkdir(f"{save_dir}/walks/long_walks/")
     except FileExistsError:
         pass
+    for s in starting_attractors:
+        print(s)
+        for start_idx in attractor_dict[s]:
+            print("Starting state: ", start_idx)
 
-    try:
-        os.mkdir(f"{dir_prefix}/{brcd}/walks/long_walks/{max_steps}_step_walks/{start_idx}")
-    except FileExistsError:
-        if overwrite_walks:
-            pass
-        else:
-            continue
+            switch_counts_0 = dict()
+            for node in nodes: switch_counts_0[node] = 0
+            n_steps_to_leave_0 = []
+            try:
+                os.mkdir(f"{save_dir}/walks/long_walks/{max_steps}_step_walks/")
+            except FileExistsError:
+                pass
 
-
-    outfile = open(f"{dir_prefix}/{brcd}/walks/long_walks/{max_steps}_step_walks/{start_idx}/results.csv", "w+")
-
-    # 1000 iterations; print progress of random walk every 10% of the way
-    # counts: histogram of walk; switches: count which TFs flipped; distance = starting state to current state; walk until take max steps or leave basin
-    # no perturbations
-    for iter_ in range(iters):
-        if iter_ % 10 == 0:
-            print(str(iter_ / iters * 100) + "%")
-        walk, counts, switches, distances = long_random_walk(start_idx, rules,
-                                                             regulators_dict, nodes,
-                                                             max_steps=max_steps)
-        n_steps_to_leave_0.append(len(distances))
-        for node in switches:
-            if node is not None: switch_counts_0[node] += 1
-        outfile.write(f"{walk}\n")
-    outfile.close()
-
-print("Running TF Perturbations...")
-
-for perturb in knockdowns:
-    for start_idx in attractor_dict['Arc_6']:
-        print("Starting state: ",start_idx)
-        print("Perturbation: ",perturb)
-
-        switch_counts_0 = dict()
-        for node in nodes: switch_counts_0[node] = 0
-        n_steps_to_leave_0 = []
-
-        outfile = open(f"{dir_prefix}/{brcd}/walks/long_walks/{max_steps}_step_walks/{start_idx}/results_{perturb}_kd.csv", "w+")
-
-        # 1000 iterations; print progress of random walk every 10% of the way
-        # counts: histogram of walk; switches: count which TFs flipped; distance = starting state to current state; walk until take max steps or leave basin
-        # no perturbations
-        for iter_ in range(iters):
-            if iter_ % 10 == 0:
-                print(str(iter_/iters*100) + "%")
-            walk, counts, switches, distances = long_random_walk(start_idx, rules,
-                                                                 regulators_dict, nodes,
-                                                                 max_steps=max_steps,
-                                                                 off_nodes=[perturb])
-            n_steps_to_leave_0.append(len(distances))
-            for node in switches:
-                if node is not None: switch_counts_0[node] += 1
-            outfile.write(f"{walk}\n")
-        outfile.close()
+            try:
+                os.mkdir(f"{save_dir}/walks/long_walks/{max_steps}_step_walks/{start_idx}")
+            except FileExistsError:
+                if overwrite_walks:
+                    pass
+                else:
+                    continue
 
 
-for perturb in activations:
-    for start_idx in attractor_dict['Arc_6']:
-        print("Starting state: ",start_idx)
-        print("Perturbation: ",perturb)
+            outfile = open(f"{save_dir}/walks/long_walks/{max_steps}_step_walks/{start_idx}/results.csv", "w+")
 
-        switch_counts_0 = dict()
-        for node in nodes: switch_counts_0[node] = 0
-        n_steps_to_leave_0 = []
+            # 1000 iterations; print progress of random walk every 10% of the way
+            # counts: histogram of walk; switches: count which TFs flipped; distance = starting state to current state; walk until take max steps or leave basin
+            # no perturbations
+            for iter_ in range(iters):
+                if iter_ % 10 == 0:
+                    print(str(iter_ / iters * 100) + "%")
+                walk, counts, switches, distances = _long_random_walk(start_idx, rules,
+                                                                     regulators_dict, nodes,
+                                                                     max_steps=max_steps)
+                n_steps_to_leave_0.append(len(distances))
+                for node in switches:
+                    if node is not None: switch_counts_0[node] += 1
+                outfile.write(f"{walk}\n")
+            outfile.close()
 
-        outfile = open(f"{dir_prefix}/{brcd}/walks/long_walks/{max_steps}_step_walks/{start_idx}/results_{perturb}_act.csv", "w+")
+        print("Running TF Perturbations...")
 
-        # 1000 iterations; print progress of random walk every 10% of the way
-        # counts: histogram of walk; switches: count which TFs flipped; distance = starting state to current state; walk until take max steps or leave basin
-        # no perturbations
-        for iter_ in range(iters):
-            if iter_ % 10 == 0:
-                print(str(iter_/iters*100) + "%")
-            walk, counts, switches, distances = long_random_walk(start_idx, rules,
-                                                                 regulators_dict, nodes,
-                                                                 max_steps=max_steps,
-                                                                 on_nodes=[perturb])
-            n_steps_to_leave_0.append(len(distances))
-            for node in switches:
-                if node is not None: switch_counts_0[node] += 1
-            outfile.write(f"{walk}\n")
-        outfile.close()
+        for perturb in off_nodes:
+            for start_idx in attractor_dict[s]:
+                print("Starting state: ",start_idx)
+                print("Perturbation: ",perturb)
+
+                switch_counts_0 = dict()
+                for node in nodes: switch_counts_0[node] = 0
+                n_steps_to_leave_0 = []
+
+                outfile = open(f"{save_dir}/walks/long_walks/{max_steps}_step_walks/{start_idx}/results_{perturb}_kd.csv", "w+")
+
+                # 1000 iterations; print progress of random walk every 10% of the way
+                # counts: histogram of walk; switches: count which TFs flipped; distance = starting state to current state; walk until take max steps or leave basin
+                # no perturbations
+                for iter_ in range(iters):
+                    if iter_ % 10 == 0:
+                        print(str(iter_/iters*100) + "%")
+                    walk, counts, switches, distances = _long_random_walk(start_idx, rules,
+                                                                         regulators_dict, nodes,
+                                                                         max_steps=max_steps,
+                                                                         off_nodes=[perturb])
+                    n_steps_to_leave_0.append(len(distances))
+                    for node in switches:
+                        if node is not None: switch_counts_0[node] += 1
+                    outfile.write(f"{walk}\n")
+                outfile.close()
+
+
+        for perturb in on_nodes:
+            for start_idx in attractor_dict[s]:
+                print("Starting state: ",start_idx)
+                print("Perturbation: ",perturb)
+
+                switch_counts_0 = dict()
+                for node in nodes: switch_counts_0[node] = 0
+                n_steps_to_leave_0 = []
+
+                outfile = open(f"{save_dir}/walks/long_walks/{max_steps}_step_walks/{start_idx}/results_{perturb}_act.csv", "w+")
+
+                # 1000 iterations; print progress of random walk every 10% of the way
+                # counts: histogram of walk; switches: count which TFs flipped; distance = starting state to current state; walk until take max steps or leave basin
+                # no perturbations
+                for iter_ in range(iters):
+                    if iter_ % 10 == 0:
+                        print(str(iter_/iters*100) + "%")
+                    walk, counts, switches, distances = _long_random_walk(start_idx, rules,
+                                                                         regulators_dict, nodes,
+                                                                         max_steps=max_steps,
+                                                                         on_nodes=[perturb])
+                    n_steps_to_leave_0.append(len(distances))
+                    for node in switches:
+                        if node is not None: switch_counts_0[node] += 1
+                    outfile.write(f"{walk}\n")
+                outfile.close()
+
+knockdowns = ['MEIS2']
+starting_attractors = ['Arc_6','Arc_5']
+long_random_walks(starting_attractors,attractor_dict, rules,regulators_dict, nodes, save_dir,
+                      on_nodes = [], off_nodes = knockdowns, max_steps = 2000, iters = 100, overwrite_walks = False)
+
+
+
+
 
 # basin_set = set(attractor_dict.keys()).difference({"Arc_6"})
 # for perturb in knockdowns:

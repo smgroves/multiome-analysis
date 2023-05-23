@@ -431,22 +431,32 @@ if filter_attractors:
 
     file.close()
     # bb.plot.plot_attractors(f'{ATTRACTOR_DIR}/attractors_filtered.txt', save_dir="")
-    att = pd.read_table(f"{ATTRACTOR_DIR}/attractors_filtered.txt", sep=',', header=0, index_col=0)
-    att = att.transpose()
-    plt.figure(figsize=(20, 12))
-    clust = sorted(att.columns.unique())
-    lut = dict(zip(clust, sns.color_palette("tab20")))
-    column_series = pd.Series(att.columns)
-    row_colors = column_series.map(lut)
-    g = sns.clustermap(att.T.reset_index().drop('index', axis = 1).T,linecolor="lightgrey",
-                       linewidths=1, figsize = (20,12),cbar_pos = None,
-                       cmap = 'binary', square = True, row_cluster = True, col_cluster = False, yticklabels = True, xticklabels = False,col_colors = row_colors)
-    markers = []
-    for i in lut.keys():
-        markers.append(plt.Line2D([0,0],[0,0],color=lut[i], marker='o', linestyle=''))
-    lgd = plt.legend(markers, lut.keys(), numpoints=1, loc = 'upper left', bbox_to_anchor=(1.05, 1.0))
-    plt.tight_layout()
-    plt.savefig(f"{ATTRACTOR_DIR}/attractors_filtered_clustered_x.pdf", bbox_extra_artists=(lgd,), bbox_inches='tight')
+
+    # added to Booleabayes version > 0.1.9
+    def plot_attractors_clustermap(fname, sep = ","):
+        att = pd.read_table(fname, sep=sep, header=0, index_col=0)
+        att = att.transpose()
+        plt.figure(figsize=(20, 12))
+        clust = sorted(att.columns.unique())
+        lut = dict(zip(clust, sns.color_palette("tab20")))
+        column_series = pd.Series(att.columns)
+        row_colors = column_series.map(lut)
+        g = sns.clustermap(att.T.reset_index().drop('index', axis = 1).T,linecolor="lightgrey",
+                           linewidths=1, figsize = (20,12),cbar_pos = None,
+                           cmap = 'binary', square = True, row_cluster = True, col_cluster = False, yticklabels = True, xticklabels = False,col_colors = row_colors)
+        markers = []
+        for i in lut.keys():
+            markers.append(plt.Line2D([0,0],[0,0],color=lut[i], marker='o', linestyle=''))
+        lgd = plt.legend(markers, lut.keys(), numpoints=1, loc = 'upper left', bbox_to_anchor=(1.05, 1.0))
+        plt.tight_layout()
+        plt.savefig(f"{fname.split('.')[0]}_clustered.pdf", bbox_extra_artists=(lgd,), bbox_inches='tight')
+
+    plot_attractors_clustermap(fname = f"{ATTRACTOR_DIR}/attractors_filtered.txt")
+
+    make_jaccard_heatmap(f'{ATTRACTOR_DIR}/attractors_filtered.txt', cmap='viridis',
+                         set_color={"Generalist":'lightgrey'},
+                         clustered=True,
+                         figsize=(10, 10), save=True)
 
     # with open(f"{dir_prefix}/{brcd}/attractors/attractors_threshold_0.5/attractor_dict.txt", 'w') as convert_file:
     #     convert_file.write(json.dumps(attractor_dict))
