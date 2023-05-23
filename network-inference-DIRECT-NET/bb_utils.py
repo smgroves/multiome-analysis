@@ -15,6 +15,28 @@ import sklearn.model_selection as ms
 import pickle
 from collections import Counter
 
+def binarized_data_dict_to_binary_df(binarized_data, nodes):
+    """
+    Function to convert a dictionary of binarized data to a binary dataframe
+    Parameters
+    ----------
+    binarized_data : dictionary
+        Dictionary of binarized data
+    nodes : list
+        List of nodes in the transcription factor network
+    Returns
+    -------
+    binary_df : dataframe
+        Binary dataframe of binarized data
+    """
+    df = pd.DataFrame(columns = nodes)
+    for k in binarized_data.keys():
+        att = [bb.utils.idx2binary(x, len(nodes)) for x in binarized_data[k]]
+        for a in att:
+            att_list = [int(i) for i in a]
+            df = df.append(pd.DataFrame(att_list, index = nodes, columns = [k]).T)
+    return df
+
 def long_random_walk(
     start_state,
     rules,

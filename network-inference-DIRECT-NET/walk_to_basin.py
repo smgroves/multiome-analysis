@@ -108,52 +108,9 @@ for i,r in attr_filtered.iterrows():
 print(attractor_dict)
 
 iters = 100
-max_steps = 1000
-# start_idx = 75109996 #NE
-
-basin_set = set(attractor_dict.keys()).difference({"Arc_6"})
+max_steps = 2000
 knockdowns = ["RORB",'EGR1']
-# for perturb in knockdowns:
-#     for start_idx in attractor_dict['Arc_6']:
-#         print("Starting state: ",start_idx)
-#         for basin_name in basin_set:
-#             print("Basin:", basin_name)
-#             basin = attractor_dict[basin_name]
-#
-#             switch_counts_0 = dict()
-#             for node in nodes: switch_counts_0[node] = 0
-#             n_steps_to_leave_0 = []
-#             try:
-#                 os.mkdir(f"{dir_prefix}/{brcd}/walks/walk_to_basin/{start_idx}")
-#             except FileExistsError: pass
-#             outfile = open(f"{dir_prefix}/{brcd}/walks/walk_to_basin/{start_idx}/results_{basin_name}_{perturb}.csv", "w+")
-#             out_len = open(f"{dir_prefix}/{brcd}/walks/walk_to_basin/{start_idx}/len_walks_{basin_name}_{perturb}.csv", "w+")
-#             outfile_missed = open(f"{dir_prefix}/{brcd}/walks/walk_to_basin/{start_idx}/results_missed_{basin_name}_{perturb}.csv", "w+")
-#
-#             # 1000 iterations; print progress of random walk every 10% of the way
-#             # counts: histogram of walk; switches: count which TFs flipped; distance = starting state to current state; walk until take max steps or leave basin
-#             # no perturbations
-#             for iter_ in range(iters):
-#                 if iter_ % 100 == 0:
-#                     print(str(iter_/iters*100) + "%")
-#                 walk, counts, switches, distances = bb.rw.random_walk_until_reach_basin(start_idx, rules,
-#                                                                                             regulators_dict, nodes,
-#                                                                                             radius = 2,
-#                                                                                             max_steps=max_steps,
-#                                                                                             basin = basin,
-#                                                                                             off_nodes=[perturb]
-#                                                                                             )
-#                 n_steps_to_leave_0.append(len(distances))
-#                 for node in switches:
-#                     if node is not None: switch_counts_0[node] += 1
-#                 if len(walk) != max_steps:
-#                     outfile.write(f"{walk}\n")
-#                     out_len.write(f"{len(walk)}\n")
-#                 else:
-#                     outfile_missed.write(f"{walk}\n")
-#             outfile.close()
-#             out_len.close()
-#             outfile_missed.close()
+
 
 # New way to do random walks until reach basin. Instead of looking for a specific basin, keep walking some length of steps
 for start_idx in attractor_dict['Arc_6']:
@@ -219,3 +176,47 @@ for perturb in knockdowns:
                 if node is not None: switch_counts_0[node] += 1
             outfile.write(f"{walk}\n")
         outfile.close()
+
+
+# basin_set = set(attractor_dict.keys()).difference({"Arc_6"})
+# for perturb in knockdowns:
+#     for start_idx in attractor_dict['Arc_6']:
+#         print("Starting state: ",start_idx)
+#         for basin_name in basin_set:
+#             print("Basin:", basin_name)
+#             basin = attractor_dict[basin_name]
+#
+#             switch_counts_0 = dict()
+#             for node in nodes: switch_counts_0[node] = 0
+#             n_steps_to_leave_0 = []
+#             try:
+#                 os.mkdir(f"{dir_prefix}/{brcd}/walks/walk_to_basin/{start_idx}")
+#             except FileExistsError: pass
+#             outfile = open(f"{dir_prefix}/{brcd}/walks/walk_to_basin/{start_idx}/results_{basin_name}_{perturb}.csv", "w+")
+#             out_len = open(f"{dir_prefix}/{brcd}/walks/walk_to_basin/{start_idx}/len_walks_{basin_name}_{perturb}.csv", "w+")
+#             outfile_missed = open(f"{dir_prefix}/{brcd}/walks/walk_to_basin/{start_idx}/results_missed_{basin_name}_{perturb}.csv", "w+")
+#
+#             # 1000 iterations; print progress of random walk every 10% of the way
+#             # counts: histogram of walk; switches: count which TFs flipped; distance = starting state to current state; walk until take max steps or leave basin
+#             # no perturbations
+#             for iter_ in range(iters):
+#                 if iter_ % 100 == 0:
+#                     print(str(iter_/iters*100) + "%")
+#                 walk, counts, switches, distances = bb.rw.random_walk_until_reach_basin(start_idx, rules,
+#                                                                                             regulators_dict, nodes,
+#                                                                                             radius = 2,
+#                                                                                             max_steps=max_steps,
+#                                                                                             basin = basin,
+#                                                                                             off_nodes=[perturb]
+#                                                                                             )
+#                 n_steps_to_leave_0.append(len(distances))
+#                 for node in switches:
+#                     if node is not None: switch_counts_0[node] += 1
+#                 if len(walk) != max_steps:
+#                     outfile.write(f"{walk}\n")
+#                     out_len.write(f"{len(walk)}\n")
+#                 else:
+#                     outfile_missed.write(f"{walk}\n")
+#             outfile.close()
+#             out_len.close()
+#             outfile_missed.close()
