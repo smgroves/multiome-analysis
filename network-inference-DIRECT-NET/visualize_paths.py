@@ -343,7 +343,7 @@ show_lineplots = True
 #
 plot_random_walks(walk_path, starting_attractors, ATTRACTOR_DIR, attr_color_map,
                       perturb = "RORB_kd",
-                      num_walks = 20,
+                      num_walks = 5,
                       binarized_data_df = binarized_data_df,
                       save_as = "_data-pca",
                       show_lineplots = True,
