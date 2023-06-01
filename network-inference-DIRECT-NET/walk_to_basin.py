@@ -167,8 +167,8 @@ def long_random_walks(starting_attractors,attractor_dict, rules,regulators_dict,
                     outfile.write(f"{walk}\n")
                 outfile.close()
 
-knockdowns = ['MEIS2']
-starting_attractors = ['Arc_6','Arc_5']
+knockdowns = ['NFIB','RORB','EGR1']
+starting_attractors = ['Arc_5']
 long_random_walks(starting_attractors,attractor_dict, rules,regulators_dict, nodes, save_dir,
                       on_nodes = [], off_nodes = knockdowns, max_steps = 2000, iters = 100, overwrite_walks = False)
 

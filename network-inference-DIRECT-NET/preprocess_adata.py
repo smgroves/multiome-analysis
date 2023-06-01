@@ -74,9 +74,12 @@ def preprocess_adata(adata, DIRECT_NET_INDIR, outfile_name="adata_imputed.csv", 
 # preprocess_adata(adata, DIRECT_NET_INDIR, outfile_name= f"adata_human_tumors_MSK.csv", extra_genes=['CD24', 'CD44', 'EPCAM', 'ICAM1', 'NCAM1'],
 #                  imputed_layer="imputed_normalized", species = 'human')
 
-for tumor in ["PleuralEffusion", "RU426", "RU779", "RU1065", "RU1066", "RU1080", "RU1108", "RU1124", "RU1144", "RU1145",
-              "RU1152", "RU1181", "RU1195", "RU1215", "RU1229", "RU1231", "RU1293", "RU1311", "RU1322"]:
-    adata = cr.read(f"../data/external_validation_looms/human_tumors/{tumor}_human_tumor_data.h5ad")
-    preprocess_adata(adata, DIRECT_NET_INDIR, outfile_name=f"human_tumors/adata_{tumor}.csv",
-                     extra_genes=['CD24', 'CD44', 'EPCAM', 'ICAM1', 'NCAM1'], imputed_layer="imputed_normalized",
-                     species = 'human')
+# for tumor in ["PleuralEffusion", "RU426", "RU779", "RU1065", "RU1066", "RU1080", "RU1108", "RU1124", "RU1144", "RU1145",
+#               "RU1152", "RU1181", "RU1195", "RU1215", "RU1229", "RU1231", "RU1293", "RU1311", "RU1322"]:
+#     adata = cr.read(f"../data/external_validation_looms/human_tumors/{tumor}_human_tumor_data.h5ad")
+#     preprocess_adata(adata, DIRECT_NET_INDIR, outfile_name=f"human_tumors/adata_{tumor}.csv",
+#                      extra_genes=['CD24', 'CD44', 'EPCAM', 'ICAM1', 'NCAM1'], imputed_layer="imputed_normalized",
+#                      species = 'human')
+
+adata = cr.read('../data/combined/adata_02_filtered.h5ad')
+preprocess_adata(adata, DIRECT_NET_INDIR, outfile_name = "adata_imputed_combined_v2.csv", extra_genes=['CD24', 'CD44', 'EPCAM', 'ICAM1', 'NCAM1','SOX11'])

@@ -76,7 +76,7 @@ def make_color_map(attractors, palette = 'hls', set_colors = None):
     palette = sns.color_palette(palette, n_colors=len(attractors))
     palette = palette.as_hex()
     cmap = {}
-    for i, s in enumerate(attractors):
+    for i, s in enumerate(sorted(attractors)):
         if set_colors is not None:
             if s in set_colors:
                 cmap[s] = set_colors[s]

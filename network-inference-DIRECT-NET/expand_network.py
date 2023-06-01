@@ -35,7 +35,36 @@ def save_if_overwrite(network_file, G, attributes = True):
         outfile.close()
 
 dir_prefix = '/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET'
-network_path = 'networks/DIRECT-NET_network_with_FIGR_threshold_0_no_NEUROG2_top8regs_NO_sinks.csv'
+# network_path = 'networks/DIRECT-NET_network_with_FIGR_threshold_0_no_NEUROG2_top8regs_NO_sinks.csv'
+#
+# net = pd.read_csv(f"{dir_prefix}/{network_path}", header = None)
+# tfs = set(net[0]).union(set(net[1]))
+# graph = nx.DiGraph()
+#
+# for tf in tfs:
+#     graph.add_node(tf)
+#
+# for i,r in net.iterrows():
+#     graph.add_edge(r[0],r[1])
+# orig_size = len(graph.edges())
+# print(orig_size)
+#
+# markers = ['ICAM1','NCAM1',"CD24",'EPCAM','CD44']
+# for m in markers:
+#     graph.add_node(m)
+#
+# for m in markers:
+#     enrichr.build_tf_network(graph, m, tfs)
+#     print(len(graph.edges())-orig_size)
+#     orig_size = len(graph.edges())
+#     time.sleep(1)
+# print(graph.nodes())
+# print(len(graph.edges()))
+#
+# network_file = f"{dir_prefix}/networks/DIRECT-NET_network_with_FIGR_threshold_0_no_NEUROG2_top8regs_NO_sinks_expanded.csv"
+# save_if_overwrite(network_file,graph)
+
+network_path = 'networks/DIRECT-NET_network_with_FIGR_threshold_0_no_NEUROG2_top8regs_NO_sinks_NOCD24_expanded.csv'
 
 net = pd.read_csv(f"{dir_prefix}/{network_path}", header = None)
 tfs = set(net[0]).union(set(net[1]))
@@ -49,7 +78,7 @@ for i,r in net.iterrows():
 orig_size = len(graph.edges())
 print(orig_size)
 
-markers = ['ICAM1','NCAM1',"CD24",'EPCAM','CD44']
+markers = ['SOX11']
 for m in markers:
     graph.add_node(m)
 
@@ -61,5 +90,5 @@ for m in markers:
 print(graph.nodes())
 print(len(graph.edges()))
 
-network_file = f"{dir_prefix}/networks/DIRECT-NET_network_with_FIGR_threshold_0_no_NEUROG2_top8regs_NO_sinks_expanded.csv"
+network_file = f"{dir_prefix}/networks/DIRECT-NET_network_with_FIGR_threshold_0_no_NEUROG2_top8regs_expanded_v2.csv"
 save_if_overwrite(network_file,graph)

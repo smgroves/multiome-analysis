@@ -120,7 +120,7 @@ def plot_random_walks(walk_path, starting_attractors, ATTRACTOR_DIR,
         attractor_dict[i].append(bb.utils.state_bool2idx(list(r)))
         attractor_bool_dict[i].append(int(bb.utils.idx2binary(bb.utils.state_bool2idx(list(r)), n)))
         att_list.append(int(bb.utils.idx2binary(bb.utils.state_bool2idx(list(r)), n)))
-    attr_color_map = make_color_map(attractor_dict.keys(), set_colors=set_colors)
+    attr_color_map = make_color_map(attractor_dict.keys(), set_colors=set_colors,)
 
     if reduction == 'pca':
         pca = PCA(n_components=2)
@@ -200,7 +200,7 @@ def plot_random_walks(walk_path, starting_attractors, ATTRACTOR_DIR,
                                      alpha=0.4, zorder=2, color = 'black', ax = ax1)
                         cnt += 1
                         line = file.readline()
-                        if cnt == num_walks: break
+                        if cnt == num_walks+1: break
                 sns.kdeplot(x=data_walks['0'], y=data_walks['1'], shade=True, thresh=0.05, zorder=1, n_levels=20, cbar=True,
                             color=attr_color_map[starting_attractors], ax = ax1)
 
@@ -235,7 +235,7 @@ def plot_random_walks(walk_path, starting_attractors, ATTRACTOR_DIR,
                                      alpha=0.4, zorder=2, color = 'black', ax = ax2)
                         cnt += 1
                         line = file.readline()
-                        if cnt == num_walks: break
+                        if cnt == num_walks+1: break
 
                 sns.kdeplot(x=data_walks['0'], y=data_walks['1'], shade=True, thresh=0.05, zorder=1, n_levels=20, cbar=True,
                             color=attr_color_map[starting_attractors], ax = ax2)
@@ -310,7 +310,7 @@ def plot_random_walks(walk_path, starting_attractors, ATTRACTOR_DIR,
                                              alpha=0.4, zorder=2, color = 'black')
                                 cnt += 1
                                 line = file.readline()
-                                if cnt == num_walks: break
+                                if cnt == num_walks+1: break
                     else:
                         with open(f"{walk_path}/{start_idx}/results.csv", 'r') as file:
                             line = file.readline()
@@ -338,7 +338,7 @@ def plot_random_walks(walk_path, starting_attractors, ATTRACTOR_DIR,
                                              alpha=0.4, zorder=2, color = 'black')
                                 cnt += 1
                                 line = file.readline()
-                                if cnt == num_walks: break
+                                if cnt == num_walks+1: break
 
                 except:
                     continue
@@ -389,6 +389,29 @@ def plot_random_walks(walk_path, starting_attractors, ATTRACTOR_DIR,
 #                   plot_vs = True,
 #                   show = False)
 
+# walk_path = f'{dir_prefix}/{brcd}/walks/long_walks/2000_step_walks'
+# plot_random_walks(walk_path, starting_attractors = 'Arc_6',
+#                   ATTRACTOR_DIR = ATTRACTOR_DIR,
+#                   perturb = "TCF7L2_act",#"RORB_kd",
+#                   num_walks = 30,
+#                   binarized_data_df = binarized_data_df,
+#                   save_as = "_data-pca_nolines",
+#                   show_lineplots = False,
+#                   fit_to_data = True,
+#                   plot_vs = True,
+#                   show = False)
+
+walk_path = f'{dir_prefix}/{brcd}/walks/long_walks/2000_step_walks'
+plot_random_walks(walk_path, starting_attractors = 'Arc_5',
+                  ATTRACTOR_DIR = ATTRACTOR_DIR,
+                  perturb = "RORB_kd",#"RORB_kd",
+                  num_walks = 30,
+                  binarized_data_df = binarized_data_df,
+                  save_as = "_data-pca_nolines",
+                  show_lineplots = False,
+                  fit_to_data = True,
+                  plot_vs = True,
+                  show = False)
 
 # This function will visualize random walks as KDE plots starting from all of the attractors for a given attractor_dict key.
 # You can specify how many walks to plot. Lineplot is not an option for these plots because they would generate files that are too large.
