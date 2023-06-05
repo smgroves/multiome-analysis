@@ -35,7 +35,7 @@ find_attractors = True
 tf_basin = 2 # if -1, use average distance between clusters for search basin for attractors.
 # otherwise use the same size basin for all phenotypes. For single cell data, there may be so many samples that average distance is small.
 filter_attractors = True
-perturbations = True
+perturbations = False
 stability = False
 on_nodes = []
 off_nodes = []
