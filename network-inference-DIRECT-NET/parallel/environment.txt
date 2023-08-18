@@ -1,0 +1,9 @@
+# steps to make the virtual environment on ACCRE
+
+ml Anaconda3/5.0.1
+
+conda create -n boba_accre python=3.7.6
+source activate boba_accre
+conda install -c conda-forge graph-tool
+pip install booleabayes
+pip install statsmodels #unnecessary for booleabayes > 0.1.10

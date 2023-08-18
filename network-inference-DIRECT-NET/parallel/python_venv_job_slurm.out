@@ -1,0 +1,320 @@
+This is array task 2, networks/test_network.csv data/adata_imputed_combined_v2.csv data/AA_clusters_splitgen.csv 0.3 0.1
+This is array task 1, networks/test_network.csv data/adata_imputed_combined_v2.csv data/AA_clusters_splitgen.csv 0.5 0
+True
+/data/qlab/smgroves/parallel_bb/parallel/booleabayes_results/networks/test_network.csv
+3432
+==================================
+Graph properties
+==================================
+<Graph object, directed, with 6 vertices and 9 edges, 3 internal vertex properties, at 0x2aee39abb5d0>
+Number of nodes: 6
+Nodes:  ['ASCL1', 'CUX1', 'EGR1', 'FOS', 'SMAD3', 'TBX15']
+Sources:  1 ['FOS']
+Sinks:  1 ['SMAD3']
+Network is a single connected component:  True
+Directed acyclic graph:  False
+==================================
+Generating Rules for K-Fold 0
+Fitting  0 / 6 rules
+ASCL1
+0
+...checking if FOS is irrelevant
+...checking if EGR1 is irrelevant
+Fitting  1 / 6 rules
+CUX1
+0
+...checking if EGR1 is irrelevant
+...checking if TBX15 is irrelevant
+Fitting  2 / 6 rules
+SMAD3
+0
+...checking if TBX15 is irrelevant
+...checking if CUX1 is irrelevant
+Fitting  3 / 6 rules
+TBX15
+0
+...checking if ASCL1 is irrelevant
+Fitting  4 / 6 rules
+EGR1
+0
+...checking if FOS is irrelevant
+Fitting  5 / 6 rules
+FOS
+0
+...checking if FOS is irrelevant
+Calculating validation averages...
+Generating Rules for K-Fold 1
+Fitting  0 / 6 rules
+ASCL1
+0
+...checking if FOS is irrelevant
+...checking if EGR1 is irrelevant
+Fitting  1 / 6 rules
+CUX1
+0
+...checking if EGR1 is irrelevant
+...checking if TBX15 is irrelevant
+Fitting  2 / 6 rules
+SMAD3
+0
+...checking if TBX15 is irrelevant
+...checking if CUX1 is irrelevant
+Fitting  3 / 6 rules
+TBX15
+0
+...checking if ASCL1 is irrelevant
+Fitting  4 / 6 rules
+EGR1
+0
+...checking if FOS is irrelevant
+Fitting  5 / 6 rules
+FOS
+0
+...checking if FOS is irrelevant
+Calculating validation averages...
+Generating Rules for K-Fold 2
+Fitting  0 / 6 rules
+ASCL1
+0
+...checking if FOS is irrelevant
+...checking if EGR1 is irrelevant
+Fitting  1 / 6 rules
+CUX1
+0
+...checking if EGR1 is irrelevant
+...checking if TBX15 is irrelevant
+Fitting  2 / 6 rules
+SMAD3
+0
+...checking if TBX15 is irrelevant
+...checking if CUX1 is irrelevant
+Fitting  3 / 6 rules
+TBX15
+0
+...checking if ASCL1 is irrelevant
+Fitting  4 / 6 rules
+EGR1
+0
+...checking if FOS is irrelevant
+Fitting  5 / 6 rules
+FOS
+0
+...checking if FOS is irrelevant
+Calculating validation averages...
+Generating Rules for K-Fold 3
+Fitting  0 / 6 rules
+ASCL1
+0
+...checking if FOS is irrelevant
+...checking if EGR1 is irrelevant
+Fitting  1 / 6 rules
+CUX1
+0
+...checking if EGR1 is irrelevant
+...checking if TBX15 is irrelevant
+Fitting  2 / 6 rules
+SMAD3
+0
+...checking if TBX15 is irrelevant
+...checking if CUX1 is irrelevant
+Fitting  3 / 6 rules
+TBX15
+0
+...checking if ASCL1 is irrelevant
+Fitting  4 / 6 rules
+EGR1
+0
+...checking if FOS is irrelevant
+Fitting  5 / 6 rules
+FOS
+0
+...checking if FOS is irrelevant
+Calculating validation averages...
+Generating Rules for K-Fold 4
+Fitting  0 / 6 rules
+ASCL1
+0
+...checking if FOS is irrelevant
+...checking if EGR1 is irrelevant
+Fitting  1 / 6 rules
+CUX1
+0
+...checking if EGR1 is irrelevant
+...checking if TBX15 is irrelevant
+Fitting  2 / 6 rules
+SMAD3
+0
+...checking if TBX15 is irrelevant
+...checking if CUX1 is irrelevant
+Fitting  3 / 6 rules
+TBX15
+0
+...checking if ASCL1 is irrelevant
+Fitting  4 / 6 rules
+EGR1
+0
+...checking if FOS is irrelevant
+Fitting  5 / 6 rules
+FOS
+0
+...checking if FOS is irrelevant
+Calculating validation averages...
+True
+/data/qlab/smgroves/parallel_bb/parallel/booleabayes_results/networks/test_network.csv
+5345
+==================================
+Graph properties
+==================================
+<Graph object, directed, with 6 vertices and 9 edges, 3 internal vertex properties, at 0x2ae9f82d9610>
+Number of nodes: 6
+Nodes:  ['ASCL1', 'CUX1', 'EGR1', 'FOS', 'SMAD3', 'TBX15']
+Sources:  1 ['FOS']
+Sinks:  1 ['SMAD3']
+Network is a single connected component:  True
+Directed acyclic graph:  False
+==================================
+Generating Rules for K-Fold 0
+Fitting  0 / 6 rules
+CUX1
+0
+...checking if EGR1 is irrelevant
+...checking if TBX15 is irrelevant
+Fitting  1 / 6 rules
+FOS
+0
+...checking if FOS is irrelevant
+Fitting  2 / 6 rules
+SMAD3
+0
+...checking if TBX15 is irrelevant
+...checking if CUX1 is irrelevant
+Fitting  3 / 6 rules
+ASCL1
+0
+...checking if FOS is irrelevant
+...checking if EGR1 is irrelevant
+Fitting  4 / 6 rules
+EGR1
+0
+...checking if FOS is irrelevant
+Fitting  5 / 6 rules
+TBX15
+0
+...checking if ASCL1 is irrelevant
+Calculating validation averages...
+Generating Rules for K-Fold 1
+Fitting  0 / 6 rules
+CUX1
+0
+...checking if EGR1 is irrelevant
+...checking if TBX15 is irrelevant
+Fitting  1 / 6 rules
+FOS
+0
+...checking if FOS is irrelevant
+Fitting  2 / 6 rules
+SMAD3
+0
+...checking if TBX15 is irrelevant
+...checking if CUX1 is irrelevant
+Fitting  3 / 6 rules
+ASCL1
+0
+...checking if FOS is irrelevant
+...checking if EGR1 is irrelevant
+Fitting  4 / 6 rules
+EGR1
+0
+...checking if FOS is irrelevant
+Fitting  5 / 6 rules
+TBX15
+0
+...checking if ASCL1 is irrelevant
+Calculating validation averages...
+Generating Rules for K-Fold 2
+Fitting  0 / 6 rules
+CUX1
+0
+...checking if EGR1 is irrelevant
+...checking if TBX15 is irrelevant
+Fitting  1 / 6 rules
+FOS
+0
+...checking if FOS is irrelevant
+Fitting  2 / 6 rules
+SMAD3
+0
+...checking if TBX15 is irrelevant
+...checking if CUX1 is irrelevant
+Fitting  3 / 6 rules
+ASCL1
+0
+...checking if FOS is irrelevant
+...checking if EGR1 is irrelevant
+Fitting  4 / 6 rules
+EGR1
+0
+...checking if FOS is irrelevant
+Fitting  5 / 6 rules
+TBX15
+0
+...checking if ASCL1 is irrelevant
+Calculating validation averages...
+Generating Rules for K-Fold 3
+Fitting  0 / 6 rules
+CUX1
+0
+...checking if EGR1 is irrelevant
+...checking if TBX15 is irrelevant
+Fitting  1 / 6 rules
+FOS
+0
+...checking if FOS is irrelevant
+Fitting  2 / 6 rules
+SMAD3
+0
+...checking if TBX15 is irrelevant
+...checking if CUX1 is irrelevant
+Fitting  3 / 6 rules
+ASCL1
+0
+...checking if FOS is irrelevant
+...checking if EGR1 is irrelevant
+Fitting  4 / 6 rules
+EGR1
+0
+...checking if FOS is irrelevant
+Fitting  5 / 6 rules
+TBX15
+0
+...checking if ASCL1 is irrelevant
+Calculating validation averages...
+Generating Rules for K-Fold 4
+Fitting  0 / 6 rules
+CUX1
+0
+...checking if EGR1 is irrelevant
+...checking if TBX15 is irrelevant
+Fitting  1 / 6 rules
+FOS
+0
+...checking if FOS is irrelevant
+Fitting  2 / 6 rules
+SMAD3
+0
+...checking if TBX15 is irrelevant
+...checking if CUX1 is irrelevant
+Fitting  3 / 6 rules
+ASCL1
+0
+...checking if FOS is irrelevant
+...checking if EGR1 is irrelevant
+Fitting  4 / 6 rules
+EGR1
+0
+...checking if FOS is irrelevant
+Fitting  5 / 6 rules
+TBX15
+0
+...checking if ASCL1 is irrelevant
+Calculating validation averages...

@@ -1,0 +1,587 @@
+This is array task 1, networks/DIRECT-NET_network_2020db_0.1_top8regs_nosinks.csv data/adata_imputed_combined_v3.csv data/AA_clusters_splitgen.csv minmax 0
+True
+/data/qlab/smgroves/parallel_bb/parallel/booleabayes_results/networks/DIRECT-NET_network_2020db_0.1_top8regs_nosinks.csv
+minmax <class 'str'> 0.0 <class 'float'>
+8821
+==================================
+Graph properties
+==================================
+<Graph object, directed, with 53 vertices and 312 edges, 3 internal vertex properties, at 0x2b216c6b4910>
+Number of nodes: 53
+Nodes:  ['ASCL1', 'BACH1', 'BACH2', 'CREB1', 'CUX1', 'CUX2', 'EGR1', 'EHF', 'EPCAM', 'ESR1', 'ETS1', 'FOS', 'FOXO3', 'GRHL2', 'HES1', 'HIF1A', 'HSF2', 'ICAM1', 'JUN', 'JUNB', 'JUND', 'LMX1B', 'MEIS2', 'NCAM1', 'NFATC2', 'NFIA', 'NFIB', 'NFIX', 'NFKB1', 'NFYC', 'NR3C2', 'NR6A1', 'PBX1', 'PPARG', 'PROX1', 'RBPJ', 'REST', 'RORA', 'RORB', 'RUNX1', 'SIX1', 'SMAD3', 'SOX11', 'STAT1', 'TBX15', 'TCF4', 'TCF7L1', 'TCF7L2', 'TEAD1', 'TFDP1', 'THRB', 'ZBTB7A', 'ZEB1']
+Sources:  12 ['ZBTB7A', 'ZEB1', 'NFYC', 'RBPJ', 'NR6A1', 'ESR1', 'TFDP1', 'STAT1', 'RORA', 'JUND', 'CREB1', 'TCF4']
+Sinks:  4 ['EPCAM', 'NCAM1', 'ICAM1', 'SOX11']
+Network is a single connected component:  True
+Directed acyclic graph:  False
+==================================
+Generating Rules for K-Fold 0
+Fitting  0 / 53 rules
+JUN
+0
+100
+200
+...checking if ETS1 is irrelevant
+...checking if EGR1 is irrelevant
+...checking if SMAD3 is irrelevant
+...checking if THRB is irrelevant
+...checking if GRHL2 is irrelevant
+...checking if NFYC is irrelevant
+...checking if FOXO3 is irrelevant
+...checking if FOS is irrelevant
+Fitting  1 / 53 rules
+ZBTB7A
+0
+...checking if ZBTB7A is irrelevant
+Fitting  2 / 53 rules
+ZEB1
+0
+...checking if ZEB1 is irrelevant
+Fitting  3 / 53 rules
+MEIS2
+0
+100
+200
+...checking if RUNX1 is irrelevant
+...checking if ZEB1 is irrelevant
+...checking if EHF is irrelevant
+...checking if EGR1 is irrelevant
+...checking if ZBTB7A is irrelevant
+...checking if FOXO3 is irrelevant
+...checking if TCF4 is irrelevant
+...checking if LMX1B is irrelevant
+Fitting  4 / 53 rules
+PPARG
+0
+100
+200
+...checking if RORA is irrelevant
+...checking if EGR1 is irrelevant
+...checking if CREB1 is irrelevant
+...checking if ZEB1 is irrelevant
+...checking if SIX1 is irrelevant
+...checking if JUN is irrelevant
+...checking if NFATC2 is irrelevant
+...checking if TCF4 is irrelevant
+Fitting  5 / 53 rules
+JUNB
+0
+100
+200
+...checking if RBPJ is irrelevant
+...checking if EGR1 is irrelevant
+...checking if RORA is irrelevant
+...checking if THRB is irrelevant
+...checking if PROX1 is irrelevant
+...checking if EHF is irrelevant
+...checking if NFIB is irrelevant
+...checking if TEAD1 is irrelevant
+Fitting  6 / 53 rules
+TBX15
+0
+...checking if SIX1 is irrelevant
+...checking if NFIA is irrelevant
+...checking if NFATC2 is irrelevant
+...checking if NFIX is irrelevant
+...checking if ESR1 is irrelevant
+...checking if GRHL2 is irrelevant
+Fitting  7 / 53 rules
+RORB
+0
+...checking if LMX1B is irrelevant
+...checking if FOXO3 is irrelevant
+...checking if NFIA is irrelevant
+...checking if ASCL1 is irrelevant
+...checking if GRHL2 is irrelevant
+Fitting  8 / 53 rules
+FOS
+0
+100
+200
+...checking if FOXO3 is irrelevant
+...checking if CREB1 is irrelevant
+...checking if HES1 is irrelevant
+...checking if RUNX1 is irrelevant
+...checking if NFIA is irrelevant
+...checking if ZEB1 is irrelevant
+...checking if HSF2 is irrelevant
+...checking if TCF4 is irrelevant
+Fitting  9 / 53 rules
+EHF
+0
+100
+200
+...checking if JUNB is irrelevant
+...checking if FOS is irrelevant
+...checking if SIX1 is irrelevant
+...checking if NR3C2 is irrelevant
+...checking if GRHL2 is irrelevant
+...checking if TCF7L2 is irrelevant
+...checking if BACH2 is irrelevant
+...checking if JUND is irrelevant
+Fitting  10 / 53 rules
+NFYC
+0
+...checking if NFYC is irrelevant
+Fitting  11 / 53 rules
+EPCAM
+0
+100
+200
+...checking if JUN is irrelevant
+...checking if CREB1 is irrelevant
+...checking if NR6A1 is irrelevant
+...checking if FOS is irrelevant
+...checking if STAT1 is irrelevant
+...checking if BACH1 is irrelevant
+...checking if JUND is irrelevant
+...checking if ETS1 is irrelevant
+Fitting  12 / 53 rules
+TEAD1
+0
+100
+200
+...checking if LMX1B is irrelevant
+...checking if TBX15 is irrelevant
+...checking if FOS is irrelevant
+...checking if TCF7L2 is irrelevant
+...checking if JUND is irrelevant
+...checking if EHF is irrelevant
+...checking if JUNB is irrelevant
+...checking if RBPJ is irrelevant
+Fitting  13 / 53 rules
+LMX1B
+0
+100
+200
+...checking if RUNX1 is irrelevant
+...checking if EHF is irrelevant
+...checking if STAT1 is irrelevant
+...checking if FOS is irrelevant
+...checking if ASCL1 is irrelevant
+...checking if HES1 is irrelevant
+...checking if ZEB1 is irrelevant
+...checking if JUNB is irrelevant
+Fitting  14 / 53 rules
+RBPJ
+0
+...checking if RBPJ is irrelevant
+Fitting  15 / 53 rules
+NCAM1
+0
+100
+...checking if TFDP1 is irrelevant
+...checking if NFYC is irrelevant
+...checking if MEIS2 is irrelevant
+...checking if RUNX1 is irrelevant
+...checking if NFIA is irrelevant
+...checking if EGR1 is irrelevant
+...checking if NFIX is irrelevant
+Fitting  16 / 53 rules
+NR6A1
+0
+...checking if NR6A1 is irrelevant
+Fitting  17 / 53 rules
+PBX1
+0
+100
+...checking if NR6A1 is irrelevant
+...checking if CREB1 is irrelevant
+...checking if CUX1 is irrelevant
+...checking if CUX2 is irrelevant
+...checking if FOS is irrelevant
+...checking if LMX1B is irrelevant
+...checking if BACH1 is irrelevant
+Fitting  18 / 53 rules
+ESR1
+0
+...checking if ESR1 is irrelevant
+Fitting  19 / 53 rules
+NR3C2
+0
+100
+200
+...checking if BACH1 is irrelevant
+...checking if FOS is irrelevant
+...checking if RBPJ is irrelevant
+...checking if TCF7L2 is irrelevant
+...checking if JUND is irrelevant
+...checking if SIX1 is irrelevant
+...checking if JUNB is irrelevant
+...checking if BACH2 is irrelevant
+Fitting  20 / 53 rules
+ETS1
+0
+100
+200
+...checking if ZEB1 is irrelevant
+...checking if NFATC2 is irrelevant
+...checking if NFYC is irrelevant
+...checking if ASCL1 is irrelevant
+...checking if JUND is irrelevant
+...checking if BACH1 is irrelevant
+...checking if TCF4 is irrelevant
+...checking if FOS is irrelevant
+Fitting  21 / 53 rules
+PROX1
+0
+...checking if NFATC2 is irrelevant
+...checking if RBPJ is irrelevant
+Fitting  22 / 53 rules
+ICAM1
+0
+100
+200
+...checking if STAT1 is irrelevant
+...checking if TCF7L1 is irrelevant
+...checking if RUNX1 is irrelevant
+...checking if EGR1 is irrelevant
+...checking if TCF7L2 is irrelevant
+...checking if MEIS2 is irrelevant
+...checking if ZEB1 is irrelevant
+...checking if NFIA is irrelevant
+Fitting  23 / 53 rules
+HIF1A
+0
+100
+200
+...checking if BACH1 is irrelevant
+...checking if RBPJ is irrelevant
+...checking if ZEB1 is irrelevant
+...checking if SIX1 is irrelevant
+...checking if EHF is irrelevant
+...checking if NFIA is irrelevant
+...checking if NFATC2 is irrelevant
+...checking if TEAD1 is irrelevant
+Fitting  24 / 53 rules
+TFDP1
+0
+...checking if TFDP1 is irrelevant
+Fitting  25 / 53 rules
+ASCL1
+0
+100
+200
+...checking if RBPJ is irrelevant
+...checking if JUND is irrelevant
+...checking if STAT1 is irrelevant
+...checking if HES1 is irrelevant
+...checking if PPARG is irrelevant
+...checking if RORB is irrelevant
+...checking if JUNB is irrelevant
+...checking if FOS is irrelevant
+Fitting  26 / 53 rules
+SOX11
+0
+...checking if CREB1 is irrelevant
+...checking if JUN is irrelevant
+...checking if BACH1 is irrelevant
+...checking if SMAD3 is irrelevant
+Fitting  27 / 53 rules
+NFKB1
+0
+100
+200
+...checking if BACH2 is irrelevant
+...checking if JUN is irrelevant
+...checking if JUND is irrelevant
+...checking if JUNB is irrelevant
+...checking if NFIB is irrelevant
+...checking if THRB is irrelevant
+...checking if FOXO3 is irrelevant
+...checking if FOS is irrelevant
+Fitting  28 / 53 rules
+HES1
+0
+100
+200
+...checking if CREB1 is irrelevant
+...checking if PROX1 is irrelevant
+...checking if ZEB1 is irrelevant
+...checking if ZBTB7A is irrelevant
+...checking if RORA is irrelevant
+...checking if HIF1A is irrelevant
+...checking if STAT1 is irrelevant
+...checking if EGR1 is irrelevant
+Fitting  29 / 53 rules
+STAT1
+0
+...checking if STAT1 is irrelevant
+Fitting  30 / 53 rules
+NFIX
+0
+100
+200
+...checking if TFDP1 is irrelevant
+...checking if HSF2 is irrelevant
+...checking if RORA is irrelevant
+...checking if STAT1 is irrelevant
+...checking if ZBTB7A is irrelevant
+...checking if NFATC2 is irrelevant
+...checking if NFKB1 is irrelevant
+...checking if EHF is irrelevant
+Fitting  31 / 53 rules
+EGR1
+0
+100
+200
+...checking if BACH1 is irrelevant
+...checking if TEAD1 is irrelevant
+...checking if MEIS2 is irrelevant
+...checking if RORA is irrelevant
+...checking if NFATC2 is irrelevant
+...checking if FOS is irrelevant
+...checking if NFIB is irrelevant
+...checking if ASCL1 is irrelevant
+Fitting  32 / 53 rules
+BACH2
+0
+100
+200
+...checking if TEAD1 is irrelevant
+...checking if RORA is irrelevant
+...checking if BACH1 is irrelevant
+...checking if RUNX1 is irrelevant
+...checking if JUND is irrelevant
+...checking if JUNB is irrelevant
+...checking if FOS is irrelevant
+...checking if THRB is irrelevant
+Fitting  33 / 53 rules
+RORA
+0
+...checking if RORA is irrelevant
+Fitting  34 / 53 rules
+BACH1
+0
+100
+200
+...checking if SIX1 is irrelevant
+...checking if FOS is irrelevant
+...checking if CREB1 is irrelevant
+...checking if TEAD1 is irrelevant
+...checking if TCF7L2 is irrelevant
+...checking if ETS1 is irrelevant
+...checking if LMX1B is irrelevant
+...checking if JUNB is irrelevant
+Fitting  35 / 53 rules
+REST
+0
+100
+200
+300
+400
+500
+...checking if TCF4 is irrelevant
+...checking if RORB is irrelevant
+...checking if TCF7L2 is irrelevant
+...checking if EGR1 is irrelevant
+...checking if FOS is irrelevant
+...checking if TFDP1 is irrelevant
+...checking if JUN is irrelevant
+...checking if RBPJ is irrelevant
+...checking if ZEB1 is irrelevant
+Fitting  36 / 53 rules
+JUND
+0
+...checking if JUND is irrelevant
+Fitting  37 / 53 rules
+CREB1
+0
+...checking if CREB1 is irrelevant
+Fitting  38 / 53 rules
+TCF7L2
+0
+100
+...checking if TCF7L1 is irrelevant
+...checking if TFDP1 is irrelevant
+...checking if MEIS2 is irrelevant
+...checking if NFIA is irrelevant
+...checking if PROX1 is irrelevant
+...checking if NFIX is irrelevant
+...checking if EGR1 is irrelevant
+Fitting  39 / 53 rules
+FOXO3
+0
+100
+...checking if TFDP1 is irrelevant
+...checking if JUND is irrelevant
+...checking if JUNB is irrelevant
+...checking if EHF is irrelevant
+...checking if TCF7L1 is irrelevant
+...checking if FOS is irrelevant
+...checking if HES1 is irrelevant
+Fitting  40 / 53 rules
+HSF2
+0
+...checking if TCF4 is irrelevant
+...checking if TEAD1 is irrelevant
+...checking if NFYC is irrelevant
+...checking if EGR1 is irrelevant
+...checking if ZEB1 is irrelevant
+...checking if TFDP1 is irrelevant
+Fitting  41 / 53 rules
+TCF7L1
+0
+100
+200
+...checking if GRHL2 is irrelevant
+...checking if TEAD1 is irrelevant
+...checking if EHF is irrelevant
+...checking if FOXO3 is irrelevant
+...checking if FOS is irrelevant
+...checking if TCF4 is irrelevant
+...checking if ZEB1 is irrelevant
+...checking if THRB is irrelevant
+Fitting  42 / 53 rules
+CUX1
+0
+100
+200
+...checking if TCF7L2 is irrelevant
+...checking if MEIS2 is irrelevant
+...checking if NR6A1 is irrelevant
+...checking if EHF is irrelevant
+...checking if THRB is irrelevant
+...checking if EGR1 is irrelevant
+...checking if TEAD1 is irrelevant
+...checking if RORA is irrelevant
+Fitting  43 / 53 rules
+NFIB
+0
+100
+200
+...checking if ZEB1 is irrelevant
+...checking if RBPJ is irrelevant
+...checking if TCF7L1 is irrelevant
+...checking if TCF4 is irrelevant
+...checking if ASCL1 is irrelevant
+...checking if THRB is irrelevant
+...checking if HSF2 is irrelevant
+...checking if STAT1 is irrelevant
+Fitting  44 / 53 rules
+THRB
+0
+...checking if SIX1 is irrelevant
+Fitting  45 / 53 rules
+SIX1
+0
+100
+200
+...checking if RUNX1 is irrelevant
+...checking if NFYC is irrelevant
+...checking if LMX1B is irrelevant
+...checking if PBX1 is irrelevant
+...checking if NFIA is irrelevant
+...checking if TCF4 is irrelevant
+...checking if SMAD3 is irrelevant
+...checking if TCF7L1 is irrelevant
+Fitting  46 / 53 rules
+RUNX1
+0
+100
+200
+...checking if HSF2 is irrelevant
+...checking if TCF4 is irrelevant
+...checking if ZEB1 is irrelevant
+...checking if MEIS2 is irrelevant
+...checking if TCF7L2 is irrelevant
+...checking if RORA is irrelevant
+...checking if STAT1 is irrelevant
+...checking if LMX1B is irrelevant
+Fitting  47 / 53 rules
+CUX2
+0
+100
+200
+...checking if FOS is irrelevant
+...checking if ZBTB7A is irrelevant
+...checking if FOXO3 is irrelevant
+...checking if TCF7L2 is irrelevant
+...checking if JUND is irrelevant
+...checking if BACH2 is irrelevant
+...checking if EHF is irrelevant
+...checking if NFIB is irrelevant
+Fitting  48 / 53 rules
+SMAD3
+0
+100
+200
+...checking if CREB1 is irrelevant
+...checking if EHF is irrelevant
+...checking if FOXO3 is irrelevant
+...checking if STAT1 is irrelevant
+...checking if RUNX1 is irrelevant
+...checking if HES1 is irrelevant
+...checking if ZBTB7A is irrelevant
+...checking if THRB is irrelevant
+Fitting  49 / 53 rules
+NFIA
+0
+100
+...checking if TCF4 is irrelevant
+...checking if RBPJ is irrelevant
+...checking if HIF1A is irrelevant
+...checking if TCF7L1 is irrelevant
+...checking if CUX2 is irrelevant
+...checking if CUX1 is irrelevant
+...checking if MEIS2 is irrelevant
+Fitting  50 / 53 rules
+NFATC2
+0
+100
+200
+...checking if JUN is irrelevant
+...checking if ASCL1 is irrelevant
+...checking if TCF4 is irrelevant
+...checking if FOS is irrelevant
+...checking if REST is irrelevant
+...checking if CREB1 is irrelevant
+...checking if LMX1B is irrelevant
+...checking if ZEB1 is irrelevant
+Fitting  51 / 53 rules
+TCF4
+0
+...checking if TCF4 is irrelevant
+Fitting  52 / 53 rules
+GRHL2
+0
+100
+200
+...checking if MEIS2 is irrelevant
+...checking if HES1 is irrelevant
+...checking if NFIA is irrelevant
+...checking if ETS1 is irrelevant
+...checking if EHF is irrelevant
+...checking if NFYC is irrelevant
+...checking if RORA is irrelevant
+...checking if TCF4 is irrelevant
+Calculating validation averages...
+/home/maddoxsf/.conda/envs/boba_accre/lib/python3.7/site-packages/sklearn/metrics/_classification.py:1318: UndefinedMetricWarning: Precision is ill-defined and being set to 0.0 due to no predicted samples. Use `zero_division` parameter to control this behavior.
+  _warn_prf(average, modifier, msg_start, len(result))
+/home/maddoxsf/.conda/envs/boba_accre/lib/python3.7/site-packages/sklearn/metrics/_classification.py:1318: UndefinedMetricWarning: Precision is ill-defined and being set to 0.0 due to no predicted samples. Use `zero_division` parameter to control this behavior.
+  _warn_prf(average, modifier, msg_start, len(result))
+/home/maddoxsf/.conda/envs/boba_accre/lib/python3.7/site-packages/sklearn/metrics/_classification.py:1318: UndefinedMetricWarning: Precision is ill-defined and being set to 0.0 due to no predicted samples. Use `zero_division` parameter to control this behavior.
+  _warn_prf(average, modifier, msg_start, len(result))
+/home/maddoxsf/.conda/envs/boba_accre/lib/python3.7/site-packages/sklearn/metrics/_classification.py:1318: UndefinedMetricWarning: Precision is ill-defined and being set to 0.0 due to no predicted samples. Use `zero_division` parameter to control this behavior.
+  _warn_prf(average, modifier, msg_start, len(result))
+/home/maddoxsf/.conda/envs/boba_accre/lib/python3.7/site-packages/sklearn/metrics/_classification.py:1318: UndefinedMetricWarning: Precision is ill-defined and being set to 0.0 due to no predicted samples. Use `zero_division` parameter to control this behavior.
+  _warn_prf(average, modifier, msg_start, len(result))
+/home/maddoxsf/.conda/envs/boba_accre/lib/python3.7/site-packages/sklearn/metrics/_classification.py:1318: UndefinedMetricWarning: Precision is ill-defined and being set to 0.0 due to no predicted samples. Use `zero_division` parameter to control this behavior.
+  _warn_prf(average, modifier, msg_start, len(result))
+/home/maddoxsf/.conda/envs/boba_accre/lib/python3.7/site-packages/sklearn/metrics/_classification.py:1580: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no true nor predicted samples. Use `zero_division` parameter to control this behavior.
+  _warn_prf(average, "true nor predicted", "F-score is", len(true_sum))
+/home/maddoxsf/.conda/envs/boba_accre/lib/python3.7/site-packages/sklearn/metrics/_classification.py:1318: UndefinedMetricWarning: Precision is ill-defined and being set to 0.0 due to no predicted samples. Use `zero_division` parameter to control this behavior.
+  _warn_prf(average, modifier, msg_start, len(result))
+/home/maddoxsf/.conda/envs/boba_accre/lib/python3.7/site-packages/sklearn/metrics/_classification.py:1318: UndefinedMetricWarning: Recall is ill-defined and being set to 0.0 due to no true samples. Use `zero_division` parameter to control this behavior.
+  _warn_prf(average, modifier, msg_start, len(result))
+Traceback (most recent call last):
+  File "parallel_rule_builder.py", line 168, in <module>
+    summary_stats = bb.tl.get_sklearn_metrics(VAL_DIR)
+  File "/home/maddoxsf/.conda/envs/boba_accre/lib/python3.7/site-packages/booleabayes/tl.py", line 658, in get_sklearn_metrics
+    roc_auc = roc_auc_score(val_df['actual_binary'], val_df['predicted'])
+  File "/home/maddoxsf/.conda/envs/boba_accre/lib/python3.7/site-packages/sklearn/metrics/_ranking.py", line 572, in roc_auc_score
+    sample_weight=sample_weight,
+  File "/home/maddoxsf/.conda/envs/boba_accre/lib/python3.7/site-packages/sklearn/metrics/_base.py", line 75, in _average_binary_score
+    return binary_metric(y_true, y_score, sample_weight=sample_weight)
+  File "/home/maddoxsf/.conda/envs/boba_accre/lib/python3.7/site-packages/sklearn/metrics/_ranking.py", line 338, in _binary_roc_auc_score
+    "Only one class present in y_true. ROC AUC score "
+ValueError: Only one class present in y_true. ROC AUC score is not defined in that case.

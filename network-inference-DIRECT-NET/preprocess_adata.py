@@ -8,10 +8,10 @@ import numpy as np
 DIRECT_NET_INDIR = "./DIRECT-NET-FILES/"
 
 
-def preprocess_adata(adata, DIRECT_NET_INDIR, outfile_name="adata_imputed.csv", extra_genes=None,
+def preprocess_adata(adata, DIRECT_NET_INDIR, Direct_net_file = "Direct_net.csv", outfile_name="adata_imputed.csv", extra_genes=None,
                      imputed_layer='imputed',
-                     species='mouse'):
-    direct_net = pd.read_csv(os.path.join(DIRECT_NET_INDIR, "Direct_net.csv"), header=0, index_col=0)
+                     species='mouse', add_figr = True):
+    direct_net = pd.read_csv(os.path.join(DIRECT_NET_INDIR, Direct_net_file), header=0, index_col=0)
     direct_net['Target_gene'] = [i.upper() for i in direct_net['Target_gene']]
     # "TF motif" column is parent node, "Target gene" is child node
     tfs = []
@@ -20,13 +20,14 @@ def preprocess_adata(adata, DIRECT_NET_INDIR, outfile_name="adata_imputed.csv", 
         tfs.append(r["Target_gene"])
     tfs = list(set(tfs))
 
-    figr = pd.read_csv(os.path.join(DIRECT_NET_INDIR, "FigR_DORC_TF.csv"), header=0, index_col=0)
-    figr.DORC = [i.upper() for i in figr.DORC]
-    figr.Motif = [i.upper() for i in figr.Motif]
+    if add_figr:
+        figr = pd.read_csv(os.path.join(DIRECT_NET_INDIR, "FigR_DORC_TF.csv"), header=0, index_col=0)
+        figr.DORC = [i.upper() for i in figr.DORC]
+        figr.Motif = [i.upper() for i in figr.Motif]
 
-    for i, r in figr.iterrows():
-        tfs.append(r['Motif'])
-        tfs.append(r["DORC"])
+        for i, r in figr.iterrows():
+            tfs.append(r['Motif'])
+            tfs.append(r["DORC"])
 
     tfs = list(set(tfs))
 
@@ -82,4 +83,8 @@ def preprocess_adata(adata, DIRECT_NET_INDIR, outfile_name="adata_imputed.csv", 
 #                      species = 'human')
 
 adata = cr.read('../data/combined/adata_02_filtered.h5ad')
-preprocess_adata(adata, DIRECT_NET_INDIR, outfile_name = "adata_imputed_combined_v2.csv", extra_genes=['CD24', 'CD44', 'EPCAM', 'ICAM1', 'NCAM1','SOX11'])
+# preprocess_adata(adata, DIRECT_NET_INDIR, outfile_name = "adata_imputed_combined_v2.csv", extra_genes=['CD24', 'CD44', 'EPCAM', 'ICAM1', 'NCAM1','SOX11'])
+
+preprocess_adata(adata, DIRECT_NET_INDIR, Direct_net_file='Direct_net_pval.csv', outfile_name = "adata_imputed_combined_v3.csv",
+                 extra_genes=['CD24A','CD44', 'EPCAM', 'ICAM1', 'NCAM1','SOX11', 'HES1', 'NFYC', 'NR6A1', 'RBPJ', 'TFDP1',
+                              'ZBTB18'])

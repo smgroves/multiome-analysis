@@ -1,0 +1,3 @@
+ArrayTaskID	network_path	data_path	cellID_table	node_normalization	node_threshold
+0	networks/test_network.csv	data/adata_imputed_combined_v3.csv	data/AA_clusters_splitgen.csv	0.1	0
+1	networks/DIRECT-NET_network_2020db_0.1_top8regs_nosinks.csv	data/adata_imputed_combined_v3.csv	data/AA_clusters_splitgen.csv	minmax	0

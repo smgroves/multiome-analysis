@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <module type="PYTHON_MODULE" version="4">
   <component name="NewModuleRootManager">
+    <content url="file://$MODULE_DIR$/../BooleaBayes">
+      <sourceFolder url="file://$MODULE_DIR$/../BooleaBayes" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/../BooleaBayes/booleabayes" isTestSource="false" />
+    </content>
     <content url="file://$MODULE_DIR$">
       <sourceFolder url="file://$MODULE_DIR$/network-inference-SG_network" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/network-inference-SG_network/src" isTestSource="false" />

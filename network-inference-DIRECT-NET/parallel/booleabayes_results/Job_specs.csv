@@ -1,0 +1,2 @@
+,time_minutes,memory_Mb,barcode,dir_prefix,network_path,data_path,cellID_table,node_normalization,node_threshold,remove_sinks,remove_selfloops,remove_sources
+0,2.613990859190623,395.336,4717,/data/qlab/smgroves/parallel_bb/parallel/booleabayes_results/,networks/test_network.csv,data/adata_imputed_combined_v3.csv,data/AA_clusters_splitgen.csv,0.1,0.0,False,True,False
