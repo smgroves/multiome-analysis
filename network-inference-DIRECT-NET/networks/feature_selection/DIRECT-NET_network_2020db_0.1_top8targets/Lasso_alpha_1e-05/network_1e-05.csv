@@ -1,0 +1,8 @@
+source,target,weight,evidence
+BACH1,AHR,18.95512489,direct-net
+FOS,AHR,15.1225685,direct-net
+NFATC2,AHR,12.39058271,direct-net
+RBPJ,AHR,13.08758211,direct-net
+REST,AHR,16.51655607,direct-net
+RORA,AHR,13.0792697,direct-net
+RORB,AHR,13.95737662,direct-net

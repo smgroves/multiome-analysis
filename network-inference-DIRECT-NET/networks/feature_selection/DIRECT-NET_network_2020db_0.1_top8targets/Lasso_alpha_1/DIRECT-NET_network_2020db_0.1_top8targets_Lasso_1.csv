@@ -1,0 +1,10 @@
+source,target,weight,evidence
+FOXO3,FOXO3,14.72322817,direct-net
+GLIS3,GLIS3,7.8192198,direct-net
+FOXO3,FOXO3,14.72322817,direct-net
+GLIS3,GLIS3,7.8192198,direct-net
+NFIA,NFIA,13.39301755,direct-net
+PBX1,PBX1,13.36344938,direct-net
+PPARG,PPARG,11.64608468,direct-net
+REST,REST,12.15706909,direct-net
+TCF7L2,TCF7L2,14.10401325,direct-net
