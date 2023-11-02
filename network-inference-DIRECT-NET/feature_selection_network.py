@@ -16,22 +16,7 @@ from sklearn.model_selection import GridSearchCV, KFold
 
 ## Set paths
 dir_prefix = '/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET'
-network_name = "DIRECT-NET_network_2020db_0.1_top8targets"
-network_path = f'networks/{network_name}.csv'
 data_path = f'data/adata_imputed_combined_v3.csv'
-
-## Set metadata information
-cellID_table = 'data/AA_clusters_splitgen.csv'
-# cellID_table = f'data/human_tumors/{sample}_clusters.csv'
-# Assign headers to cluster csv, with one called "class"
-# cluster_header_list = ['class']
-
-# cluster headers with "identity" replaced with "class"
-cluster_header_list = ["class"]
-
-# read in network and data as pandas DataFrames
-network = pd.read_csv(op.join(dir_prefix, network_path), index_col=None, header = None)
-network.columns = ['source', 'target', 'weight', 'evidence']
 data = pd.read_csv(op.join(dir_prefix, data_path), index_col=0, header = 0)
 data.columns = [col.upper() for col in data.columns]
 
@@ -124,8 +109,18 @@ def lasso_feature_selection(network, data, network_name, dir_prefix, save_networ
                     with open(feature_sel_folder + f'/{network_name}_Lasso_{alpha}.csv', 'a') as f:
                         subset.to_csv(f, header=False, index = False)
 
+# network_name = "DIRECT-NET_network_2020db_0.1_top8targets"
+# network_path = f'networks/{network_name}.csv'
+# network = pd.read_csv(op.join(dir_prefix, network_path), index_col=None, header = None)
+# network.columns = ['source', 'target', 'weight', 'evidence']
 # lasso_feature_selection(network, data, network_name, dir_prefix)
 # lasso_feature_selection(network, data, network_name, dir_prefix, save_network = False, plot = True)
+
+network_name = "DIRECT-NET_network_2020db_0.1"
+network_path = f'networks/{network_name}.csv'
+network = pd.read_csv(op.join(dir_prefix, network_path), index_col=None, header = None)
+network.columns = ['source', 'target', 'weight', 'evidence']
+# lasso_feature_selection(network, data, network_name, dir_prefix)
 
 #comparing the networks
 
@@ -171,5 +166,5 @@ for alpha in [0.00001, 0.0001, 0.001, 0.01, 0.1, 1]:
     new_network_path = f"{dir_prefix}/networks/feature_selection/{network_name}/Lasso_alpha_{alpha}/{network_name}_Lasso_{alpha}.csv"
     new_net  = pd.read_csv(new_network_path, index_col=None, header = 0)
     # compare_networks(network, new_network, alpha, save_dir=f"{dir_prefix}/networks/feature_selection/{network_name}")
-    compare_networks(network, new_net, alpha, save = False)
+    compare_networks(network, new_net, alpha, save = True, save_dir=f"{dir_prefix}/networks/feature_selection/{network_name}")
 
