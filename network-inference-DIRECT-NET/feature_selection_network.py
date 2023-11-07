@@ -16,9 +16,9 @@ from sklearn.model_selection import GridSearchCV, KFold
 
 ## Set paths
 dir_prefix = '/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET'
-data_path = f'data/adata_imputed_combined_v3.csv'
-data = pd.read_csv(op.join(dir_prefix, data_path), index_col=0, header = 0)
-data.columns = [col.upper() for col in data.columns]
+# data_path = f'data/adata_imputed_combined_v3.csv'
+# data = pd.read_csv(op.join(dir_prefix, data_path), index_col=0, header = 0)
+# data.columns = [col.upper() for col in data.columns]
 
 ###############################################
 # Arboreto package (used in SCENIC) for GRN inference
@@ -161,10 +161,66 @@ def compare_networks(network, new_net, alpha, save = True,save_dir = ""):
 # orig_network_path = network_path = f'networks/DIRECT-NET_network_with_FIGR_threshold_0_no_NEUROG2_top8regs_expanded_v2.csv'
 # original_network = pd.read_csv(op.join(dir_prefix, network_path), index_col=None, header = None)
 # original_network.columns = ['source', 'target']
+#
+# for alpha in [0.00001, 0.0001, 0.001, 0.01, 0.1, 1]:
+#     new_network_path = f"{dir_prefix}/networks/feature_selection/{network_name}/Lasso_alpha_{alpha}/{network_name}_Lasso_{alpha}.csv"
+#     new_net  = pd.read_csv(new_network_path, index_col=None, header = 0)
+#     # compare_networks(network, new_network, alpha, save_dir=f"{dir_prefix}/networks/feature_selection/{network_name}")
+#     compare_networks(network, new_net, alpha, save = True, save_dir=f"{dir_prefix}/networks/feature_selection/{network_name}")
 
-for alpha in [0.00001, 0.0001, 0.001, 0.01, 0.1, 1]:
-    new_network_path = f"{dir_prefix}/networks/feature_selection/{network_name}/Lasso_alpha_{alpha}/{network_name}_Lasso_{alpha}.csv"
-    new_net  = pd.read_csv(new_network_path, index_col=None, header = 0)
-    # compare_networks(network, new_network, alpha, save_dir=f"{dir_prefix}/networks/feature_selection/{network_name}")
-    compare_networks(network, new_net, alpha, save = True, save_dir=f"{dir_prefix}/networks/feature_selection/{network_name}")
 
+#start with 0.1 network, and then only do Lasso on those with >8 regulators. Pick the lowest alpha with <=8 regulators.
+network_name = "DIRECT-NET_network_2020db_0.1"
+network_path = f'networks/{network_name}.csv'
+network = pd.read_csv(op.join(dir_prefix, network_path), index_col=None, header = None)
+network.columns = ['source', 'target', 'weight', 'evidence']
+
+#make dictionary mapping tfs to correct alpha values
+tfs = sorted(list(set(network['source']).union(set(network['target']))))
+tf_dict = {tf: 0 for tf in tfs}
+tf_parent_dict = {tf: [] for tf in tfs}
+alphas =[0.00001, 0.0001, 0.001, 0.01, 0.1, 1]
+parents = []
+for tf in tfs:
+    tmp = network.loc[network['target'] == tf]
+    num_parents = len(np.unique(tmp['source']))
+    if num_parents < 8:
+        alpha = 0
+        tf_parent_dict[tf] = list(np.unique(tmp['source'].values))
+        tf_dict[tf] = alpha
+    else:
+        count = 0
+        while num_parents > 8:
+            try:
+                alpha = alphas[count]
+                new_network_path = f"{dir_prefix}/networks/feature_selection/{network_name}/Lasso_alpha_{alpha}/{network_name}_Lasso_{alpha}.csv"
+                new_net = pd.read_csv(new_network_path, index_col=None, header=0)
+                tmp_new = new_net.loc[new_net['target'] == tf]
+                num_parents = len(np.unique(tmp_new['source']))
+                count += 1
+            except:
+                alpha = "NA"
+                break
+        tf_dict[tf] = alpha
+        tf_parent_dict[tf] = list(np.unique(tmp_new['source'].values))
+    print(tf, alpha, num_parents)
+    parents.append(num_parents)
+
+print(tf_dict)
+
+# turn dictionary of lists into longform dataframe
+tf_parent_df = pd.DataFrame([(k, v) for k, val in tf_parent_dict.items() for v in val])
+tf_parent_df.columns = ['target', 'source']
+tf_parent_df = tf_parent_df.sort_index(axis = 1)
+print(tf_parent_df.head())
+
+tf_parent_df.to_csv(f"{dir_prefix}/networks/feature_selection/{network_name}/combined_{network_name}_Lasso.csv", index = False, header = False)
+
+most_parents = np.max(parents)
+bins = np.arange(most_parents+2) - 0.5
+plt.hist(parents, bins = bins, edgecolor='#e0e0e0')
+plt.xticks(range(most_parents + 1))
+plt.xlim([-1, most_parents + 1])
+plt.title("Number of parents for each target with LASSO regression independently")
+plt.savefig(f"{dir_prefix}/networks/feature_selection/{network_name}/parent_hist_Lasso.png")
+plt.close()

@@ -27,9 +27,9 @@ print_graph_information = True #whether to print graph info to {brcd}.txt
 plot_network = True
 split_train_test = True
 write_binarized_data = True
-fit_rules = True
-run_validation = True
-validation_averages = True
+fit_rules = False
+run_validation = False
+validation_averages = False
 find_average_states = False
 find_attractors = False
 tf_basin = 2 # if -1, use average distance between clusters for search basin for attractors.
@@ -54,11 +54,11 @@ transpose = True
 validation_fname = f'validation/'
 # fname = f"{sample}"
 fname = "combined"
-notes_for_log = "Fitting rules and validation for updated DIRECT-NET network with 2020db, top 8 targets, and Lasso a = 0.001"
+notes_for_log = "Print network for updated DIRECT-NET network with 2020db and indpendent LASSO models"
 
 ## Set paths
 dir_prefix = '/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET'
-network_path = 'networks/DIRECT-NET_network_2020db_0.1_top8targets_Lasso_0.001.csv' #just removed column headers from original
+network_path = 'networks/feature_selection/DIRECT-NET_network_2020db_0.1/combined_DIRECT-NET_network_2020db_0.1_Lasso.csv'
 data_path = f'data/adata_imputed_combined_v3.csv'
 t1 = False
 data_t1_path = None #if no T1 (i.e. single dataset), replace with None
@@ -150,7 +150,8 @@ graph, vertex_dict = bb.load.load_network(f'{dir_prefix}/{network_path}', remove
 v_names, nodes = bb.utils.get_nodes(vertex_dict, graph)
 
 if print_graph_information:
-    print_graph_info(graph, vertex_dict, nodes,  fname, brcd = brcd, dir_prefix = dir_prefix,plot = False)
+    print_graph_info(graph, vertex_dict, nodes,  fname, brcd = brcd, dir_prefix = dir_prefix,plot = True,
+                     add_edge_weights=False)
 
 # =============================================================================
 # Load the data and clusters
@@ -261,12 +262,15 @@ if fit_rules:
     draw_grn(graph,vertex_dict,rules, regulators_dict,f"{dir_prefix}/{brcd}/{fname}_network.pdf", save_edge_weights=True,
              edge_weights_fname=f"{dir_prefix}/{brcd}/rules/edge_weights.csv")#, gene2color = gene2color)
 else:
-    print("Reading in pre-generated rules...")
-    rules, regulators_dict = bb.load.load_rules(fname=f"{dir_prefix}/{brcd}/rules/rules_{brcd}.txt")
+    try:
+        print("Reading in pre-generated rules...")
+        rules, regulators_dict = bb.load.load_rules(fname=f"{dir_prefix}/{brcd}/rules/rules_{brcd}.txt")
 
-    if plot_network:
-        draw_grn(graph,vertex_dict,rules, regulators_dict,f"{dir_prefix}/{brcd}/{fname}_network.pdf", save_edge_weights=True,
-             edge_weights_fname=f"{dir_prefix}/{brcd}/rules/edge_weights.csv")#, gene2color = gene2color)
+        if plot_network:
+            draw_grn(graph,vertex_dict,rules, regulators_dict,f"{dir_prefix}/{brcd}/{fname}_network.pdf", save_edge_weights=True,
+                 edge_weights_fname=f"{dir_prefix}/{brcd}/rules/edge_weights.csv")#, gene2color = gene2color)
+    except FileNotFoundError:
+        print("Rules file not found. Please set fit_rules to True to generate rules.")
 # =============================================================================
 # Calculate AUC for test dataset for a true error calculation
 # =============================================================================
