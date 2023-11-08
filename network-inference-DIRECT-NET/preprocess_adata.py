@@ -85,6 +85,10 @@ def preprocess_adata(adata, DIRECT_NET_INDIR, Direct_net_file = "Direct_net.csv"
 adata = cr.read('../data/combined/adata_02_filtered.h5ad')
 # preprocess_adata(adata, DIRECT_NET_INDIR, outfile_name = "adata_imputed_combined_v2.csv", extra_genes=['CD24', 'CD44', 'EPCAM', 'ICAM1', 'NCAM1','SOX11'])
 
-preprocess_adata(adata, DIRECT_NET_INDIR, Direct_net_file='Direct_net_pval.csv', outfile_name = "adata_imputed_combined_v3.csv",
-                 extra_genes=['CD24A','CD44', 'EPCAM', 'ICAM1', 'NCAM1','SOX11', 'HES1', 'NFYC', 'NR6A1', 'RBPJ', 'TFDP1',
-                              'ZBTB18'])
+# preprocess_adata(adata, DIRECT_NET_INDIR, Direct_net_file='Direct_net_pval.csv', outfile_name = "adata_imputed_combined_v3.csv",
+#                  extra_genes=['CD24A','CD44', 'EPCAM', 'ICAM1', 'NCAM1','SOX11', 'HES1', 'NFYC', 'NR6A1', 'RBPJ', 'TFDP1',
+#                               'ZBTB18'])
+
+umap = pd.DataFrame((adata.obsm["X_umap_wnn"]), index = adata.obs_names, columns = ['UMAP1', 'UMAP2'])
+print(umap.head())
+umap.to_csv("./data/umap_wnn_combined.csv")

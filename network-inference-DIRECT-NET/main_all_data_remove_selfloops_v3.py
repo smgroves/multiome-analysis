@@ -23,10 +23,10 @@ customPalette = sns.color_palette('tab10')
 # Set variables and csvs
 # To modulate which parts of the pipeline need to be computed, use the following variables
 # =============================================================================
-print_graph_information = True #whether to print graph info to {brcd}.txt
-plot_network = True
-split_train_test = True
-write_binarized_data = True
+print_graph_information = False #whether to print graph info to {brcd}.txt
+plot_network = False
+split_train_test = False
+write_binarized_data = False
 fit_rules = False
 run_validation = False
 validation_averages = False
@@ -58,7 +58,7 @@ notes_for_log = "Print network for updated DIRECT-NET network with 2020db and in
 
 ## Set paths
 dir_prefix = '/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET'
-network_path = 'networks/feature_selection/DIRECT-NET_network_2020db_0.1/combined_DIRECT-NET_network_2020db_0.1_Lasso.csv'
+network_path = 'networks/feature_selection/DIRECT-NET_network_2020db_0.1/combined_DIRECT-NET_network_2020db_0.1_Lasso_wo_sinks.csv'
 data_path = f'data/adata_imputed_combined_v3.csv'
 t1 = False
 data_t1_path = None #if no T1 (i.e. single dataset), replace with None
