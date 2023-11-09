@@ -64,12 +64,15 @@ def visualize_normalization(dir_prefix, data_path, nodes, node_normalization, em
     binarized_data_df_new = pca.fit_transform(binarized_data_df)
     data = pd.DataFrame(binarized_data_df_new, columns=['0', '1'], index=binarized_data_df.index)
     data['color'] = clusters['class']
-    print(data.head())
     pal = {"Generalist_NE": "lightgrey", "Generalist_nonNE": "grey", "Arc_1": "red", "Arc_2": "orange",
            "Arc_3": "yellow", "Arc_4": "green", "Arc_5": "blue", "Arc_6": "purple"}
-    scatterplot = sns.scatterplot(data=data, x='0', y='1', hue='color', alpha=0.7, palette=pal, edgecolor='none', s=10)
+    fig, axs = plt.subplots(1, 2, figsize=(12, 6), dpi=200)  # 1 row, 2 columns
+    sns.scatterplot(x=umap['UMAP1'], y=umap['UMAP2'], hue=clusters['class'],palette=pal, edgecolor='none', s=2, ax=axs[0])
+    axs[0].set_title("UMAP of Original Data Colored by Phenotype")
+
+    scatterplot = sns.scatterplot(data=data, x='0', y='1', hue='color', alpha=0.7, palette=pal, edgecolor='none', s=10, ax=axs[1])
     scatterplot.legend(loc='center left', bbox_to_anchor=(1, 0.5))
-    plt.title("PCA of Binarized Data Colored by Phenotype")
+    axs[1].set_title("PCA of Binarized Data Colored by Phenotype")
     plt.tight_layout()
     pdf.savefig()
     plt.clf()

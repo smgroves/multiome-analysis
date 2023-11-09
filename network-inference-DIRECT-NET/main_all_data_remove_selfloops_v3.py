@@ -27,9 +27,9 @@ print_graph_information = False #whether to print graph info to {brcd}.txt
 plot_network = False
 split_train_test = False
 write_binarized_data = False
-fit_rules = False
-run_validation = False
-validation_averages = False
+fit_rules = True
+run_validation = True
+validation_averages = True
 find_average_states = False
 find_attractors = False
 tf_basin = 2 # if -1, use average distance between clusters for search basin for attractors.
@@ -54,7 +54,7 @@ transpose = True
 validation_fname = f'validation/'
 # fname = f"{sample}"
 fname = "combined"
-notes_for_log = "Print network for updated DIRECT-NET network with 2020db and indpendent LASSO models"
+notes_for_log = "Fitting rules for updated DIRECT-NET network with 2020db and indpendent LASSO models, wo sinks"
 
 ## Set paths
 dir_prefix = '/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET'
@@ -586,7 +586,7 @@ if False:
 
 time2 = time.time()
 time_for_job = (time2 - time1) / 60.
-print("Time for job: ", time_for_job)
+print("Time for job: ", time_for_job, " minutes")
 
 log_job(dir_prefix, brcd, random_state, network_path, data_path, data_t1_path, cellID_table, node_normalization,
         node_threshold, split_train_test, write_binarized_data,fit_rules,run_validation,validation_averages,
