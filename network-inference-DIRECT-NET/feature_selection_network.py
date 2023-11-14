@@ -214,7 +214,7 @@ tf_parent_df.columns = ['target', 'source']
 tf_parent_df = tf_parent_df.sort_index(axis = 1)
 print(tf_parent_df.head())
 
-tf_parent_df.to_csv(f"{dir_prefix}/networks/feature_selection/{network_name}/combined_{network_name}_Lasso.csv", index = False, header = False)
+tf_parent_df.to_csv(f"{dir_prefix}/networks/feature_selection/{network_name}/combined_{network_name}_Lasso_.csv", index = False, header = False)
 
 most_parents = np.max(parents)
 bins = np.arange(most_parents+2) - 0.5
@@ -222,5 +222,5 @@ plt.hist(parents, bins = bins, edgecolor='#e0e0e0')
 plt.xticks(range(most_parents + 1))
 plt.xlim([-1, most_parents + 1])
 plt.title("Number of parents for each target with LASSO regression independently")
-plt.savefig(f"{dir_prefix}/networks/feature_selection/{network_name}/parent_hist_Lasso.png")
+plt.savefig(f"{dir_prefix}/networks/feature_selection/{network_name}/parent_hist_Lasso_.png")
 plt.close()
