@@ -1,0 +1,2 @@
+start-state,dist-to-start,attractor
+2442428322229856,1, 190628508544608

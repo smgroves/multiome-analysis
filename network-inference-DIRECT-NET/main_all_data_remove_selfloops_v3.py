@@ -27,14 +27,14 @@ print_graph_information = False #whether to print graph info to {brcd}.txt
 plot_network = False
 split_train_test = False
 write_binarized_data = False
-fit_rules = True
-run_validation = True
-validation_averages = True
-find_average_states = False
-find_attractors = False
+fit_rules = False
+run_validation = False
+validation_averages = False
+find_average_states = True
+find_attractors = True
 tf_basin = 2 # if -1, use average distance between clusters for search basin for attractors.
 # otherwise use the same size basin for all phenotypes. For single cell data, there may be so many samples that average distance is small.
-filter_attractors = False
+filter_attractors = True
 perturbations = False
 stability = False
 on_nodes = []
@@ -54,7 +54,7 @@ transpose = True
 validation_fname = f'validation/'
 # fname = f"{sample}"
 fname = "combined"
-notes_for_log = "Fitting rules for updated DIRECT-NET network with 2020db and indpendent LASSO models, wo sinks"
+notes_for_log = "Attractors for updated DIRECT-NET network with 2020db and indpendent LASSO models, wo sinks"
 
 ## Set paths
 dir_prefix = '/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET'
