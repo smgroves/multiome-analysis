@@ -30,13 +30,13 @@ write_binarized_data = False
 fit_rules = False
 run_validation = False
 validation_averages = False
-find_average_states = True
-find_attractors = True
+find_average_states = False
+find_attractors = False
 tf_basin = 2 # if -1, use average distance between clusters for search basin for attractors.
 # otherwise use the same size basin for all phenotypes. For single cell data, there may be so many samples that average distance is small.
-filter_attractors = True
-perturbations = False
-stability = False
+filter_attractors = False
+perturbations = True
+stability = True
 on_nodes = []
 off_nodes = []
 
@@ -51,15 +51,15 @@ transpose = True
 
 # sample = sys.argv[1]
 
-validation_fname = f'validation/'
+validation_fname = 'validation/'
 # fname = f"{sample}"
 fname = "combined"
-notes_for_log = "Attractors for updated DIRECT-NET network with 2020db and indpendent LASSO models, wo sinks"
+notes_for_log = "Perturbations for updated DIRECT-NET network with 2020db and indpendent LASSO models, wo sinks"
 
 ## Set paths
 dir_prefix = '/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET'
 network_path = 'networks/feature_selection/DIRECT-NET_network_2020db_0.1/combined_DIRECT-NET_network_2020db_0.1_Lasso_wo_sinks.csv'
-data_path = f'data/adata_imputed_combined_v3.csv'
+data_path = 'data/adata_imputed_combined_v3.csv'
 t1 = False
 data_t1_path = None #if no T1 (i.e. single dataset), replace with None
 
