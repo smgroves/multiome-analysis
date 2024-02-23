@@ -94,7 +94,8 @@ dir_prefix = '/Users/smgroves/Documents/GitHub/multiome-analysis/network-inferen
 # save_if_overwrite(network_file,graph)
 
 dir_prefix = '/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET'
-network_path = 'networks/feature_selection/DIRECT-NET_network_2020db_0.1/combined_DIRECT-NET_network_2020db_0.1_Lasso.csv'
+# network_path = 'networks/feature_selection/DIRECT-NET_network_2020db_0.1/combined_DIRECT-NET_network_2020db_0.1_Lasso.csv'
+network_path = 'networks/DIRECT-NET_network_2020db_0.1_top8regs.csv'
 
 net = pd.read_csv(f"{dir_prefix}/{network_path}", header = None)
 tfs = set(net[0]).union(set(net[1]))

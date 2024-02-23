@@ -23,7 +23,7 @@ customPalette = sns.color_palette('tab10')
 # Set variables and csvs
 # To modulate which parts of the pipeline need to be computed, use the following variables
 # =============================================================================
-print_graph_information = False #whether to print graph info to {brcd}.txt
+print_graph_information = True #whether to print graph info to {brcd}.txt
 plot_network = False
 split_train_test = False
 write_binarized_data = False
@@ -31,12 +31,12 @@ fit_rules = False
 run_validation = False
 validation_averages = False
 find_average_states = False
-find_attractors = False
+find_attractors = True
 tf_basin = 2 # if -1, use average distance between clusters for search basin for attractors.
 # otherwise use the same size basin for all phenotypes. For single cell data, there may be so many samples that average distance is small.
-filter_attractors = False
+filter_attractors = True
 perturbations = True
-stability = True
+stability = False
 on_nodes = []
 off_nodes = []
 
@@ -54,11 +54,12 @@ transpose = True
 validation_fname = 'validation/'
 # fname = f"{sample}"
 fname = "combined"
-notes_for_log = "Perturbations for updated DIRECT-NET network with 2020db and indpendent LASSO models, wo sinks"
-
+# notes_for_log = "Perturbations for updated DIRECT-NET network with 2020db and indpendent LASSO models, wo sinks"
+notes_for_log = "Attractors and perturbations for updated DIRECT-NET network with 2020db and top 8 regulators"
 ## Set paths
 dir_prefix = '/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET'
-network_path = 'networks/feature_selection/DIRECT-NET_network_2020db_0.1/combined_DIRECT-NET_network_2020db_0.1_Lasso_wo_sinks.csv'
+# network_path = 'networks/feature_selection/DIRECT-NET_network_2020db_0.1/combined_DIRECT-NET_network_2020db_0.1_Lasso_wo_sinks.csv'
+network_path = "networks/DIRECT-NET_network_2020db_0.1_top8regs_wo_sinks.csv"
 data_path = 'data/adata_imputed_combined_v3.csv'
 t1 = False
 data_t1_path = None #if no T1 (i.e. single dataset), replace with None
@@ -83,7 +84,8 @@ cluster_header_list = ["class"]
 
 ## Set brcd and train/test data if rerun
 # brcd = str(random.randint(0,99999))
-brcd = str(6666)
+# brcd = str(6666) #correspond to LASSO network
+brcd = 1112 #corresponds to updated 2020db network 0.1 with manually selected top 8 regulators
 print(brcd)
 # if rerunning a brcd and data has already been split into training and testing sets, use the below code
 # Otherwise, these settings are ignored
@@ -307,10 +309,10 @@ if validation_averages:
     print("AUC means: ",aucs.mean())
 
     # bb.plot.plot_aucs(aucs, save=True, save_dir=VAL_DIR, show_plot=True)
-    bb.plot.plot_aucs(VAL_DIR, save=True, show_plot=True) #once BB > 0.0.7, change to this line
+    bb.plot.plot_aucs(VAL_DIR, save=True, show_plot=False) #once BB > 0.0.7, change to this line
 
 
-    bb.plot.plot_validation_avgs(fprs_all, tprs_all, len(nodes), area_all, save=True, save_dir=VAL_DIR, show_plot=True)
+    bb.plot.plot_validation_avgs(fprs_all, tprs_all, len(nodes), area_all, save=True, save_dir=VAL_DIR, show_plot=False)
 
 
     ## bb version > 0.1.7
@@ -470,7 +472,7 @@ else:
 # record random walk from each attractor in each phenotype with different perturbations
 # will make plots for each perturbation for each starting state
 
-dir_prefix_walks = op.join(dir_prefix, brcd)
+dir_prefix_walks = op.join(dir_prefix, str(brcd))
 
 
 if perturbations:
