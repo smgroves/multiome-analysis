@@ -31,10 +31,10 @@ fit_rules = False
 run_validation = False
 validation_averages = False
 find_average_states = False
-find_attractors = True
+find_attractors = False
 tf_basin = 2 # if -1, use average distance between clusters for search basin for attractors.
 # otherwise use the same size basin for all phenotypes. For single cell data, there may be so many samples that average distance is small.
-filter_attractors = True
+filter_attractors = False
 perturbations = True
 stability = False
 on_nodes = []
@@ -55,7 +55,7 @@ validation_fname = 'validation/'
 # fname = f"{sample}"
 fname = "combined"
 # notes_for_log = "Perturbations for updated DIRECT-NET network with 2020db and indpendent LASSO models, wo sinks"
-notes_for_log = "Attractors and perturbations for updated DIRECT-NET network with 2020db and top 8 regulators"
+notes_for_log = "Perturbations for updated DIRECT-NET network with 2020db and top 8 regulators"
 ## Set paths
 dir_prefix = '/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET'
 # network_path = 'networks/feature_selection/DIRECT-NET_network_2020db_0.1/combined_DIRECT-NET_network_2020db_0.1_Lasso_wo_sinks.csv'
