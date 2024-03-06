@@ -9,12 +9,12 @@ import matplotlib.pyplot as plt
 from bb_utils import draw_grn
 
 dir_prefix = '/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET'
-brcd = str(6666)
+brcd = str(1112)
 save_dir = f"{dir_prefix}/{brcd}"
 
 edge_weights = pd.read_csv(f"{dir_prefix}/{brcd}/rules/edge_weights.csv", header = 0, index_col=0)
 # network_file = f"{dir_prefix}/networks/DIRECT-NET_network_with_FIGR_threshold_0_no_NEUROG2_top8regs_NO_sinks_NOCD24_expanded.csv"
-network_file = f"{dir_prefix}/networks/feature_selection/DIRECT-NET_network_2020db_0.1/combined_DIRECT-NET_network_2020db_0.1_Lasso_wo_sinks.csv"
+network_file = f"{dir_prefix}/networks/DIRECT-NET_network_2020db_0.1_top8regs_wo_sinks.csv"
 nodes = edge_weights.index
 
 def plot_subgraph(keep_nodes, network_file, nodes, edge_weights, keep_parents = True, keep_children = True,
