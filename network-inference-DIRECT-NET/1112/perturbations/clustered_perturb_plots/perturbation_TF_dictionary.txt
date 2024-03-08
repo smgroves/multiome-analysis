@@ -1,0 +1,35 @@
+ASCL1:{"Regulators": ["Arc_1"], "Destabilizers": ["Generalist_nonNE", "Arc_4"]}
+BACH1:{"Regulators": [], "Destabilizers": ["Generalist_nonNE", "Arc_3", "Arc_4", "Arc_1_Generalist_NE"]}
+CREB1:{"Regulators": ["Arc_1"], "Destabilizers": ["Generalist_nonNE", "Arc_3", "Arc_4"]}
+EGR1:{"Regulators": [], "Destabilizers": ["Arc_4"]}
+EHF:{"Regulators": ["Arc_4"], "Destabilizers": ["Arc_3", "Arc_1_Generalist_NE"]}
+FOS:{"Regulators": ["Generalist_nonNE", "Arc_4"], "Destabilizers": ["Arc_1", "Arc_5"]}
+FOXO3:{"Regulators": [], "Destabilizers": ["Arc_3", "Arc_1_Generalist_NE"]}
+GRHL2:{"Regulators": [], "Destabilizers": ["Arc_3", "Arc_1_Generalist_NE"]}
+HES1:{"Regulators": ["Arc_4"], "Destabilizers": []}
+HSF2:{"Regulators": [], "Destabilizers": ["Arc_4"]}
+JUN:{"Regulators": ["Arc_1_Generalist_NE"], "Destabilizers": []}
+JUND:{"Regulators": [], "Destabilizers": ["Arc_3", "Arc_1_Generalist_NE"]}
+LMX1B:{"Regulators": ["Arc_6", "Arc_1", "Arc_5_Generalist_NE"], "Destabilizers": ["Generalist_nonNE", "Arc_4"]}
+MEIS2:{"Regulators": [], "Destabilizers": ["Generalist_nonNE", "Arc_4"]}
+NFATC2:{"Regulators": ["Generalist_NE", "Arc_6", "Arc_1", "Arc_5", "Arc_5_Generalist_NE"], "Destabilizers": ["Generalist_nonNE", "Arc_4"]}
+NFIA:{"Regulators": ["Arc_4"], "Destabilizers": ["Arc_3", "Arc_1_Generalist_NE"]}
+NFIB:{"Regulators": [], "Destabilizers": ["Arc_3", "Arc_1_Generalist_NE"]}
+NFIX:{"Regulators": ["Arc_4"], "Destabilizers": []}
+NFYC:{"Regulators": [], "Destabilizers": ["Arc_3", "Arc_1_Generalist_NE"]}
+PROX1:{"Regulators": ["Arc_1"], "Destabilizers": ["Arc_4"]}
+RBPJ:{"Regulators": ["Generalist_NE", "Arc_6", "Arc_1", "Arc_5", "Arc_5_Generalist_NE"], "Destabilizers": ["Generalist_nonNE", "Arc_3", "Arc_1_Generalist_NE"]}
+RORA:{"Regulators": [], "Destabilizers": ["Generalist_nonNE", "Arc_3"]}
+RORB:{"Regulators": [], "Destabilizers": ["Arc_4"]}
+RUNX1:{"Regulators": ["Generalist_nonNE", "Arc_4"], "Destabilizers": ["Arc_3", "Arc_1_Generalist_NE"]}
+SIX1:{"Regulators": ["Arc_1", "Arc_5", "Arc_5_Generalist_NE"], "Destabilizers": ["Generalist_nonNE", "Arc_3", "Arc_4", "Arc_1_Generalist_NE"]}
+SMAD3:{"Regulators": ["Arc_4"], "Destabilizers": []}
+STAT1:{"Regulators": ["Generalist_nonNE", "Arc_4"], "Destabilizers": ["Arc_3"]}
+TBX15:{"Regulators": [], "Destabilizers": ["Arc_4"]}
+TCF4:{"Regulators": ["Generalist_NE", "Arc_6", "Arc_1", "Arc_5", "Arc_5_Generalist_NE"], "Destabilizers": ["Generalist_nonNE", "Arc_3", "Arc_1_Generalist_NE"]}
+TCF7L1:{"Regulators": ["Arc_4"], "Destabilizers": []}
+TCF7L2:{"Regulators": ["Generalist_nonNE", "Arc_4"], "Destabilizers": []}
+TEAD1:{"Regulators": ["Arc_5", "Arc_5_Generalist_NE"], "Destabilizers": ["Generalist_nonNE", "Arc_3", "Arc_1_Generalist_NE"]}
+TFDP1:{"Regulators": ["Arc_1"], "Destabilizers": []}
+THRB:{"Regulators": [], "Destabilizers": ["Arc_3"]}
+ZEB1:{"Regulators": ["Arc_1_Generalist_NE"], "Destabilizers": ["Generalist_nonNE", "Arc_4"]}
