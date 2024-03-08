@@ -88,7 +88,8 @@ def plot_subgraph(keep_nodes, network_file, nodes, edge_weights, keep_parents = 
 # keep_nodes = ['ZBTB7A']
 # ASCL1, RORB, NFIB, EGR1,REST and TCF7L2.
 
-for g in ['ASCL1', 'RORB', 'NFIB', 'EGR1', 'REST', 'TCF7L2']:
+# for g in ['ASCL1', 'RORB', 'NFIB', 'EGR1', 'REST', 'TCF7L2']:
+for g in ['TEAD1','RBPJ']:
     plot_subgraph([g], network_file, nodes, edge_weights, keep_parents = True, keep_children = True,
               save_dir = f"{dir_prefix}/{brcd}", arrows = "curved", show = False, save = True, off_node_arrows_gray=True,
               weight = 3)
