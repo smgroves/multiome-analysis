@@ -2,7 +2,7 @@ import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
 dir_prefix = '/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET'
-brcd = '1112'
+brcd = '6666'
 perturbations = f"{dir_prefix}/{brcd}/perturbations/clustered_perturb_plots/"
 stats = pd.read_csv(f"{perturbations}/perturbation_stats.csv", header = 0, index_col = None )
 
@@ -33,3 +33,4 @@ plt.ylabel("Non-NE destabilization score (average across attractors)")
 plt.xlim(-.65, .2)
 plt.ylim(-.65,.2)
 plt.savefig(f"{perturbations}/NE_vs_nonNE_scatterplot.pdf")
+# plt.show()
