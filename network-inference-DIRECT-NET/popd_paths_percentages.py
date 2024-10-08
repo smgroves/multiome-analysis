@@ -96,11 +96,11 @@ starting_attractors = 'Arc_6'
 num_walks = 100
 radius = 4
 
-# make_percentage_popd_df(walk_path,starting_attractors, num_walks, radius, attractor_dict, n, perturbation = None)
+# make_percentage_popd_df(walk_path=f'{dir_prefix}/{brcd}/walks/long_walks/2000_step_walks',starting_attractors = 'Arc_6', num_walks = 100, radius  = 4, attractor_dict, n = len(nodes), perturbation = 'RORB_kd')
 # print("RORB_kd")
 # make_percentage_popd_df(walk_path,starting_attractors, num_walks, radius, attractor_dict, n, perturbation = 'RORB_kd')
 # print("EGR1_kd")
-# make_percentage_popd_df(walk_path,starting_attractors, num_walks, radius, attractor_dict, n, perturbation = 'EGR1_kd')
+# make_percentage_popd_df(walk_path,starting_attractors, num_walks = 100, radius, attractor_dict, n = len(nodes), perturbation = 'EGR1_kd')
 # make_percentage_popd_df(walk_path,starting_attractors, num_walks, radius, attractor_dict, n, perturbation = 'TCF7L2_act')
 # make_percentage_popd_df(walk_path,starting_attractors, num_walks, radius, attractor_dict, n, perturbation = 'MEIS2_kd')
 
