@@ -1,3 +1,4 @@
+#%%
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
@@ -6,8 +7,8 @@ import os
 dir_prefix = '/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET'
 brcd = '1112'
 
-
-
+print(brcd)
+#%%
 perturbations = f"{dir_prefix}/{brcd}/perturbations/clustered_perturb_plots/"
 stats = pd.read_csv(f"{perturbations}/perturbation_stats.csv", header = 0, index_col = None )
 
@@ -26,7 +27,7 @@ print(stats.head())
 summ = stats.groupby(["gene",'NE', 'perturb']).mean().reset_index()
 print(summ.head())
 
-
+#%%
 loc = (summ.pivot(index = ['gene','perturb'], columns = 'NE',values = 'mean').reset_index())
 
 # plt.figure(figsize = (15,15),dpi = 300)
@@ -102,6 +103,7 @@ for i,r in loc.iterrows():
 
 loc['size'] = 4*loc['num_attr']
 
+#%%
 plt.figure(figsize = (15,15),dpi = 300)
 sns.scatterplot(data = loc, x = 'NE',y = 'nonNE', hue = 'perturb', size='num_attr', sizes = (20,500))
 for i,r in loc.iterrows():
@@ -112,5 +114,44 @@ plt.xlabel("NE destabilization score (average across attractors)")
 plt.ylabel("Non-NE destabilization score (average across attractors)")
 plt.xlim(-.65, .2)
 plt.ylim(-.65,.2)
-plt.savefig(f"{perturbations}/NE_vs_nonNE_scatterplot_with_size.pdf")
+# plt.savefig(f"{perturbations}/NE_vs_nonNE_scatterplot_KD_only.pdf")
+plt.show()
+
+#%%
+loc_KD = loc.loc[loc['perturb'] == 'activate']
+plt.figure(figsize = (15,10),dpi = 300)
+sns.scatterplot(data = loc_KD, x = 'NE',y = 'nonNE',  sizes = (20,500))
+for i,r in loc_KD.iterrows():
+    if r['NE'] < -.05 or r['nonNE'] < -0.05:
+        plt.annotate(r['gene'], (r['NE'],r['nonNE']), ha = 'right')
+plt.axhline(0, linestyle = "--", color = 'gray')
+plt.axvline(0, linestyle = "--", color = 'gray')
+# add highlight where x < r.loc['ASCL1','NE'] 
+# ascl1_x = loc_KD.loc[loc_KD['gene'] == 'ASCL1', 'NE'].iloc[0]
+# plt.axvline(ascl1_x, linestyle = "--", color = 'red')
+
+plt.xlabel("NE destabilization score (average across attractors)")
+plt.ylabel("Non-NE destabilization score (average across attractors)")
+plt.xlim(-.4, .2)
+plt.ylim(-.65,.2)
+plt.savefig(f"{perturbations}/NE_vs_nonNE_scatterplot_act_only.pdf")
 # plt.show()
+#%% Plot only top master regulators for each archetype independently
+# only use information from KD perturbations, since activation would suggest master destabilizer
+
+single_stats = stats.loc[stats['perturb'] == 'knockdown']
+
+# wide form not long form: rows = gene, column names = cluster, values = mean destabilization score
+single_stats_wide = single_stats.pivot(index = 'gene', columns = 'cluster', values = 'mean').reset_index()
+
+#rename particular columns
+single_stats_wide = single_stats_wide.rename(columns = {'Arc_1':'Intermediate','Arc_3':'Secretory','Arc_4':'nonNE1','Arc_5':'NE1', 'Arc_6':'NE2'})
+(single_stats_wide.head())
+# %%
+# make a new df that for each column calculates [column] - [ave of other columns] to get a relative destabilization score for each gene in each archetype
+archetypes = ['Intermediate','Secretory','nonNE1','NE1','NE2','Arc_1_Generalist_NE','Arc_5_Generalist_NE','Generalist_NE','Generalist_nonNE']
+relative_destabilization = pd.DataFrame(columns = ['gene'] + archetypes)
+relative_destabilization['gene'] = single_stats_wide['gene']
+for a in archetypes:
+    relative_destabilization[a] = single_stats_wide[a] - single_stats_wide[[c for c in archetypes if c != a]].mean(axis = 1)        
+# %%
