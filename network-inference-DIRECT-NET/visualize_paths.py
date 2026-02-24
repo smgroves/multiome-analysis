@@ -17,13 +17,13 @@ node_normalization = 0.3
 node_threshold = 0  # don't remove any parents
 transpose = True
 fname = "combined"
-brcd = str(9999)
+brcd = str(6667)
 
-data_path = f'data/adata_imputed_combined.csv'
-data_train_t0_path = f'{brcd}/data_split/train_t0_{fname}.csv'
-data_test_t0_path = f'{brcd}/data_split/test_t0_{fname}.csv'
+data_path = f'data/adata_imputed_combined_v3_RORA_RORB_ave.csv'
+data_train_t0_path = f'{brcd}/data_split/train_t0{fname}.csv'
+data_test_t0_path = f'{brcd}/data_split/test_t0{fname}.csv'
 dir_prefix = '/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET'
-network_path = 'networks/DIRECT-NET_network_with_FIGR_threshold_0_no_NEUROG2_top8regs_NO_sinks_NOCD24_expanded.csv'
+network_path = "networks/feature_selection/DIRECT-NET_network_2020db_0.1/combined_DIRECT-NET_network_2020db_0.1_Lasso_wo_sinks_RORA_RORB_combined.csv"
 ATTRACTOR_DIR = f"{dir_prefix}/{brcd}/attractors/attractors_threshold_0.5"
 
 cellID_table = 'data/AA_clusters.csv'
@@ -360,7 +360,7 @@ def plot_random_walks(walk_path, starting_attractors, ATTRACTOR_DIR,
                 if show:
                     plt.show()
                 else:
-                    plt.savefig(f"{walk_path}/{start_idx}/singleplot_walks_{perturb}_{starting_attractors}{save_as}.png")
+                    plt.savefig(f"{walk_path}/{start_idx}_singleplot_walks_{perturb}_{starting_attractors}{save_as}.png")
 
 
 # walk_path = f'{dir_prefix}/{brcd}/walks/long_walks/1000_step_walks'
@@ -401,11 +401,11 @@ def plot_random_walks(walk_path, starting_attractors, ATTRACTOR_DIR,
 #                   plot_vs = True,
 #                   show = False)
 
-walk_path = f'{dir_prefix}/{brcd}/walks/long_walks/2000_step_walks'
+walk_path = f'{dir_prefix}/{brcd}/walks/long_walks/4000_step_walks'
 plot_random_walks(walk_path, starting_attractors = 'Arc_5',
                   ATTRACTOR_DIR = ATTRACTOR_DIR,
-                  perturb = "RORB_kd",#"RORB_kd",
-                  num_walks = 30,
+                  perturb = "RORA_RORB_kd",#"RORB_kd",
+                  num_walks = 5,
                   binarized_data_df = binarized_data_df,
                   save_as = "_data-pca_nolines",
                   show_lineplots = False,

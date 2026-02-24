@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 import booleabayes as bb
 import os
 dir_prefix = '/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET'
-brcd = '1112'
+brcd = '6667'
 
 print(brcd)
 #%%
@@ -114,7 +114,7 @@ plt.xlabel("NE destabilization score (average across attractors)")
 plt.ylabel("Non-NE destabilization score (average across attractors)")
 plt.xlim(-.65, .2)
 plt.ylim(-.65,.2)
-# plt.savefig(f"{perturbations}/NE_vs_nonNE_scatterplot_KD_only.pdf")
+plt.savefig(f"{perturbations}/NE_vs_nonNE_scatterplot.pdf")
 plt.show()
 
 #%%

@@ -1355,6 +1355,119 @@ def draw_grn(
         )
     return G, edge_weight_df, edge_binary_df
 
+def draw_grn_alt(
+    G,
+    gene2vertex,
+    rules,
+    regulators_dict,
+    fname,
+    gene2group=None,
+    gene2color=None,
+    type="",
+    B_min=5,
+    save_edge_weights=True,
+    edge_weights_fname="edge_weights.csv",
+):
+    vertex2gene = G.vertex_properties["name"]
+
+    vertex_group = None
+    if gene2group is not None:
+        vertex_group = G.new_vertex_property("int")
+        for gene in gene2group.keys():
+            vertex_group[gene2vertex[gene]] = gene2group[gene]
+
+    vertex_colors = [0.85, 0.75, 0.85, 1.0]
+    if gene2color is not None:
+        vertex_colors = G.new_vertex_property("vector<float>")
+        for gene in gene2color.keys():
+            vertex_colors[gene2vertex[gene]] = gene2color[gene]
+
+    edge_weight_df = pd.DataFrame(
+        index=sorted(regulators_dict.keys()), columns=sorted(regulators_dict.keys())
+    )
+    edge_binary_df = pd.DataFrame(
+        index=sorted(regulators_dict.keys()), columns=sorted(regulators_dict.keys())
+    )
+
+    edge_markers = G.new_edge_property("string")
+    edge_weights = G.new_edge_property("float")
+    edge_colors = G.new_edge_property("vector<float>")
+    for edge in G.edges():
+        edge_colors[edge] = [0.0, 0.0, 0.0, 0.3]
+        edge_markers[edge] = "arrow"
+        edge_weights[edge] = 0.2
+
+    for edge in G.edges():
+        vs, vt = edge.source(), edge.target()
+        source = vertex2gene[vs]
+        target = vertex2gene[vt]
+        regulators = regulators_dict[target]
+        if source in regulators:
+            i = regulators.index(source)
+            n = 2 ** len(regulators)
+
+            rule = rules[target]
+            off_leaves, on_leaves = bb.utils.get_leaves_of_regulator(n, i)
+            if (
+                rule[off_leaves].mean() < rule[on_leaves].mean()
+            ):  # The regulator is an activator
+                edge_colors[edge] = [0.0, 0.3, 0.0, 0.8]
+                edge_binary_df.loc[target, source] = 1
+            else:
+                edge_markers[edge] = "bar"
+                edge_colors[edge] = [0.88, 0.0, 0.0, 0.5]
+                edge_binary_df.loc[target, source] = -1
+
+            # note: not sure why I added 0.2 to each edge weight.. skewing act larger and inh smaller?
+            edge_weights[edge] = rule[on_leaves].mean() - rule[off_leaves].mean() + 0.2
+            edge_weight_df.loc[target, source] = (
+                rule[on_leaves].mean() - rule[off_leaves].mean()
+            )
+    G.edge_properties["edge_weights"] = edge_weights
+    if save_edge_weights:
+        edge_weight_df.to_csv(edge_weights_fname)
+
+        pos = gt.sfdp_layout(
+            G,
+            groups=vertex_group,
+            mu=2.0,        # increase from 0.5 — this is the repulsive force strength
+            # eweight=edge_weights,
+            max_iter=2000,
+            C=0.5,         # edge length constant — increase to spread connected nodes apart
+            K=1.0,         # preferred edge length — try 0.5–2.0
+            p=2.0,         # repulsion exponent — higher = stronger short-range repulsion
+            gamma=0.1,     # cooling schedule — lower = more careful optimization
+        )
+    # pos = gt.arf_layout(G, max_iter=100, dt=1e-4)
+    eprops = {
+        "color": edge_colors,
+        "pen_width": 1,
+        "marker_size": 10,
+        "end_marker": edge_markers,
+    }
+    vprops = {
+        "text": vertex2gene,
+        "shape": "circle",
+        "size": 40,
+        "pen_width": 1,
+        "text_position": -2,  # places text outside/below the node instead of inside
+        "font_size": 10,      # control text size independently
+        "fill_color": vertex_colors,
+        "text_color": [0, 0, 0, 1],  
+    }
+    if type == "circle":
+        state = gt.minimize_nested_blockmodel_dl(G, B_min=B_min)
+        state.draw(vprops=vprops, eprops=eprops)  # mplfig=ax[0,1])
+    else:
+        gt.graph_draw(
+            G,
+            pos=pos,
+            output=fname,
+            vprops=vprops,
+            eprops=eprops,
+            output_size=(1000, 1000),
+        )
+    return G, edge_weight_df, edge_binary_df
 
 def plot_stability(
     attractor_dict,

@@ -42,7 +42,7 @@ if __name__ == "__main__":
     filter_attractors = False
     perturbations = False
     stability = False
-    walk_to_basin = True
+    walk_to_basin = False
     plot_walk_to_basin = True
     on_nodes = []
     off_nodes = []
@@ -823,10 +823,11 @@ if __name__ == "__main__":
     # record random walk from one attractor to another for each combination of attractors
     # give list of perturbation nodes and repeat walks with perturbed nodes to record #
     # that make it from one attractor to another
+    long_walk_length = 4000
+
     if walk_to_basin:
         ATTRACTOR_DIR = f"{dir_prefix}/{brcd}/attractors/attractors_threshold_0.5"
         attractor_dict = bb.utils.get_attractor_dict(ATTRACTOR_DIR, filtered=True)
-
         knockdowns = ["RORA_RORB"]
         starting_attractors = [
             "Arc_6",
@@ -844,7 +845,7 @@ if __name__ == "__main__":
             save_dir=f"{dir_prefix}/{brcd}",
             on_nodes=[],
             off_nodes=knockdowns,
-            max_steps=4000,
+            max_steps=long_walk_length,
             iters=100,
             overwrite_walks=False,
         )
@@ -853,7 +854,7 @@ if __name__ == "__main__":
         attr_color_map = {
             "Arc_1": "red",
             "Arc_2": "purple",
-            "Arc_5_Arc_6": "teal",
+            "Arc_3": "teal",
             "Arc_4": "orange",
             "Arc_5": "blue",
             "Arc_6": "green",
@@ -862,52 +863,52 @@ if __name__ == "__main__":
         }
         ATTRACTOR_DIR = f"{dir_prefix}/{brcd}/attractors/attractors_threshold_0.5"
         attractor_dict = bb.utils.get_attractor_dict(ATTRACTOR_DIR, filtered=True)
-        walk_path = f"{dir_prefix}/{brcd}/walks/long_walks/2000_step_walks"
-        starting_attractors = "Arc_3"
+        walk_path = f"{dir_prefix}/{brcd}/walks/long_walks/{long_walk_length}_step_walks"
+        starting_attractors = "Arc_5"
         # "Arc_1",
         # "Generalist_NE",
         # "Arc_3",
         # "Generalist_nonNE",
 
-        # bb.plot.plot_random_walks(
+        bb.plot.plot_random_walks(
+            walk_path,
+            starting_attractors,
+            ATTRACTOR_DIR=ATTRACTOR_DIR,
+            nodes=nodes,
+            perturb="RORA_RORB_kd",
+            num_walks=5,
+            binarized_data=binarized_data_t0,
+            save_as="_data-pca",
+            show_lineplots=True,
+            fit_to_data=True,
+            plot_vs=True,
+            show=False,
+            set_colors={"Generalist_NE": "darkgrey", "Generalist_nonNE": "lightgrey"},
+        )
+
+        # num_walks = 100
+        # radius = 4
+        # n = len(nodes)
+        # print("Make percentage pop dynamics df...")
+        # make_percentage_popd_df(
         #     walk_path,
         #     starting_attractors,
-        #     ATTRACTOR_DIR=ATTRACTOR_DIR,
-        #     nodes=nodes,
-        #     perturb="RORA_kd",
-        #     num_walks=5,
-        #     binarized_data=binarized_data_t0,
-        #     save_as="_data-pca",
-        #     show_lineplots=True,
-        #     fit_to_data=True,
-        #     plot_vs=True,
-        #     show=False,
-        #     set_colors={"Generalist_NE": "darkgrey", "Generalist_nonNE": "lightgrey"},
+        #     num_walks,
+        #     radius,
+        #     attractor_dict,
+        #     n,
+        #     perturbation=None,
         # )
-
-        num_walks = 100
-        radius = 4
-        n = len(nodes)
-        print("Make percentage pop dynamics df...")
-        make_percentage_popd_df(
-            walk_path,
-            starting_attractors,
-            num_walks,
-            radius,
-            attractor_dict,
-            n,
-            perturbation=None,
-        )
-        print("Make percentage pop dynamics df RORA kd...")
-        make_percentage_popd_df(
-            walk_path,
-            starting_attractors,
-            num_walks,
-            radius,
-            attractor_dict,
-            n,
-            perturbation="RORA_RORB_kd",
-        )
+        # print("Make percentage pop dynamics df RORA kd...")
+        # make_percentage_popd_df(
+        #     walk_path,
+        #     starting_attractors,
+        #     num_walks,
+        #     radius,
+        #     attractor_dict,
+        #     n,
+        #     perturbation="RORA_RORB_kd",
+        # )
         # print("Make percentage pop dynamics df RORB kd...")
         # make_percentage_popd_df(
         #     walk_path,
@@ -919,15 +920,15 @@ if __name__ == "__main__":
         #     perturbation="RORB_kd",
         # )
 
-        plot_attractors_reached(
-            walk_path,
-            starting_attractors,
-            attractor_dict,
-            perturbations=["RORA_RORB_kd"],
-            num_walks=100,
-            radius=4,
-            length_walks=2000,
-        )
+        # plot_attractors_reached(
+        #     walk_path,
+        #     starting_attractors,
+        #     attractor_dict,
+        #     perturbations=["RORA_RORB_kd"],
+        #     num_walks=100,
+        #     radius=4,
+        #     length_walks=long_walk_length,
+        # )
 
         # plot_all_random_walks(
         #     walk_path,
