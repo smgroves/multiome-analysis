@@ -882,7 +882,7 @@ if __name__ == "__main__":
             show_lineplots=True,
             fit_to_data=True,
             plot_vs=True,
-            show=False,
+            show=True,
             set_colors={"Generalist_NE": "darkgrey", "Generalist_nonNE": "lightgrey"},
         )
 

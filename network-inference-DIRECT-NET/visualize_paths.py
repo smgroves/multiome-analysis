@@ -1,4 +1,5 @@
 # This code is adapted from Dropbox/Grad School/ Quaranta Lab/SCLC/Network/visualize_paths.py
+#%%
 import booleabayes as bb
 import pandas as pd
 import numpy as np
@@ -73,7 +74,7 @@ binarized_data_test = bb.proc.binarize_data(data_test_t0, phenotype_labels=clust
 
 binarized_data_df = binarized_data_dict_to_binary_df(binarized_data_t0, nodes)
 print(binarized_data_df.head())
-
+#%%
 # This function will visualize random walks starting from a single attractor (each attractor in starting_attractors, which is a key in attractor_dict) and plot the lineplots of the walks. You can specify how many walks to plot.
 
 # NOTE: This function will be integrated into booleabayes version > 0.1.9
@@ -408,14 +409,14 @@ plot_random_walks(walk_path, starting_attractors = 'Arc_5',
                   num_walks = 5,
                   binarized_data_df = binarized_data_df,
                   save_as = "_data-pca_nolines",
-                  show_lineplots = False,
+                  show_lineplots = True,
                   fit_to_data = True,
                   plot_vs = True,
-                  show = False)
+                  show = True)
 
 # This function will visualize random walks as KDE plots starting from all of the attractors for a given attractor_dict key.
 # You can specify how many walks to plot. Lineplot is not an option for these plots because they would generate files that are too large.
-
+#%%
 def plot_all_random_walks(walk_path, starting_attractors, ATTRACTOR_DIR,
                       perturb = None,
                       num_walks = 20,

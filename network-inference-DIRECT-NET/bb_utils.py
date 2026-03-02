@@ -1367,6 +1367,11 @@ def draw_grn_alt(
     B_min=5,
     save_edge_weights=True,
     edge_weights_fname="edge_weights.csv",
+    mu=3.0,
+    C=0.5,
+    K=2.0,
+    p=2.0,
+    gamma=0.1,
 ):
     vertex2gene = G.vertex_properties["name"]
 
@@ -1427,16 +1432,16 @@ def draw_grn_alt(
     if save_edge_weights:
         edge_weight_df.to_csv(edge_weights_fname)
 
-        pos = gt.sfdp_layout(
+    pos = gt.sfdp_layout(
             G,
             groups=vertex_group,
-            mu=2.0,        # increase from 0.5 — this is the repulsive force strength
+            mu=mu,        # increase from 0.5 — this is the repulsive force strength
             # eweight=edge_weights,
             max_iter=2000,
-            C=0.5,         # edge length constant — increase to spread connected nodes apart
-            K=1.0,         # preferred edge length — try 0.5–2.0
-            p=2.0,         # repulsion exponent — higher = stronger short-range repulsion
-            gamma=0.1,     # cooling schedule — lower = more careful optimization
+            C=C,         # edge length constant — increase to spread connected nodes apart
+            K=K,         # preferred edge length — try 0.5–2.0
+            p=p,         # repulsion exponent — higher = stronger short-range repulsion
+            gamma=gamma,     # cooling schedule — lower = more careful optimization
         )
     # pos = gt.arf_layout(G, max_iter=100, dt=1e-4)
     eprops = {
