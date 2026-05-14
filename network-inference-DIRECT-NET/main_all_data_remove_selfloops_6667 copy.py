@@ -33,8 +33,8 @@ if __name__ == "__main__":
     split_train_test = False
     write_binarized_data = False
     fit_rules = False
-    run_validation = False
-    validation_averages = False
+    run_validation = True
+    validation_averages = True
     find_average_states = False
     find_attractors = False
     tf_basin = 2  # if -1, use average distance between clusters for search basin for attractors.

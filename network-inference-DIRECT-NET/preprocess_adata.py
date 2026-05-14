@@ -61,7 +61,8 @@ def preprocess_adata(adata, DIRECT_NET_INDIR, Direct_net_file = "Direct_net.csv"
 # preprocess_adata(adata, DIRECT_NET_INDIR, outfile_name = "adata_imputed_combined.csv", extra_genes=['CD24', 'CD44', 'EPCAM', 'ICAM1', 'NCAM1'])
 #
 # adata = cr.read("../data/external_validation_looms/allografts.h5ad")
-# preprocess_adata(adata, DIRECT_NET_INDIR, outfile_name = "adata_allografts.csv", extra_genes=['CD24', 'CD44', 'EPCAM', 'ICAM1', 'NCAM1'])
+# preprocess_adata(adata, DIRECT_NET_INDIR, outfile_name = "adata_allografts.csv", extra_genes=['CD24', 'CD44', 'EPCAM', 'ICAM1', 'NCAM1''HES1', 'NFYC', 'NR6A1', 'RBPJ', 'RORA','RORB', 'SOX11', 'TFDP1'])
+
 
 
 # adata = cr.read("../data/external_validation_looms/5B_allograftdata.h5ad")
@@ -75,20 +76,22 @@ def preprocess_adata(adata, DIRECT_NET_INDIR, Direct_net_file = "Direct_net.csv"
 # preprocess_adata(adata, DIRECT_NET_INDIR, outfile_name= f"adata_human_tumors_MSK.csv", extra_genes=['CD24', 'CD44', 'EPCAM', 'ICAM1', 'NCAM1'],
 #                  imputed_layer="imputed_normalized", species = 'human')
 
-# for tumor in ["PleuralEffusion", "RU426", "RU779", "RU1065", "RU1066", "RU1080", "RU1108", "RU1124", "RU1144", "RU1145",
-#               "RU1152", "RU1181", "RU1195", "RU1215", "RU1229", "RU1231", "RU1293", "RU1311", "RU1322"]:
-#     adata = cr.read(f"../data/external_validation_looms/human_tumors/{tumor}_human_tumor_data.h5ad")
-#     preprocess_adata(adata, DIRECT_NET_INDIR, outfile_name=f"human_tumors/adata_{tumor}.csv",
-#                      extra_genes=['CD24', 'CD44', 'EPCAM', 'ICAM1', 'NCAM1'], imputed_layer="imputed_normalized",
-#                      species = 'human')
 
-adata = cr.read('../data/combined/adata_02_filtered.h5ad')
+# adata = cr.read('../data/combined/adata_02_filtered.h5ad')
 # preprocess_adata(adata, DIRECT_NET_INDIR, outfile_name = "adata_imputed_combined_v2.csv", extra_genes=['CD24', 'CD44', 'EPCAM', 'ICAM1', 'NCAM1','SOX11'])
 
 # preprocess_adata(adata, DIRECT_NET_INDIR, Direct_net_file='Direct_net_pval.csv', outfile_name = "adata_imputed_combined_v3.csv",
 #                  extra_genes=['CD24A','CD44', 'EPCAM', 'ICAM1', 'NCAM1','SOX11', 'HES1', 'NFYC', 'NR6A1', 'RBPJ', 'TFDP1',
 #                               'ZBTB18'])
 
-umap = pd.DataFrame((adata.obsm["X_umap_wnn"]), index = adata.obs_names, columns = ['UMAP1', 'UMAP2'])
-print(umap.head())
-umap.to_csv("./data/umap_wnn_combined.csv")
+# umap = pd.DataFrame((adata.obsm["X_umap_wnn"]), index = adata.obs_names, columns = ['UMAP1', 'UMAP2'])
+# print(umap.head())
+# umap.to_csv("./data/umap_wnn_combined.csv")
+
+
+# for tumor in ["PleuralEffusion", "RU426", "RU779", "RU1065", "RU1066", "RU1080", "RU1108", "RU1124", "RU1144", "RU1145",
+#               "RU1152", "RU1181", "RU1195", "RU1215", "RU1229", "RU1231", "RU1293", "RU1311", "RU1322"]:
+#     adata = cr.read(f"../data/external_validation_looms/human_tumors/{tumor}_human_tumor_data.h5ad")
+#     preprocess_adata(adata, DIRECT_NET_INDIR, outfile_name=f"human_tumors/adata_{tumor}.csv",
+#                      extra_genes=['CD24', 'CD44', 'EPCAM', 'ICAM1', 'NCAM1','HES1', 'NFYC', 'NR6A1', 'RBPJ', 'RORA','RORB', 'SOX11', 'TFDP1'], imputed_layer="imputed_normalized",
+#                      species = 'human')
