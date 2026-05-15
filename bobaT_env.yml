@@ -1,0 +1,55 @@
+name: bobaT_env
+channels:
+  - conda-forge
+  - bioconda
+  - defaults
+dependencies:
+  - python=3.11
+  - pip
+  # Core scientific stack
+  - numpy>=1.24,<2.0         # numba/graph-tool have issues with numpy 2.x
+  - pandas>=2.0
+  - scipy>=1.10
+  - scikit-learn>=1.3
+  - statsmodels>=0.14
+  # Visualization
+  - matplotlib>=3.7
+  - seaborn>=0.12
+  # Single-cell core
+  - anndata>=0.10,<0.11      # anndata 0.11+ requires Python 3.12
+  - leidenalg>=0.10
+  - umap-learn>=0.5
+  # Graph analysis — graph-tool 2.98 only available for py311+ on conda-forge
+  - graph-tool>=2.98
+  - networkx>=3.0
+  # Performance
+  - cython
+  - numba>=0.58
+  - h5py>=3.8
+  # Utilities
+  - click>=8.0
+  - requests
+  # Jupyter
+  - jupyter
+  - jupyterlab
+  - pip:
+    # Network/Boolean modeling
+    - booleabayes==1.0.1       # installs bobaT==0.1.1 as dependency
+    # Network inference
+    - arboreto                 # GRNBoost2, GENIE3
+    # Single-cell trajectory/RNA velocity
+    - scvelo>=0.3
+    - cellrank>=2.0,<2.2       # cellrank 2.2+ requires Python 3.12
+    # Single-cell QC and integration
+    - scanpy>=1.9,<1.12        # scanpy 1.12+ requires Python 3.12
+    - magic-impute
+    - scrublet
+    - scanorama
+    - dropkick==1.2.6
+    # Stats / annotation
+    - statannot
+    - gseapy
+    # Other tools
+    - dataframe_image
+    - py_pcha
+    - kitchen

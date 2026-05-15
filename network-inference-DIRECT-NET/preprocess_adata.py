@@ -8,10 +8,11 @@ import numpy as np
 DIRECT_NET_INDIR = "./DIRECT-NET-FILES/"
 
 
-def preprocess_adata(adata, DIRECT_NET_INDIR, Direct_net_file = "Direct_net.csv", outfile_name="adata_imputed.csv", extra_genes=None,
+def preprocess_adata(adata, DIRECT_NET_INDIR, Direct_net_file="Direct_net.csv", outfile_name="adata_imputed.csv", extra_genes=None,
                      imputed_layer='imputed',
-                     species='mouse', add_figr = True):
-    direct_net = pd.read_csv(os.path.join(DIRECT_NET_INDIR, Direct_net_file), header=0, index_col=0)
+                     species='mouse', add_figr=True):
+    direct_net = pd.read_csv(os.path.join(
+        DIRECT_NET_INDIR, Direct_net_file), header=0, index_col=0)
     direct_net['Target_gene'] = [i.upper() for i in direct_net['Target_gene']]
     # "TF motif" column is parent node, "Target gene" is child node
     tfs = []
@@ -21,7 +22,8 @@ def preprocess_adata(adata, DIRECT_NET_INDIR, Direct_net_file = "Direct_net.csv"
     tfs = list(set(tfs))
 
     if add_figr:
-        figr = pd.read_csv(os.path.join(DIRECT_NET_INDIR, "FigR_DORC_TF.csv"), header=0, index_col=0)
+        figr = pd.read_csv(os.path.join(
+            DIRECT_NET_INDIR, "FigR_DORC_TF.csv"), header=0, index_col=0)
         figr.DORC = [i.upper() for i in figr.DORC]
         figr.Motif = [i.upper() for i in figr.Motif]
 
@@ -38,7 +40,8 @@ def preprocess_adata(adata, DIRECT_NET_INDIR, Direct_net_file = "Direct_net.csv"
     print(tfs)
     print(len(tfs))
 
-    overlap = (list(set(tfs).intersection(set([i.upper() for i in adata.var_names]))))
+    overlap = (list(set(tfs).intersection(
+        set([i.upper() for i in adata.var_names]))))
     print(list(set(tfs).difference(set([i.upper() for i in adata.var_names]))))
 
     if species == 'mouse':
@@ -61,16 +64,18 @@ def preprocess_adata(adata, DIRECT_NET_INDIR, Direct_net_file = "Direct_net.csv"
 # preprocess_adata(adata, DIRECT_NET_INDIR, outfile_name = "adata_imputed_combined.csv", extra_genes=['CD24', 'CD44', 'EPCAM', 'ICAM1', 'NCAM1'])
 #
 # adata = cr.read("../data/external_validation_looms/allografts.h5ad")
-# preprocess_adata(adata, DIRECT_NET_INDIR, outfile_name = "adata_allografts.csv", extra_genes=['CD24', 'CD44', 'EPCAM', 'ICAM1', 'NCAM1''HES1', 'NFYC', 'NR6A1', 'RBPJ', 'RORA','RORB', 'SOX11', 'TFDP1'])
-
+# preprocess_adata(adata, DIRECT_NET_INDIR, outfile_name="adata_allografts.csv", extra_genes=[
+#                  'CD24', 'CD44', 'EPCAM', 'ICAM1', 'NCAM1''HES1', 'NFYC', 'NR6A1', 'RBPJ', 'RORA', 'RORB', 'SOX11', 'TFDP1'])
 
 
 # adata = cr.read("../data/external_validation_looms/5B_allograftdata.h5ad")
 # preprocess_adata(adata, DIRECT_NET_INDIR, outfile_name = "adata_5B_allografts.csv", extra_genes=['CD24', 'CD44', 'EPCAM', 'ICAM1', 'NCAM1'])
 
-# for allo in ["1L","2L","2LR","3L","5B","TKO-luc","mt2","mt3","mt4","mt4Rf","mt5","mt6"]:
-#     adata = cr.read(f"../data/external_validation_looms/{allo}_allograftdata.h5ad")
-#     preprocess_adata(adata, DIRECT_NET_INDIR, outfile_name = f"adata_{allo}_allografts.csv", extra_genes=['CD24', 'CD44', 'EPCAM', 'ICAM1', 'NCAM1'])
+for allo in ["1L", "2L", "2LR", "3L", "5B", "TKO-luc", "mt2", "mt3", "mt4", "mt4Rf", "mt5", "mt6"]:
+    adata = cr.read(
+        f"../data/external_validation_looms/{allo}_allograftdata.h5ad")
+    preprocess_adata(adata, DIRECT_NET_INDIR, outfile_name=f"adata_{allo}_allografts.csv", extra_genes=[
+                     'CD24', 'CD44', 'EPCAM', 'ICAM1', 'NCAM1', 'HES1', 'NFYC', 'NR6A1', 'RBPJ', 'RORA', 'RORB', 'SOX11', 'TFDP1'])
 
 # adata = cr.read(f"../data/external_validation_looms/adata.SCLC.010920.h5ad")
 # preprocess_adata(adata, DIRECT_NET_INDIR, outfile_name= f"adata_human_tumors_MSK.csv", extra_genes=['CD24', 'CD44', 'EPCAM', 'ICAM1', 'NCAM1'],
