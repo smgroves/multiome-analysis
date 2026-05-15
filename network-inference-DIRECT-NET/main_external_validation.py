@@ -4,6 +4,7 @@ import bobaT as bb
 import seaborn as sns
 import numpy as np
 import time
+import sys
 import random
 print("Start")
 
@@ -19,15 +20,15 @@ split_train_test = False
 write_binarized_data = False
 fit_rules = False
 run_validation = True
-validation_averages = True
-find_average_states = False
-find_attractors = False
-# if -1, use average distance between clusters for search basin for attractors.
-tf_basin = 2
-# otherwise use the same size basin for all phenotypes. For single cell data, there may be so many samples that average distance is small.
-filter_attractors = False
-perturbations = True
-stability = False
+validation_averages = False
+# find_average_states = False
+# find_attractors = False
+# # if -1, use average distance between clusters for search basin for attractors.
+# tf_basin = 2
+# # otherwise use the same size basin for all phenotypes. For single cell data, there may be so many samples that average distance is small.
+# filter_attractors = False
+# perturbations = False
+# stability = False
 on_nodes = []
 off_nodes = []
 
@@ -40,9 +41,9 @@ node_normalization = 0.3
 node_threshold = 0  # don't remove any parents
 transpose = True
 
-# sample = sys.argv[1]
-sample = "TKO-luc"
-validation_fname = f'validation/allografts/{sample}'
+sample = sys.argv[1]
+# sample = "TKO-luc"
+validation_fname = f'validation/human_tumor_MSK/{sample}'
 fname = f"{sample}"
 notes_for_log = "External validation"
 
@@ -70,7 +71,7 @@ cluster_header_list = ["class"]
 brcd = str(6667)
 print(brcd)
 
-data_test_t0_path = f'data/allografts/adata_{sample}_allografts_v3_RORA_RORB_ave.csv'
+data_test_t0_path = f'data/human_tumor_MSK/adata_{sample}_v3_RORA_RORB_ave.csv'
 
 # use a job brcd to keep track of multiple jobs for the same brcd
 job_brcd = str(random.randint(0, 99999))
@@ -114,31 +115,6 @@ print('Reading in data')
 data_test_t0 = bb.load.load_data(f'{dir_prefix}/{data_test_t0_path}', nodes, norm=node_normalization, delimiter=',',
                                  log1p=False, transpose=True, sample_order=False, fillna=0)
 
-# clusters = bb.utils.get_clusters(data_test_t0_path, is_data_split=False,
-#                                  cellID_table=f"{dir_prefix}/{cellID_table}", cluster_header_list=cluster_header_list)
-
-# # combine RORA and RORB into "RORA_RORB" because they are similar TFs and we don't have both in the human dataset; take maverage
-# if "RORA" in data_test_t0.index and "RORB" in data_test_t0.index:
-#     data_test_t0.loc["RORA_RORB"] = np.mean(
-#         data_test_t0.loc["RORA"], data_test_t0.loc["RORB"])
-#     data_test_t0 = data_test_t0.drop(["RORA", "RORB"], axis=0)
-
-# # =============================================================================
-# # Read in binarized data
-# # =============================================================================
-# print('Binarizing data')
-# if write_binarized_data:
-#     save = True
-# else:
-#     save = False
-# if not os.path.exists(f"{dir_prefix}/{brcd}/binarized_data"):
-#     # Create a new directory because it does not exist
-#     os.makedirs(f"{dir_prefix}/{brcd}/binarized_data")
-
-# print('Binarizing test data')
-# binarized_data_test = bb.proc.binarize_data(data_test_t0, phenotype_labels=clusters, save=save,
-#                                             save_dir=f"{dir_prefix}/{brcd}/binarized_data", fname=f'binarized_data_test_t0_{fname}')
-
 
 print("Reading in pre-generated rules...")
 rules, regulators_dict = bb.load.load_rules(
@@ -171,6 +147,7 @@ if validation_averages:
     # TODO: remove any nodes that are sources and are skewing the AUCs artificially
     print("Calculating validation averages...")
     VAL_DIR = f"{dir_prefix}/{brcd}/{validation_fname}"
+    root_nodes = [v for v in graph.vertices() if v.in_degree() == 0]
 
     if run_validation == False:
         # Function to calculate roc and tpr, fpr, area from saved validation files
@@ -183,10 +160,11 @@ if validation_averages:
 
     # bb.plot.plot_aucs(aucs, save=True, save_dir=VAL_DIR, show_plot=True)
     # once BB > 0.0.7, change to this line
-    bb.plot.plot_aucs(VAL_DIR, save=True, show_plot=True)
+    # bb.plot.plot_aucs(VAL_DIR, save=True, show_plot=True)
 
     bb.plot.plot_validation_avgs(fprs_all, tprs_all, len(
-        nodes), area_all, save=True, save_dir=VAL_DIR, show_plot=True)
+        nodes), area_all, save=True, save_dir=VAL_DIR, show_plot=True,
+        sources=root_nodes, remove_sources=True)
 
     # bb version > 0.1.7
     summary_stats = bb.tl.get_sklearn_metrics(
@@ -202,9 +180,3 @@ else:
 time2 = time.time()
 time_for_job = (time2 - time1) / 60.
 print("Time for job: ", time_for_job)
-
-log_job(dir_prefix, brcd, random_state, network_path, data_test_t0_path, data_t1_path, cellID_table, node_normalization,
-        node_threshold, split_train_test, write_binarized_data, fit_rules, run_validation, validation_averages,
-        find_average_states, find_attractors, tf_basin, filter_attractors, on_nodes, off_nodes, perturbations, stability,
-        time=time_for_job, job_barcode=job_brcd,
-        notes_for_job=notes_for_log)
