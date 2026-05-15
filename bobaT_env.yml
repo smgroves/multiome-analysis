@@ -34,7 +34,7 @@ dependencies:
   - jupyterlab
   - pip:
     # Network/Boolean modeling
-    - booleabayes==1.0.1       # installs bobaT==0.1.1 as dependency
+    - bobaT==0.1.1       
     # Network inference
     - arboreto                 # GRNBoost2, GENIE3
     # Single-cell trajectory/RNA velocity
@@ -45,7 +45,7 @@ dependencies:
     - magic-impute
     - scrublet
     - scanorama
-    - dropkick==1.2.6
+    # - dropkick==1.2.6
     # Stats / annotation
     - statannot
     - gseapy
