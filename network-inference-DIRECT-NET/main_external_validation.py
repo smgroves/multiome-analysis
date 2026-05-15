@@ -14,7 +14,6 @@ customPalette = sns.color_palette('tab10')
 # Set variables and csvs
 # To modulate which parts of the pipeline need to be computed, use the following variables
 # =============================================================================
-print_graph_information = True  # whether to print graph info to {brcd}.txt
 plot_network = False
 split_train_test = False
 write_binarized_data = False
@@ -43,7 +42,7 @@ transpose = True
 
 # sample = sys.argv[1]
 sample = "TKO-luc"
-validation_fname = f'validation/allografts/{sample}/'
+validation_fname = f'validation/allografts/{sample}'
 fname = f"{sample}"
 notes_for_log = "External validation"
 
@@ -71,7 +70,7 @@ cluster_header_list = ["class"]
 brcd = str(6667)
 print(brcd)
 
-data_test_t0_path = f'data/allografts/adata_{sample}_allografts_v3.csv'
+data_test_t0_path = f'data/allografts/adata_{sample}_allografts_v3_RORA_RORB_ave.csv'
 
 # use a job brcd to keep track of multiple jobs for the same brcd
 job_brcd = str(random.randint(0, 99999))
@@ -107,10 +106,6 @@ graph, vertex_dict = bb.load.load_network(f'{dir_prefix}/{network_path}', remove
 
 v_names, nodes = bb.utils.get_nodes(vertex_dict, graph)
 
-if print_graph_information:
-    print_graph_info(graph, vertex_dict, nodes,  fname,
-                     brcd=brcd, dir_prefix=dir_prefix, plot=False)
-
 # =============================================================================
 # Load the data and clusters
 # =============================================================================
@@ -119,39 +114,36 @@ print('Reading in data')
 data_test_t0 = bb.load.load_data(f'{dir_prefix}/{data_test_t0_path}', nodes, norm=node_normalization, delimiter=',',
                                  log1p=False, transpose=True, sample_order=False, fillna=0)
 
-clusters = bb.utils.get_clusters(data_test_t0_path, is_data_split=False,
-                                 cellID_table=f"{dir_prefix}/{cellID_table}", cluster_header_list=cluster_header_list)
+# clusters = bb.utils.get_clusters(data_test_t0_path, is_data_split=False,
+#                                  cellID_table=f"{dir_prefix}/{cellID_table}", cluster_header_list=cluster_header_list)
 
-# combine RORA and RORB into "RORA_RORB" because they are similar TFs and we don't have both in the human dataset; take maverage
-if "RORA" in data_test_t0.index and "RORB" in data_test_t0.index:
-    data_test_t0.loc["RORA_RORB"] = np.mean(
-        data_test_t0.loc["RORA"], data_test_t0.loc["RORB"])
-    data_test_t0 = data_test_t0.drop(["RORA", "RORB"], axis=0)
+# # combine RORA and RORB into "RORA_RORB" because they are similar TFs and we don't have both in the human dataset; take maverage
+# if "RORA" in data_test_t0.index and "RORB" in data_test_t0.index:
+#     data_test_t0.loc["RORA_RORB"] = np.mean(
+#         data_test_t0.loc["RORA"], data_test_t0.loc["RORB"])
+#     data_test_t0 = data_test_t0.drop(["RORA", "RORB"], axis=0)
 
-# =============================================================================
-# Read in binarized data
-# =============================================================================
-print('Binarizing data')
-if write_binarized_data:
-    save = True
-else:
-    save = False
-if not os.path.exists(f"{dir_prefix}/{brcd}/binarized_data"):
-    # Create a new directory because it does not exist
-    os.makedirs(f"{dir_prefix}/{brcd}/binarized_data")
+# # =============================================================================
+# # Read in binarized data
+# # =============================================================================
+# print('Binarizing data')
+# if write_binarized_data:
+#     save = True
+# else:
+#     save = False
+# if not os.path.exists(f"{dir_prefix}/{brcd}/binarized_data"):
+#     # Create a new directory because it does not exist
+#     os.makedirs(f"{dir_prefix}/{brcd}/binarized_data")
 
-print('Binarizing test data')
-binarized_data_test = bb.proc.binarize_data(data_test_t0, phenotype_labels=clusters, save=save,
-                                            save_dir=f"{dir_prefix}/{brcd}/binarized_data", fname=f'binarized_data_test_t0_{fname}')
+# print('Binarizing test data')
+# binarized_data_test = bb.proc.binarize_data(data_test_t0, phenotype_labels=clusters, save=save,
+#                                             save_dir=f"{dir_prefix}/{brcd}/binarized_data", fname=f'binarized_data_test_t0_{fname}')
 
 
 print("Reading in pre-generated rules...")
 rules, regulators_dict = bb.load.load_rules(
     fname=f"{dir_prefix}/{brcd}/rules/rules_{brcd}.txt")
 
-if plot_network:
-    draw_grn(graph, vertex_dict, rules, regulators_dict, f"{dir_prefix}/{brcd}/{fname}_network.pdf", save_edge_weights=True,
-             edge_weights_fname=f"{dir_prefix}/{brcd}/rules/edge_weights.csv")  # , gene2color = gene2color)
 # =============================================================================
 # Calculate AUC for test dataset for a true error calculation
 # =============================================================================
@@ -160,7 +152,7 @@ if run_validation:
     print("Running validation step...")
     VAL_DIR = f"{dir_prefix}/{brcd}/{validation_fname}"
     try:
-        os.mkdir(VAL_DIR)
+        os.makedirs(VAL_DIR)
     except FileExistsError:
         pass
 
@@ -176,6 +168,7 @@ else:
     print("Skipping validation step...")
 
 if validation_averages:
+    # TODO: remove any nodes that are sources and are skewing the AUCs artificially
     print("Calculating validation averages...")
     VAL_DIR = f"{dir_prefix}/{brcd}/{validation_fname}"
 
@@ -196,7 +189,8 @@ if validation_averages:
         nodes), area_all, save=True, save_dir=VAL_DIR, show_plot=True)
 
     # bb version > 0.1.7
-    summary_stats = bb.tl.get_sklearn_metrics(VAL_DIR)
+    summary_stats = bb.tl.get_sklearn_metrics(
+        VAL_DIR)  # TODO need to fix append here
     bb.plot.plot_sklearn_metrics(VAL_DIR)
     bb.plot.plot_sklearn_summ_stats(summary_stats.drop(
         "max_error", axis=1), VAL_DIR, fname="")
