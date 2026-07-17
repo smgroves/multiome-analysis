@@ -68,3 +68,15 @@ data/cibersort-ne-cells-closest-to-archetypes.txt
 data/cibersort-ne-cells-closest-to-archetypes.csv
 data/cibersort-ne-cells-closest-to-archetypes copy.txt
 /.claude
+
+# Large CellOracle benchmark method outputs (294MB) — regenerate from the Google Drive archive
+benchmarking/data/celloracle/inference_results/
+benchmarking/data/celloracle/*.parquet
+benchmarking/__pycache__/
+benchmarking/benchmarking_out/
+
+# Raw benchmark input data (large) — download via benchmarking script
+benchmarking/data/tabula_muris/
+benchmarking/data/cusanovich_atac/
+benchmarking/data/preprocessed/
+*.pyc

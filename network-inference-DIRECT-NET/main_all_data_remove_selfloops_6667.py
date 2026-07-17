@@ -4,7 +4,7 @@ import time
 
 import numpy as np
 import seaborn as sns
-import booleabayes as bb
+import bobaT as bb
 import os
 import os.path as op
 import pandas as pd
