@@ -4,7 +4,7 @@ import time
 
 import numpy as np
 import seaborn as sns
-import booleabayes as bb
+import bobaT as bb
 import os
 import os.path as op
 import pandas as pd
@@ -58,12 +58,12 @@ if __name__ == "__main__":
 
     # sample = sys.argv[1]
 
-    validation_fname = "validation/"
+    validation_fname = "validation/in_sample_validation/"
     # fname = f"{sample}"
     fname = "combined"
-    notes_for_log = "Validation and attractor finding for updated DIRECT-NET network with 2020db and indpendent LASSO models, wo sinks, RORA/RORB combined"
+    notes_for_log = "Validation for updated DIRECT-NET network with 2020db and indpendent LASSO models, wo sinks, RORA/RORB combined"
     ## Set paths
-    dir_prefix = "/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET"
+    dir_prefix = "/Users/xpz5km/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET"
     network_path = "networks/feature_selection/DIRECT-NET_network_2020db_0.1/combined_DIRECT-NET_network_2020db_0.1_Lasso_wo_sinks_RORA_RORB_combined.csv"
     data_path = "/data/adata_imputed_combined_v3_RORA_RORB_ave.csv"
     t1 = False
@@ -470,6 +470,7 @@ if __name__ == "__main__":
             save=True,
             save_dir=VAL_DIR,
             show_plot=False,
+            vertex_dict=vertex_dict, graph=graph, remove_sources=True
         )
 
         ## bb version > 0.1.7

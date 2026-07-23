@@ -19,8 +19,8 @@ plot_network = False
 split_train_test = False
 write_binarized_data = False
 fit_rules = False
-run_validation = True
-validation_averages = False
+run_validation = False
+validation_averages = True
 on_nodes = []
 off_nodes = []
 
@@ -40,7 +40,7 @@ fname = f"{sample}"
 notes_for_log = "External validation"
 
 # Set paths
-dir_prefix = '/Users/smgroves/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET'
+dir_prefix = '/Users/xpz5km/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET'
 network_path = "networks/feature_selection/DIRECT-NET_network_2020db_0.1/combined_DIRECT-NET_network_2020db_0.1_Lasso_wo_sinks_RORA_RORB_combined.csv"
 
 t1 = False

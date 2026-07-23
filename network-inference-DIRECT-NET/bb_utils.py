@@ -3,7 +3,7 @@ import os
 import resource
 import numpy as np
 from graph_tool import all as gt
-import booleabayes as bb
+import bobaT as bb
 from graph_tool import GraphView
 import matplotlib.pyplot as plt
 import seaborn as sns
