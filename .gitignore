@@ -85,3 +85,7 @@ benchmarking/data/preprocessed/
 # "Sourcing a real SCLC ground truth" for provenance; the small derived edge CSVs we built
 # from them (borromeo2016_ascl1_human_chip.csv, pozo2021_ascl1_direct.csv) are NOT ignored.
 benchmarking/data/sclc_chipseq_gt/*.xlsx
+
+# SCENIC cisTarget databases (~410MB, downloaded from resources.aertslab.org, re-downloadable
+# — see comparison_scenic_fit_6667.py) and its run intermediates.
+benchmarking/data/scenic/

@@ -22,7 +22,7 @@ Note on scope: this is edge/degree agreement, not the network-science centrality
 
 1. **Done** — boba-T (`6667`) vs. the DIRECT-NET candidate network it was fit on.
 2. **Done** — boba-T (`6667`) vs. CellOracle (`6667`), both scored against that same candidate network as the reference, using the coefficient matrix comparison 3 already fit (below).
-3. **Done** — boba-T (`6667`) vs. CellOracle (`6667`) vs. three real, independent ASCL1 ChIP-seq ground truths (two human, one RPR2-mouse — not the candidate network), scored separately. The mouse one (25 shared nodes) is the most statistically meaningful of the three; the two human ones are underpowered (4–5 shared nodes) — see [Sourcing a real SCLC ground truth](#sourcing-a-real-sclc-ground-truth-done-with-a-correction).
+3. **Done** — five `6667` networks (boba-T; CellOracle and GENIE3 restricted to the DIRECT-NET candidate net; CellOracle and SCENIC run from scratch with no DIRECT-NET restriction at all) vs. three real, independent ASCL1 ChIP-seq ground truths (two human, one RPR2-mouse), scored separately. The mouse one (25 shared nodes) is the most statistically meaningful of the three; the two human ones are underpowered (4–5 shared nodes). The from-scratch methods recover *zero* true edges on all three ground truths, with a checked, non-speculative explanation — see [Sourcing a real SCLC ground truth](#sourcing-a-real-sclc-ground-truth-done-with-a-correction).
 4. **Not done** — boba-T (mouse tissue) vs. CellOracle (mouse tissue) vs. ChIP-Atlas. Blocked on rerunning boba-T on the mouse ground-truth benchmark; see [that section](#running-boba-t-on-the-mouse-ground-truth-benchmark).
 
 Steps 1–2, run end to end just now:
@@ -162,22 +162,41 @@ What was used, all three ASCL1-only (single source TF — none of the tables cle
 - **`data/sclc_chipseq_gt/borromeo2016_ascl1_mouse_chip.csv`** — Table S8's `mSCLC_fpkm_RNA-seq` sheet, filtered to `ASCL1 bound in mSCLC != "No"` (that column holds peak IDs when bound, the literal string `"No"` when not): 3,992 `ASCL1 → target` edges, unsigned. **This is the actual RPR2-mouse ground truth.** Gene symbols are mouse case convention (`Ephb2`) in the source table; upper-cased in the saved CSV to match the human-convention symbols `6667`'s network uses, which is what ortholog symbol-matching across species conventionally does.
 - **`data/sclc_chipseq_gt/pozo2021_ascl1_direct.csv`** — Table S6's "105 ASCL1 Direct repressed" + "190 ASCL1 Direct activated" sheets (the two sheets behind Fig. 5C's Venn, ChIP binding *and* siASCL1-knockdown differential expression in NCI-H2107): 295 signed `ASCL1 → target` edges (−1 repressed, +1 activated). Human. Table S6's other sheets (`132 3TF shared...`, `145 ASCL1+NKX2-1...`, `163 NKX2-1...`, etc.) were **not** used for NKX2-1/PROX1 edges: those genes were only knocked down *in combination with ASCL1* (the "3TF" condition), never individually, so an expression change there can't be cleanly attributed to NKX2-1 or PROX1 alone rather than to the co-knocked-down ASCL1. Table S4 (ChIP peaks + HiChIP gene assignment, no functional filter, broader) was left unused since S6 already gave a usable, more rigorous list.
 
-Scored with [`comparison1_structure_6667_vs_chipseq_gt.py`](comparison1_structure_6667_vs_chipseq_gt.py) — reuses `load_bobat`/the already-fit `celloracle_coef_matrix.csv` from comparison 3, `run_structure_comparison`, and a new `loaders.load_sclc_chipseq_gt`, against each ground truth **separately**, three output files:
+Scored with [`comparison1_structure_6667_vs_chipseq_gt.py`](comparison1_structure_6667_vs_chipseq_gt.py) — reuses `load_bobat` plus five methods' fitted networks, `run_structure_comparison`, and a new `loaders.load_sclc_chipseq_gt`, against each ground truth **separately**, three output files, five methods each. Two treatments are compared side by side:
+
+- **Restricted to the DIRECT-NET candidate network** (the fairness principle used throughout this document): boba-T, `CellOracle (DIRECT-NET base)` ([`comparison3_fit_celloracle_6667.py`](comparison3_fit_celloracle_6667.py)), `GENIE3 (DIRECT-NET-restricted)` ([`comparison_genie3_fit_6667.py`](comparison_genie3_fit_6667.py)).
+- **Run from the beginning — given all the data, no DIRECT-NET restriction at all**: `CellOracle (from scratch)` ([`comparison_celloracle_fromscratch_fit_6667.py`](comparison_celloracle_fromscratch_fit_6667.py), using CellOracle's own human promoter base GRN) and `SCENIC (from scratch)` ([`comparison_scenic_fit_6667.py`](comparison_scenic_fit_6667.py), full GRNBoost2 + RcisTarget motif pruning — a dedicated `scenic_env` conda env was needed; pySCENIC 0.12.1's dependency chain doesn't run on a modern numpy/pandas/dask stack, see that script's docstring for the exact version pins that fixed each import-time crash). SCENIC's `--min_genes` was set to 1 (its default of 20 assumes thousands of candidate targets, not 53).
 
 | ground truth | species | n_shared_nodes | method | n_pred | n_overlap | precision | recall | f1 | sign_concordance |
 |---|---|---|---|---|---|---|---|---|---|
 | Borromeo human (620 edges) | human | 5 | boba-T | 4 | 1 | 0.250 | 0.20 | 0.222 | n/a (unsigned GT) |
-| Borromeo human (620 edges) | human | 5 | CellOracle | 3 | 1 | 0.333 | 0.20 | 0.250 | n/a (unsigned GT) |
+| Borromeo human (620 edges) | human | 5 | CellOracle (DIRECT-NET base) | 3 | 1 | 0.333 | 0.20 | 0.250 | n/a (unsigned GT) |
+| Borromeo human (620 edges) | human | 5 | GENIE3 (DIRECT-NET-restricted) | 3 | 1 | 0.333 | 0.20 | 0.250 | n/a (unsigned GT) |
+| Borromeo human (620 edges) | human | 5 | **CellOracle (from scratch)** | 4 | **0** | 0.000 | 0.00 | 0.000 | n/a |
+| Borromeo human (620 edges) | human | 4 | **SCENIC (from scratch)** | 1 | **0** | 0.000 | 0.00 | 0.000 | n/a |
 | **Borromeo mouse, RPR2 (3,992 edges)** | **mouse** | **25** | **boba-T** | **61** | **7** | **0.115** | **0.28** | **0.163** | n/a (unsigned GT) |
-| **Borromeo mouse, RPR2 (3,992 edges)** | **mouse** | **25** | **CellOracle** | **55** | **7** | **0.127** | **0.28** | **0.175** | n/a (unsigned GT) |
+| **Borromeo mouse, RPR2 (3,992 edges)** | **mouse** | **25** | **CellOracle (DIRECT-NET base)** | **55** | **7** | **0.127** | **0.28** | **0.175** | n/a (unsigned GT) |
+| **Borromeo mouse, RPR2 (3,992 edges)** | **mouse** | **25** | **GENIE3 (DIRECT-NET-restricted)** | **55** | **7** | **0.127** | **0.28** | **0.175** | n/a (unsigned GT) |
+| Borromeo mouse, RPR2 (3,992 edges) | mouse | 25 | **CellOracle (from scratch)** | 109 | **0** | 0.000 | 0.00 | 0.000 | n/a |
+| Borromeo mouse, RPR2 (3,992 edges) | mouse | 25 | **SCENIC (from scratch)** | 99 | **0** | 0.000 | 0.00 | 0.000 | n/a |
 | Pozo (295 edges) | human | 4 | boba-T | 4 | 2 | 0.500 | 0.50 | 0.500 | 0.0 |
-| Pozo (295 edges) | human | 4 | CellOracle | 3 | 2 | 0.500 | 0.50 | 0.500 | 1.0 |
+| Pozo (295 edges) | human | 4 | CellOracle (DIRECT-NET base) | 4 | 2 | 0.500 | 0.50 | 0.500 | 1.0 |
+| Pozo (295 edges) | human | 4 | GENIE3 (DIRECT-NET-restricted) | 4 | 2 | 0.500 | 0.50 | 0.500 | 0.5 |
+| Pozo (295 edges) | human | 4 | **CellOracle (from scratch)** | 1 | **0** | 0.000 | 0.00 | 0.000 | n/a |
+| Pozo (295 edges) | human | 4 | **SCENIC (from scratch)** | 3 | **0** | 0.000 | 0.00 | 0.000 | n/a |
 
 Full tables: `benchmarking_out/comparison1_structure_6667_vs_{borromeo2016_ascl1_human,borromeo2016_ascl1_mouse,pozo2021_ascl1_direct}.csv`.
 
-**Read the two human rows as a proof that the pipeline works, not a real accuracy comparison** — 4–5 shared nodes and 1–2 overlapping edges has no meaningful confidence interval either direction. The one qualitative signal worth noting without over-reading it: on the Pozo ground truth, boba-T got the *existence* of both overlapping edges right but the *sign* wrong on one of them (`sign_concordance` 0.0), while CellOracle got both signs right (1.0) — interesting, but n=2, treat it as a lead, not a conclusion.
+**Read the two human ground truths as a proof that the pipeline works, not a real accuracy comparison** — 4–5 shared nodes and 1–2 overlapping edges has no meaningful confidence interval either direction. The one qualitative signal worth noting without over-reading it: on the Pozo ground truth, boba-T got the *existence* of both overlapping edges right but the *sign* wrong on one of them (`sign_concordance` 0.0), CellOracle (DIRECT-NET base) got both signs right (1.0), and GENIE3 landed in between (0.5) — its importances are unsigned by construction, so its "sign" here is a post-hoc correlation-sign convention, not a modeled direction.
 
-**The RPR2-mouse row is the one actually worth reading** — 25 shared nodes and 7 overlapping edges is a real, if still modest, sample. Both methods land close together (F1 0.163 boba-T vs. 0.175 CellOracle, identical n_overlap of 7, identical recall of 0.28) — CellOracle predicts fewer total edges among these 25 nodes (55 vs. boba-T's 61) for the same overlap, giving it a slightly better precision/F1, but this is a small enough gap and small enough N that "CellOracle edges out boba-T on RPR2-mouse ASCL1 targets" would be overstating it. What it does support: both methods recover a real, non-random fraction (28%) of actual ASCL1 ChIP-seq targets from the RPR2 mouse model, restricted to genes both methods could call.
+**The RPR2-mouse row is the one actually worth reading** — 25 shared nodes and 7 overlapping edges is a real, if still modest, sample, for the DIRECT-NET-restricted methods. boba-T, CellOracle (DIRECT-NET base), and GENIE3 (DIRECT-NET-restricted) all land close together (F1 0.163–0.175, identical n_overlap of 7, identical recall of 0.28). CellOracle and GENIE3 have identical numbers here not by coincidence of scoring but because their edge sets are **exactly identical** — verified directly, not just same counts. The reason: both exclude self-loops (13 of the 228 candidate edges are `gene → itself`), CellOracle internally as part of its own fitting code, GENIE3 by explicit choice in `comparison_genie3_fit_6667.py`; boba-T's BooleaBayes rules keep self-loops (real auto-regulation), which is most of why its predicted-edge count (61) is higher than the other two's (55) among these nodes. Beyond that shared exclusion, CellOracle's ridge and GENIE3's random forest — two structurally different fitting methods — independently zeroed out the exact same 13 candidate edges once self-loops are set aside too.
+
+**The "from scratch" result is the most informative single finding in this section: both CellOracle (from scratch) and SCENIC (from scratch) recover *zero* true edges, on all three ground truths, despite predicting plenty of edges overall** (up to 109 among the RPR2-mouse ground truth's 25 shared nodes — more than any DIRECT-NET-restricted method). This was checked directly rather than taken at face value:
+
+- **CellOracle (from scratch)**: `ASCL1` is a valid candidate regulator in the restricted human promoter base GRN (confirmed present in `keep_tfs`), but its fitted ridge coefficient is **exactly zero for every one of the 52 target genes** — the promoter-motif-scan signal for ASCL1 apparently isn't strong or clean enough, competing against other candidate TFs in the same ridge fit, to survive regularization for *any* target.
+- **SCENIC (from scratch)**: `ASCL1` never made it into the final 36 regulons at all. But it's not absent from the pipeline — the raw GRNBoost2 step (before motif pruning) ranks `ASCL1 → PROX1` as its single strongest edge (importance 246.5, out of 52 candidate targets) — and `PROX1` is a real, ChIP+knockdown-confirmed ASCL1 target per Pozo's Table S6. That real signal got dropped at the RcisTarget motif-enrichment (`ctx`) step: enrichment testing asks whether a candidate gene set is non-randomly enriched for a motif *against a genome-wide background*, which has essentially no statistical power when the candidate set is drawn from a 53-gene universe instead of the thousands of genes SCENIC is designed around — the same "intended to use around 1000-3000 genes" scale mismatch flagged for CellOracle's own from-scratch run above, and the same mechanism discussed for [why GENIE3 underperforms in the real Fig. S2 benchmark](#running-boba-t-on-the-mouse-ground-truth-benchmark) relative to its restricted showing in comparison 3: a real regulatory signal in the raw co-expression numbers, thrown out for lack of statistical power at small scale, not necessarily because the underlying signal was wrong.
+
+The takeaway for `6667` specifically: on a 53-gene curated network, letting CellOracle or SCENIC discover their own candidate structure — the way they'd actually be used in a real project — currently recovers none of the independently-confirmed ASCL1 ChIP-seq edges checked here, while every method that was handed the DIRECT-NET-restricted candidate set (including boba-T) recovers a real, non-random fraction. That's informative about what the DIRECT-NET restriction is doing for this comparison — supplying exactly the kind of ATAC-informed prior that a 53-gene network is too small for generic motif-scan/co-expression methods to rediscover on their own — not necessarily a statement about which method is "better" in the genome-scale regime either is actually designed for.
 
 Not yet tried: feeding any of these ground truths into `run_beeline_comparison` (comparison 2) instead of `run_structure_comparison` — all three are real independent references, so AUROC/EPR would be as legitimate here as the structure numbers above (and the mouse one, with 25 shared nodes, has enough of a candidate universe to make AUROC less noisy than on the two human ones).
 
@@ -190,6 +209,8 @@ This is the path to an actual Fig.-S2-style figure — real AUROC/EPR numbers ag
 boba-T's SCLC runs get their candidate network from DIRECT-NET, which needs paired single-cell multiome (ATAC + RNA from the same cells) to link peaks to genes. The mouse benchmark doesn't have that — Tabula Muris (scRNA) and the Cusanovich atlas (scATAC) are unpaired, matched only by tissue, which is also how CellOracle itself used them. DIRECT-NET simply cannot run here; boba-T needs a different source for its candidate edges.
 
 The resolution: CellOracle ships a base GRN already built from that exact Cusanovich atlas — `celloracle.data.load_mouse_scATAC_atlas_base_GRN()` (mm9, TF motif scan over ~92k peaks from the atlas, verified against the installed package). Handing this to boba-T as its candidate network means both methods start from the same TF-binding prior, which is exactly the "same base GRN" fairness principle used everywhere else in this document — and it's a real ATAC-derived prior, not a workaround. The comparable released CellOracle variant, `celloracle_cluster_mouseAtacBaseGRN`, uses the same base GRN, which is why that's the variant to compare against in the structure quickstart above rather than the promoter-based or scrambled variants.
+
+**Why this restriction matters, not just for fairness but for whether a method finds anything at all**: CellOracle's own Fig. S2 benchmark shows GENIE3 doing much worse than CellOracle's ATAC/promoter-restricted variants at recovering true ChIP-Atlas edges — and the `6667`/from-scratch experiment above ([Sourcing a real SCLC ground truth](#sourcing-a-real-sclc-ground-truth-done-with-a-correction)) reproduces the same pattern directly: CellOracle and SCENIC, run on `6667` with no ATAC/DIRECT-NET restriction at all, recovered *zero* true ASCL1 ChIP-seq edges across three independent ground truths, while every DIRECT-NET-restricted method (including boba-T) recovered a real, non-random fraction. The mechanism in both cases is the same: without a curated, ATAC-informed candidate set, these methods have to rediscover regulatory structure from co-expression and/or generic sequence motifs alone, across a much larger and noisier space of candidate gene pairs — and that's a much harder problem than pruning/weighting a set of edges someone already told you were plausible. This is why handing boba-T the same mouse-scATAC-atlas restriction CellOracle's own best-performing Fig.-S2 variant uses, rather than leaving it to find structure unaided, is the right choice for a benchmark that's supposed to isolate rule-fitting quality rather than re-litigating whether ATAC-informed priors help (they clearly do, on both datasets checked here).
 
 ```python
 # Run once in celloracle_env: cache the mouse scATAC-atlas base GRN as boba-T's candidate network too.
@@ -379,10 +400,14 @@ What's missing, concretely:
 benchmarking/
 ├── cell-oracle-benchmark.py                        # thin CLI: `from grn_benchmark.runners import main`
 ├── preprocess_benchmark_data.py                     # CLI: reproduce CellOracle's scRNA preprocessing
-├── comparison3_fit_celloracle_6667.py               # comparison 3, fitting step (celloracle_env)
-├── comparison3_score_celloracle_vs_bobat_6667.py    # comparison 3, scoring step (bobaT_env)
-├── comparison1_structure_6667_vs_chipseq_gt.py      # comparison 1, real ChIP-seq ground truth (either env)
+├── comparison3_fit_celloracle_6667.py               # comparison 3, CellOracle fitting step, DIRECT-NET-restricted (celloracle_env)
+├── comparison_genie3_fit_6667.py                    # comparison 3, GENIE3 fitting step, DIRECT-NET-restricted (either env)
+├── comparison_celloracle_fromscratch_fit_6667.py    # comparison 1, CellOracle from scratch, own promoter base GRN (celloracle_env)
+├── comparison_scenic_fit_6667.py                    # comparison 1, SCENIC from scratch, GRNBoost2+RcisTarget (scenic_env)
+├── comparison3_score_celloracle_vs_bobat_6667.py    # comparison 3, scoring step, all methods (bobaT_env)
+├── comparison1_structure_6667_vs_chipseq_gt.py      # comparison 1, real ChIP-seq ground truth, all methods (either env)
 ├── setup_celloracle_env.sh                          # builds the celloracle_env conda env (Apple Silicon)
+├── setup_scenic_env.sh                              # builds the scenic_env conda env
 ├── grn_benchmark/                                   # the package (split from one file 2026-07-17)
 │   ├── config.py                 # paths + BenchmarkConfig (CFG)
 │   ├── edges.py                  # canonical edge schema + graph helpers
@@ -396,9 +421,10 @@ benchmarking/
 │   ├── comparison1_structure_6667_vs_borromeo2016_ascl1_human.csv
 │   ├── comparison1_structure_6667_vs_borromeo2016_ascl1_mouse.csv
 │   ├── comparison1_structure_6667_vs_pozo2021_ascl1_direct.csv
-│   └── comparison3_celloracle_vs_bobat_6667.csv
+│   └── comparison3_all_methods_vs_bobat_6667.csv
 └── data/                                            # inputs + ground truth; see data/README.md for provenance
-    └── sclc_chipseq_gt/                              # real SCLC ChIP-seq ground truth (see below); .xlsx gitignored, derived .csv tracked
+    ├── sclc_chipseq_gt/                              # real SCLC ChIP-seq ground truth (see below); .xlsx gitignored, derived .csv tracked
+    └── scenic/                                       # cisTarget databases + SCENIC intermediates (gitignored; ~410MB, re-downloadable)
 ```
 
 Comparison 3's own scoring output also lands next to boba-T's rules: `network-inference-DIRECT-NET/6667/rules/celloracle_coef_matrix.csv` and `network-inference-DIRECT-NET/6667/validation/celloracle_validation/accuracy_plots/*.csv`.
@@ -437,9 +463,9 @@ Large inputs (Tabula Muris scRNA, Cusanovich scATAC, CellOracle's released `infe
 
 | Comparison | Status |
 |---|---|
-| 1. Network structure vs. reference | Implemented; run on `6667` vs. the DIRECT-NET candidate net *and* vs. three real ASCL1 ChIP-seq ground truths (2 human, 1 RPR2-mouse — mouse one has real N=25, humans are small-N); mouse-tissue-benchmark version (Fig-S2-style) still needs the boba-T mouse run |
+| 1. Network structure vs. reference | Implemented; 5 methods run on `6667` (boba-T, CellOracle/GENIE3 DIRECT-NET-restricted, CellOracle/SCENIC from scratch) vs. the DIRECT-NET candidate net *and* vs. three real ASCL1 ChIP-seq ground truths — DIRECT-NET-restricted methods recover real edges, from-scratch methods recover zero (explained, not just observed); mouse-tissue-benchmark version (Fig-S2-style) still needs the boba-T mouse run |
 | 2. Edge-weight recovery (BEELINE AUROC/EPR) | Implemented + validated against CellOracle's own Fig-S2 numbers; real Fig-S2-style figure with boba-T needs the boba-T mouse run |
-| 3. Predicted vs. actual TF expression | Implemented and run on `6667` — real result: boba-T R² 0.832 vs. CellOracle R² 0.780 (42 shared genes); mouse-benchmark version needs a held-out split there |
+| 3. Predicted vs. actual TF expression | Implemented and run on `6667` for boba-T, CellOracle, and GENIE3 — real result: R² 0.832 / 0.780 / 0.899 (42 shared genes); full SCENIC/WGCNA not attempted (see roadmap); mouse-benchmark version needs a held-out split there |
 | 4. In-silico perturbation | Stubbed; boba-T's per-attractor output needs an aggregation step before this is buildable |
 
 The one prerequisite shared by everything still marked "needs the boba-T mouse run": [Running boba-T on the mouse ground-truth benchmark](#running-boba-t-on-the-mouse-ground-truth-benchmark) above.
@@ -447,3 +473,5 @@ The one prerequisite shared by everything still marked "needs the boba-T mouse r
 ## Environment notes
 
 CellOracle 0.20.0 does not `pip install` cleanly on Apple Silicon out of the box (velocyto needs OpenMP, gimmemotifs is pinned to a version whose C sources fail under modern clang, etc.) — `setup_celloracle_env.sh` has the full workaround and is idempotent-ish to re-run. Base GRNs from `co.data.load_human_promoter_base_GRN()` / `load_mouse_scATAC_atlas_base_GRN()` download to `~/celloracle_data/`.
+
+pySCENIC 0.12.1 similarly needs its own env (`setup_scenic_env.sh`) — its 2022-era dependency chain (arboreto, dask, numpy) conflicts with both `celloracle_env` and `bobaT_env`'s pins. The cisTarget motif databases it needs (`data/scenic/`, ~410MB) are downloaded fresh from `resources.aertslab.org` and gitignored; see `comparison_scenic_fit_6667.py` for the exact URLs.
