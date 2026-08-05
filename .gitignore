@@ -89,3 +89,7 @@ benchmarking/data/sclc_chipseq_gt/*.xlsx
 # SCENIC cisTarget databases (~410MB, downloaded from resources.aertslab.org, re-downloadable
 # — see comparison_scenic_fit_6667.py) and its run intermediates.
 benchmarking/data/scenic/
+
+# Preprocessed genome-wide SCLC/AA expression data (~206MB), derived from the source Box
+# multiome dataset — see preprocess_sclc_full_6667.py to regenerate from Box.
+benchmarking/data/sclc_full/
