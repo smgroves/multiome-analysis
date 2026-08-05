@@ -14,7 +14,7 @@ BENCH_DATA = os.path.join(REPO, "benchmarking", "data")
 # BEELINE example ground truth, downloaded from Murali-group/Beeline (GSD dataset).
 BEELINE_GSD = os.path.join(BENCH_DATA, "beeline", "GSD")
 
-# CellOracle Fig-7 benchmark data (ChIP-Atlas ground truth + released method outputs).
+# CellOracle Fig-S2 benchmark data (ChIP-Atlas ground truth + released method outputs).
 CO_CHIP_GT_DIR = os.path.join(BENCH_DATA, "celloracle", "chip_atlas_gt")
 CO_INFERENCE_DIR = os.path.join(BENCH_DATA, "celloracle", "inference_results")
 

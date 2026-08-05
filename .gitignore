@@ -80,3 +80,8 @@ benchmarking/data/tabula_muris/
 benchmarking/data/cusanovich_atac/
 benchmarking/data/preprocessed/
 *.pyc
+
+# Journal supplementary tables (third-party, some multi-MB) — see benchmarking/README.md
+# "Sourcing a real SCLC ground truth" for provenance; the small derived edge CSVs we built
+# from them (borromeo2016_ascl1_human_chip.csv, pozo2021_ascl1_direct.csv) are NOT ignored.
+benchmarking/data/sclc_chipseq_gt/*.xlsx

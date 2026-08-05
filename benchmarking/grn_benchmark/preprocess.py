@@ -1,6 +1,6 @@
 """Preprocess raw scRNA-seq the same way the CellOracle benchmark did.
 
-The CellOracle Fig-7 benchmark handed every GRN method (CellOracle, GENIE3, SCENIC,
+The CellOracle Fig-S2 benchmark handed every GRN method (CellOracle, GENIE3, SCENIC,
 WGCNA, DCOL) the SAME per-sample input, produced by CellOracle's standard scRNA
 pipeline. Paper Methods (Kamimoto et al. 2023), verbatim:
 

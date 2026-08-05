@@ -177,6 +177,20 @@ def load_celloracle_base_grn(
     return _finalize_edges(long[["source", "target", "weight", "sign"]])
 
 
+def load_sclc_chipseq_gt(path: str) -> pd.DataFrame:
+    """Real, independent SCLC ChIP-seq ground truth -> canonical edges.
+
+    Expects a pre-extracted (source, target, sign) CSV -- see benchmarking/README.md
+    ("Sourcing a real SCLC ground truth") for how borromeo2016_ascl1_human_chip.csv and
+    pozo2021_ascl1_direct.csv were built from the papers' supplementary tables. Both are
+    ASCL1-only (single source TF); sign is 0 for binding-only evidence (Borromeo),
+    +/-1 for binding + knockdown-confirmed direction (Pozo).
+    """
+    df = pd.read_csv(path)
+    df["weight"] = df["sign"].astype(float)   # signed if known, else 0 -> weight 0 (unsigned)
+    return _finalize_edges(df[["source", "target", "weight", "sign"]])
+
+
 def load_ground_truth(source: str = "beeline", path: Optional[str] = None) -> pd.DataFrame:
     """Reference network for structure (point 1) and gold standard (point 2).
 

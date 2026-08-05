@@ -151,7 +151,7 @@ def run_co_reproduction(sample: str, inference_dir: str = CO_INFERENCE_DIR) -> p
 
 
 def run_co_reproduction_all(inference_dir: str = CO_INFERENCE_DIR) -> pd.DataFrame:
-    """Reproduce Fig. 7a/b across every sample present in inference_dir."""
+    """Reproduce Fig. S2a/b across every sample present in inference_dir."""
     samples = sorted(s for s in os.listdir(inference_dir)
                      if os.path.isdir(os.path.join(inference_dir, s)))
     li = []

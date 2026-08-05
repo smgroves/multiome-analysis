@@ -1,8 +1,11 @@
-"""The three comparison points: network structure, edge weights (BEELINE), perturbation.
+"""Comparisons 1, 2, and 4 from benchmarking/README.md: network structure, edge weights
+(BEELINE), and perturbation. Comparison 3 (predicted vs. actual expression) is NOT in this
+module -- it's scored with boba-T's own get_sklearn_metrics, not a metric defined here; see
+comparison3_fit_celloracle_6667.py and comparison3_score_celloracle_vs_bobat_6667.py.
 
 1. structure_metrics / run_structure_comparison / pairwise_jaccard  -- topology overlap
 2. beeline_metrics / run_beeline_comparison                          -- AUROC / AUPRC / EPR
-3. run_perturbation_comparison                                       -- stubbed
+4. run_perturbation_comparison                                       -- stubbed
 """
 
 from __future__ import annotations
@@ -170,11 +173,11 @@ def run_beeline_comparison(
     nodes: Optional[set[str]] = None,
     allow_self: bool = False,
 ) -> pd.DataFrame:
-    """Fig. 7a/b-style table: one row per method, AUROC + EPR columns.
+    """Fig. S2a/b-style table: one row per method, AUROC + EPR columns.
 
     Candidate universe defaults to the ground-truth gene set (BEELINE convention).
     For full parity with the BEELINE toolkit (AUPRC ratio, motif-scrambled controls,
-    cell-count robustness in Fig. 7c/d), export these ranked edge lists and run
+    cell-count downsampling robustness), export these ranked edge lists and run
     github.com/Murali-group/Beeline; this gives the same core metrics inline.
     """
     if nodes is None:
@@ -185,7 +188,7 @@ def run_beeline_comparison(
 
 
 # ---------------------------------------------------------------------------
-# Comparison 3: IN SILICO PERTURBATION  (stub)
+# Comparison 4: IN SILICO PERTURBATION  (stub)
 # ---------------------------------------------------------------------------
 
 def run_perturbation_comparison(*args, **kwargs):

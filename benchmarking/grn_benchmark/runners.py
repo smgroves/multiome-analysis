@@ -126,7 +126,7 @@ def run_methods_vs_reference(reference_source: str = "beeline",
     except NotImplementedError as e:
         print(f"\n[reference not set] {e}")
 
-    # run_perturbation_comparison(...)  # point 3, later
+    # run_perturbation_comparison(...)  # comparison 4, later
 
 
 def main():
