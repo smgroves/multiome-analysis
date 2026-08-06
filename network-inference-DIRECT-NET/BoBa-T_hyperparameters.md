@@ -64,7 +64,7 @@ per-gene truth tables are already reasonably sparse relative to ~7100 training c
 raising this from 0 is a lower-priority lever than §1 unless a specific gene's fit looks
 like it's driven by a spurious regulator.
 
-## 3. Regulators-per-gene cap (Phase 2/3 — not yet implemented)
+## 3. Regulators-per-gene cap (Phase 2 — implemented and tested, `6669`)
 
 **Why it matters**: truth-table size is `2^n` for `n` regulators. Per-leaf data gets
 exponentially sparser as `n` grows, which is exactly what feeds the §1 mechanism (fewer
@@ -82,12 +82,23 @@ gene with 6+ candidate regulators in a <10k-cell dataset is a candidate for capp
 4-5; the same cap is too aggressive for a 100k-cell dataset. Compute this cap
 per-dataset, not as a fixed constant across projects.
 
-**Implementation note (not yet built)**: this doesn't require a BoBa-T source change —
-it's a pre-filter on the network edge list (drop the lowest-strength incoming edges per
-gene, e.g. by DIRECT-NET/LASSO edge weight) applied before `bb.load.load_network`, fully
+**Implementation**: no BoBa-T source change needed — a pre-filter on the network edge
+list (`build_capped_network.py`), dropping the lowest-fitted-relevance regulator(s) per
+over-cap gene (ranked by 6667's own `strengths.csv`) before `bb.load.load_network`, fully
 on the multiome-analysis side.
 
-## 4. Normalization scheme choice, and the "artificial spread" problem (Phase 2/3)
+**Tested result (`6669`, cap=6, applied to the 10 genes that had 7-8 regulators)**:
+essentially neutral. In-sample mean R² 0.855 (identical to 6667's 0.855 — no fit quality
+lost from removing up to 2 regulators per gene). External validation nearly unchanged
+too: `organoid_shGFP` 0.016 (vs. 6667's 0.023), `organoid_shRORB2` 0.162 (vs. 0.162,
+essentially identical), `mets_compiled` 0.013 (vs. 0.019) — all within noise of baseline,
+neither a clear win nor a loss. **Interpretation**: consistent with §6-9's finding that the
+worst external-validation shortfalls are driven by genuine cross-context rewiring, not by
+overfitting to sparse high-order truth tables — a capacity-reduction fix like this
+wouldn't be expected to move that kind of shortfall, and it didn't. Low-risk to adopt as a
+simplification (fewer parameters, same performance) but not a fix for §6-9's core finding.
+
+## 4. Normalization scheme choice, and the "artificial spread" problem (Phase 2 — prototyped and tested, `6670`)
 
 `bb.load.load_data`'s `norm=` also accepts `"gmm"` (2-component Gaussian-mixture soft
 assignment) and `"minmax"` (exact min/max rescale) as alternatives to the quantile-clip
@@ -105,9 +116,31 @@ of the per-gene IQRs across the whole network) rather than that gene's own min/m
 pass the result through a fixed-scale squashing function (e.g. a logistic centered at the
 gene's median with a shared slope). A genuinely low-variance gene then stays compressed
 near the middle of `[0,1]` instead of being stretched to occupy the same range as a truly
-bimodal gene. Not yet prototyped — a natural Phase 2/3 companion to §5's screening, since
-you'd want the bimodality/spread check in place first to know which genes this would
-actually change the fit for.
+bimodal gene.
+
+**Prototyped (`build_global_reference_norm.py`, `6670`)**: logistic squash referenced to
+the median of all 53 genes' raw standard deviations (shared scale), slope `K` swept
+empirically (`K=2.0`, an initial guess, collapsed the whole network to ~1% confidently
+-binarized cells on average — devastating given §1's `1-max(heat)` mechanism; `K=0.2` kept
+the network-wide mean extreme-fraction (0.47) comparable to `node_normalization=0.3`'s
+fixed 0.60 while preserving real per-gene differentiation, e.g. `BACH2` 0.04 vs `ZBTB20`
+0.96 exact-0/1 fraction, vs. both pinned to exactly 0.60 under the old scheme).
+
+**Tested result**: in-sample mean R² 0.80 (`6670`) vs. 6667's 0.855 — a modest, plausible
+cost from an untuned prototype scheme. **Scoring external data against it surfaced a
+real, important failure mode**: applying the training data's *own* fixed reference
+(median + scale) to a new dataset — the mechanistically "correct" way to use this scheme
+across datasets, and the direct answer to "how would you compensate for the
+diversity<->R² relationship" — caused several genes' *actual* values to saturate to an
+essentially constant 0 or 1 in `organoid_shGFP` (e.g. `EPCAM`: actual std collapsed to
+8.5e-8), because organoid's raw baseline for that gene sits systematically offset from
+GEMM's median, not just differently spread. With near-zero true variance, R² (dividing by
+it) becomes numerically degenerate — one run produced a mean R² of roughly -1.8e14, not a
+real signal. **This scheme correctly targets the right mechanism (§6's diversity finding)
+but needs more care before it's usable for cross-dataset scoring**: candidates for a
+follow-up prototype — robust/winsorized scaling instead of a raw logistic, or excluding
+genes with near-zero true variance from R² aggregation and reporting a bounded metric
+instead.
 
 ## 5. Bimodality / true-spread screening (Phase 2/3)
 
@@ -132,18 +165,39 @@ pre-fit QC step, flagging genes for extra scrutiny rather than blocking the fit.
 ## 6. Domain-shift interpretation
 
 Low external-validation R² isn't automatically a rule-fitting problem — see
-`comparisons/domain_shift_diagnostic/FINDINGS.md` for the full analysis. Summary: a
-continuous per-cell stress score does **not** robustly explain organoid/mets_compiled's
-worst-validating genes (correlations are weak and inconsistent in sign). But grouping by
-discrete cell-type/cluster identity finds a much sharper signal — mets_compiled's cluster
-`2` (1221 cells, not a small/noisy group) is the single highest-residual cluster for 7 of
-its 10 worst-validating genes. **Read**: the shortfall isn't spread evenly across a
-dataset — it's concentrated in specific subpopulations that are either genuinely
-out-of-distribution relative to the GEMM training data, or represent a real biological
-state the current regulator set doesn't capture. Before concluding a hyperparameter
-change should compensate for a validation set's low aggregate score, check whether that
-low score is actually a few concentrated subpopulations dragging down an otherwise-solid
-fit.
+`comparisons/domain_shift_diagnostic/FINDINGS.md` for the full analysis (9 sections,
+summarized here). Checked across all 33 of 6667's scored external samples (allografts,
+human tumors, organoid variants, mets_compiled), not just organoid:
+
+- A continuous per-cell stress score does **not** robustly explain the worst-validating
+  genes (correlations are weak and inconsistent in sign) (§1-2).
+- Distance from the training distribution — UMAP-space distance, kNN distance in raw
+  expression space, distance to the 8 known GEMM attractors — is at best a weak-to-moderate
+  predictor of a sample's mean R² (r=-0.09 to -0.49) (§5). A sample can have a
+  perfectly ordinary, GEMM-like average expression profile and still validate badly.
+- What actually predicts mean R² well: **how much of a sample's own variance lies along
+  GEMM's specific fitted identity axes** (r=0.65, the best predictor found) — not how much
+  variance it has overall (r=0.58), and not how far its average state sits from training
+  data (§4, §6-7).
+- The two worst-validating samples (`mets_compiled`, `organoid_shGFP`) fail for different
+  specific reasons: `mets_compiled`'s worst subpopulation (cluster 2) is a
+  dissociation-stress technical artifact (§3), while `organoid_shGFP` has real,
+  substantial lineage heterogeneity (§8) that simply doesn't align to GEMM's specific
+  identity-axis combination.
+- **Decisive test (§9)**: hard-binarizing cells into their exact combinatorial regulator
+  state and comparing to GEMM's fitted rule value for that *exact* state (removing any
+  population-mixture confound) shows organoid_shGFP's disagreement is genuine rewiring,
+  not a compositional artifact — the same TF combination really does imply a different
+  outcome in organoid vs. GEMM, consistent with real context-dependent TF activity
+  (cofactor/chromatin/signaling differences between in vivo tissue and culture), not a
+  BoBa-T fitting defect.
+
+**Read**: the shortfall isn't spread evenly across a dataset — it's concentrated in
+specific subpopulations or driven by specific rewired relationships, not a uniform
+degradation. Before concluding a hyperparameter change should compensate for a validation
+set's low aggregate score, check whether that low score reflects a few concentrated
+subpopulations or specific rewired edges (§10's checklist) rather than a general BoBa-T
+fitting weakness.
 
 ## 7. Pseudo-observation weighting: opt-in alternative, default unchanged (Phase 2/3, BoBa-T source)
 
@@ -158,11 +212,14 @@ Spec for a `weighting=` parameter on `get_rules`/`get_rules_scvelo`:
   exercised indirectly through `norm` — where `norm` only changes how many cells *can*
   become confident matches, this changes the rule itself to require aggregate evidence
   rather than one lucky cell.
-- **Why deferred**: `6668`'s result (§1) showed the norm-based lever isn't a clean fix on
-  its own, which argues for waiting to see whether §6's domain-shift read changes the
-  interpretation before investing in a BoBa-T source change here — if the shortfall is
-  concentrated in specific out-of-distribution subpopulations rather than spread by weak
-  aggregate evidence generally, this fix would help less than it might first appear to.
+- **Why deferred, now confirmed**: `6668`'s result (§1) showed the norm-based lever isn't a
+  clean fix on its own; §9's leaf-conditional test now confirms why a pseudo-observation
+  change wouldn't fix the organoid/mets_compiled shortfall either — the problem isn't weak
+  aggregate evidence for an otherwise-correctly-specified leaf, it's that the leaf's *true*
+  value genuinely differs by context (real rewiring). No amount of evidence-weighting
+  changes what a leaf's fitted value should be when the training and target contexts
+  disagree about it. This fix would still be worth having for its original purpose
+  (reducing single-cell-driven noise within one context), just not as an extrapolation fix.
 
 ## 8. Canalizing-function structure: opt-in mode, not default (Phase 2/3, BoBa-T source)
 
@@ -181,3 +238,95 @@ BoBa-T source (strips the known `_validation.csv` suffix instead of splitting on
 display-only, doesn't change any fitted value or metric. `6667`'s and `6668`'s
 `summary_stats.csv` (in-sample and all 5 external validation sets) have been
 regenerated under the fix.
+
+## 10. Pre-extrapolation checklist: will this rule set actually transfer to a new dataset?
+
+Before trusting a fitted rule set's predictions on a genuinely new dataset (a new
+cell-culture system, a new species, a new experimental condition), run these checks in
+order — cheapest/most diagnostic first. All are generalizations of scripts already built
+and run for organoid_shGFP/mets_compiled in `comparisons/domain_shift_diagnostic/`
+(reusable, just point them at the new dataset).
+
+1. **Diversity ratio** (`diagnose_sample_diversity.py`, §6/§7's baseline check): compute
+   the new dataset's mean per-gene raw standard deviation relative to the training data's
+   own. A ratio well below 1 (e.g. <0.3-0.4, per the samples that validated worst) is an
+   early warning that the dataset may not vary enough for R²-style validation to be
+   meaningful at all, independent of whether the rules are "right."
+2. **Identity-axis variance fraction** (`diagnose_variance_composition.py`, §7 — **the
+   single best predictor found**, r=0.65 across 33 samples): fit PCA on the *training*
+   data, project the new dataset onto that fixed basis, and compute what fraction of the
+   new dataset's *own* variance lands on the training data's top identity PCs. Low
+   fraction (<0.3, per the worst-validating samples) is a real warning sign — but **do
+   not stop here**: §8-9 showed a dataset can score low on this check while still having
+   real, relevant biological heterogeneity that simply isn't aligned to the training data's
+   specific axis combination, which this metric cannot distinguish from genuine unfitness.
+3. **The decisive check: leaf-conditional agreement** (`diagnose_leaf_conditional_agreement.py`,
+   §9). For a handful of the network's genes (start with ones with 4-6 regulators — few
+   enough regulators that leaves stay well-populated), hard-binarize (>0.5) the new
+   dataset's cells into their exact combinatorial regulator state and compare each
+   well-populated leaf's mean *actual* target value to the training rule's fitted value
+   for that *exact* leaf. Run the same check on the training data's own held-out test set
+   first as a positive control (should show small residuals, ~0.03-0.06 per the GEMM
+   check) — this confirms the test itself is working before interpreting the new
+   dataset's result. **This is the only check in this list that directly measures whether
+   the fitted logic itself transfers**, rather than a proxy (variance overlap, distance)
+   that can be fooled by population composition (§9's core finding: marginal correlation
+   and even PCA-axis overlap can look bad or good somewhat independently of whether the
+   actual conditional relationships hold).
+4. **If check 3 shows large, systematic leaf-conditional residuals**: don't try to fix
+   this with a `node_normalization`/`node_threshold` hyperparameter sweep (§1's `6668`
+   result already showed the norm knob doesn't move this kind of shortfall) — it means
+   specific regulatory relationships are genuinely different in the new context, most
+   plausibly because TF *activity* (not just measured expression level) depends on
+   cofactor/chromatin/signaling context that differs between the training and target
+   systems. The rules may still be directionally/qualitatively useful, but shouldn't be
+   trusted for genes/leaves that fail this check, and any perturbation predictions
+   involving those genes should be flagged as training-context-specific rather than
+   general claims.
+
+## 11. Robust-core subnetwork: identifying which edges transfer, not just whether the whole network does (implemented, `diagnose_leaf_conditional_agreement_full.py`)
+
+§9's leaf-conditional test (originally run on 5 genes against `organoid_shGFP` alone) is
+directly generalizable into a systematic map of which *specific* parts of the network are
+context-robust vs. context-specific, rather than a single pass/fail per external sample.
+Relevant to BoBa-T's own claim that Boolean structure lets it predict dynamics/attractors
+in unseen conditions: that claim is likely true for some edges and not others, and this
+gives a way to say which.
+
+**Design**:
+1. Run `diagnose_leaf_conditional_agreement.py`'s core check (already built) across
+   *every* network gene (not just the 5 tested) and across *every* scored external sample
+   (not just `organoid_shGFP`) — both the well-validating ones (`allograft_TKO-luc`,
+   `human_RU1311`) and the poorly-validating ones (`organoid_shGFP`, `mets_compiled`,
+   `human_RU1215`), to see whether the same specific edges are the ones that fail
+   everywhere, or whether different samples rewire different parts of the network.
+2. For each gene, compute a transferability score: the cell-count-weighted fraction of its
+   well-populated leaves (across all tested samples) with small residual (<0.15, per §9's
+   threshold) against the training rule value.
+3. Genes/edges with high transferability across most/all tested contexts form a **robust
+   core** — the part of the network where a rule fit on GEMM is likely to actually hold in
+   a new, previously-unseen context, and where claims about predicting unseen-cluster
+   dynamics or attractor structure are best supported. Genes/edges that fail
+   context-specifically (fail in some samples, hold in others) point to *what kind* of
+   context shift matters for that specific regulatory relationship — worth cross-referencing
+   against sample metadata (culture vs. tissue, tumor subtype, technical depth) the way §3
+   and §8 did for specific cases.
+4. **Done, at full scale (53 genes x 33 external samples)**: see
+   `comparisons/domain_shift_diagnostic/FINDINGS.md` §10. Headline result: per-sample mean
+   transferability correlates with that sample's mean R² at **r=0.96** — the strongest
+   predictor found across this entire investigation, as expected since it directly
+   measures rule-holds-in-this-sample with the composition confound removed by
+   construction. **Caveat that matters for reading the per-gene ranking**: the network's
+   11 self-loop-only "source" nodes score a trivial 1.0 (a self-loop predicts a gene
+   largely from its own level, which "transfers" anywhere) and must be excluded before
+   ranking genes — same reason the existing pipeline already excludes them from averaged
+   ROC plots. Among real (>=2-regulator) genes, even the single most-transferable one
+   (`TEAD1`) only reaches 0.63 across the *full*, deliberately heterogeneous 33-sample
+   population (mouse allografts + human tumors + mouse organoid culture together) — no
+   edge is universally robust across that much biological diversity, which is a realistic
+   ceiling, not a bug. Least-transferable genes (`NFIX`, `JUNB`, `KMT2A`, `TCF7L2`, `FOS`,
+   `LMX1B`, `MEIS2`, `EHF`, `JUN`, `ASCL1`) substantially overlap with the genes flagged
+   throughout this investigation as worst-validating/most-rewired — a good consistency
+   check. The full per-gene x per-sample matrix supports re-aggregating over any sample
+   subset relevant to a specific claim (e.g. in-vivo-only for a more permissive "robust
+   core for in-vivo extrapolation" ranking).

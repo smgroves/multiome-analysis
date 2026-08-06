@@ -363,3 +363,103 @@ though both systems are exploring recognizably the same biology.
 
 Outputs: `organoid_shgfp_own_pc_metadata_correlation.csv`,
 `organoid_shgfp_own_pc_categorical_variance.csv`.
+
+## 9. Resolved: genuine rewiring, not a population-mixture artifact (`diagnose_leaf_conditional_agreement.py`)
+
+§8 leaves one loose end: if organoid_shGFP varies along the *same genes* as GEMM's
+identity axes, why would their specific relationships differ — shouldn't the same
+regulatory logic apply to both? There are two very different explanations, and marginal
+pairwise correlation (§4) cannot tell them apart:
+
+- **Composition artifact**: BoBa-T's own model says a gene's relationship to one regulator
+  can flip sign depending on a *second* regulator's state — that's what a multi-regulator
+  truth table encodes (conditional, not simple pairwise, logic). If GEMM and organoid cells
+  have a different *mixture* of full regulator-combination states, the marginal
+  correlation between any single regulator pair can look totally different even if every
+  individual fitted truth-table entry is unchanged. Under this explanation, the actual
+  logic transfers fine; only the population-level summary (correlation, R²) looks bad.
+- **Genuine rewiring**: the same regulator combination really does imply a different
+  target value in organoid vs. GEMM — a real biological difference in what that
+  combination of TF states produces, not a statistical artifact.
+
+**Direct test**: hard-binarize cells (>0.5) into their exact combinatorial leaf — the same
+indexing `get_rules`/`parent_heatmap` use — for 5 genes (`LMX1B`, `ASCL1`, `NFIB`,
+`TCF7L1`, `EHF`; 4 to 8 regulators each), and compare each leaf's mean *actual* target
+value against GEMM's own fitted rule value for that *exact* leaf. This removes the
+composition confound entirely — cells are grouped by their precise combinatorial state,
+not by a marginal summary.
+
+**Positive control**: GEMM's own held-out test data shows excellent leaf-conditional
+agreement (mean |residual| 0.03-0.06 across all 5 genes) — confirms the test itself works
+and the rules are genuinely well-fit in-distribution.
+
+**organoid_shGFP does not replicate this, even leaf-conditionally**: mean |residual| ≈
+0.40 across the same 5 genes (only 19% of well-populated leaves agree within 0.15).
+Concretely, `EHF`'s leaf where both regulators are OFF: GEMM's rule value is 0.17;
+organoid_shGFP's actual mean for cells in that *exact* combinatorial state is 0.68 — nearly
+inverted, with the population-mixture confound already removed. Same pattern for `ASCL1`,
+`NFIB`, `TCF7L1`, `LMX1B` — large, systematic residuals persist leaf-by-leaf.
+
+**Conclusion: this is genuine rewiring, not a composition artifact.** The same
+combination of TF states really does produce a different target-gene outcome in organoid
+vs. GEMM. This is consistent with real, well-documented biology: TF *activity* (as opposed
+to TF presence/expression level, which is what BoBa-T's regulator values measure) depends
+on cofactor availability and chromatin/signaling context — factors that plausibly differ
+between an intact in vivo tumor (immune/stromal signaling, native ECM, systemic hormones)
+and an organoid grown in defined culture media, even for identical genetic background.
+BoBa-T's rules encode "what does this TF combination mean" *in the context it was fit in*
+— they are not guaranteed, and here are directly shown not, to encode a context-independent
+causal law.
+
+Outputs: `leaf_conditional_agreement_organoid_shgfp.csv`.
+
+## 10. Full-scale robust-core map: 53 genes x 33 external samples (`diagnose_leaf_conditional_agreement_full.py`)
+
+§9 tested 5 genes against 1 sample. Generalized to every one of 6667's network genes
+against every one of the 33 scored external samples (allografts, human tumors, organoid
+variants, mets_compiled), building the per-gene x per-sample transferability matrix
+proposed in `BoBa-T_hyperparameters.md` §11 (transferability = cell-count-weighted
+fraction of a gene's well-populated combinatorial leaves, across a sample, whose actual
+mean agrees with GEMM's fitted rule value within 0.15).
+
+**Validates the whole approach**: GEMM's own held-out test data scores 0.986 mean
+transferability (near-perfect positive control). And **per-sample mean transferability
+correlates with that sample's mean R² at r=0.96** across all 33 samples — by far the
+strongest predictor found in this entire investigation (vs. §4's sign-flip rate at -0.72,
+§7's identity-PC-variance-fraction at 0.65). This makes sense: it's the most direct
+possible measurement of "does the fitted rule actually hold in this sample," with the
+population-composition confound removed by construction.
+
+**Caveat, important for interpretation**: the network's 11 self-loop-only "source" nodes
+(`CREB1`, `TCF4`, `ESR1`, `SOX9`, `RBPJ`, `NR6A1`, `NFYC`, `JUND`, `ZEB1`, `STAT1`,
+`TFDP1` — same list the existing pipeline already excludes from averaged-ROC plots for
+the same reason, "artificially high ROC") score a trivial 1.0 transferability across
+every sample. A self-loop rule predicts a gene largely from its own current level, which
+trivially "transfers" anywhere — this is not a real generalization result and must be
+excluded before ranking genes.
+
+**Real result, excluding self-loop nodes** (42 genes with >=2 regulators):
+- **Most transferable**: `TEAD1` (0.63), `PROX1` (0.52), `BACH1` (0.50), `HSF2` (0.50),
+  `EGR1` (0.48), `ZBTB20` (0.47), `NFATC2` (0.47), `STAT2` (0.46), `NCAM1` (0.46), `SIX4`
+  (0.45). Even the single best real (non-self-loop) gene only reaches 0.63 — no edge in
+  this network transfers reliably across the *full*, highly heterogeneous population of
+  33 external samples (mouse allografts, human tumors, mouse organoid culture all mixed
+  together). This is a realistic ceiling, not a bug: the population deliberately spans
+  very different biological contexts.
+- **Least transferable**: `NFIX` (0.23), `JUNB` (0.23), `KMT2A` (0.23), `TCF7L2` (0.25),
+  `FOS` (0.30), `LMX1B` (0.31), `MEIS2` (0.31), `EHF` (0.33), `JUN` (0.33), `ASCL1` (0.33)
+  — notably, these are largely the same genes flagged throughout this investigation as
+  worst-validating/most-rewired (`ASCL1`, `LMX1B`, `EHF`, `JUN` all appeared in §4's and
+  §9's per-gene analyses), a good internal consistency check on the method.
+
+**Practical use**: this matrix (`leaf_conditional_transferability_matrix.csv`) can be
+re-aggregated over any subset of samples relevant to a specific claim — e.g. restricting
+to just the allograft+human-tumor (in-vivo) samples to get a "robust core for in-vivo
+extrapolation" ranking, separate from the full population's necessarily more conservative
+one. Any attractor-prediction or perturbation claim in the paper involving a
+bottom-ranked gene for the relevant target context should be scoped accordingly rather
+than presented as a general claim.
+
+Outputs: `leaf_conditional_transferability_matrix.csv` (full per-gene x per-sample
+matrix), `leaf_conditional_robust_core_per_gene.csv` (per-gene summary),
+`leaf_conditional_per_sample_summary.csv` (per-sample summary + r=0.96 check).

@@ -130,6 +130,35 @@ To put CellOracle on the same footing: after `oracle.fit_GRN_for_simulation(...)
 
 GENIE3's random forest comes out ahead of both boba-T and CellOracle on every metric here — plausible on its own terms: an RF is a much more flexible, nonlinear predictor than either boba-T's Boolean rules or CellOracle's linear ridge, so on a pure held-out-prediction-accuracy question it has room to fit patterns the other two structurally can't. That's a real result, not an artifact — the held-out split, base GRN, and shared-node rule are identical to the boba-T/CellOracle comparison — but it says more about raw predictive flexibility than about which method recovers the "right" regulatory structure (that's comparison 1's job, not this one's); a highly flexible model winning a pure prediction contest while still getting the causal structure wrong is a very ordinary failure mode, not ruled out by this number. `alpha=10` for CellOracle and `n_estimators=1000` for GENIE3 were both left at defaults, not tuned — a fairer three-way race would sweep both. Full per-gene numbers: `benchmarking_out/comparison3_all_methods_vs_bobat_6667.csv`.
 
+**Caveat on the boba-T vs. CellOracle R² margin specifically, found while re-verifying a
+similar CellOracle comparison built for the HSC combinatorial-logic work** (see
+`verify_celloracle_6667.py`): `comparison3_fit_celloracle_6667.py` applies the train-fitted
+`coef_matrix` to `test_t0combined.csv` — the **raw**, un-imputed test values — but CellOracle's
+own `fit_GRN_for_simulation` actually fits its Ridge models on `oracle.adata.layers[
+"imputed_count"]` (the KNN-smoothed output of `knn_imputation()`), not on the raw values it
+was given. Evaluating on a different representation than the model was trained for
+understates its held-out accuracy. (This is a different issue from a second bug found and
+fixed in the HSC work — a missing Ridge intercept — which does *not* affect this script:
+`to01()`'s min-max rescaling here happens to be invariant to a missing additive constant, so
+that part of the R²=0.780 figure is safe.)
+
+Checked whether this representation mismatch actually moves the number by refitting Ridge
+directly on the real `imputed_count` (same candidate network, same alpha, same held-out
+split) and evaluating CellOracle's coefficients against the *matching* imputed test cells
+instead of the raw ones: **mean R² rises from 0.780 to 0.864** — a real, substantial jump, not
+noise (my reproduction of the original method scored 0.781, essentially exact agreement,
+confirming this isn't a different setup). But smoothing the evaluation target should help
+*any* reasonable model a little, not just CellOracle — so the fair question is what happens to
+boba-T's own R² against that identical smoothed target. Checked directly: boba-T's R² moves
+from 0.856 to 0.875 (+0.019) against the same imputed test cells, far less than CellOracle's
+jump (+0.084). **On a single, consistent evaluation target, the gap that was reported as
+0.832 vs. 0.780 (a 0.052 margin) narrows to roughly 0.875 vs. 0.864 (a 0.011 margin) — boba-T
+is still narrowly ahead, but nowhere near as decisively as the original table alone suggests.**
+Not yet corrected in the table above (would need redoing GENIE3's evaluation on the same
+matched imputed target too, for a genuinely fair three-way re-score) — flagged here rather
+than silently left as originally reported, since it materially changes how confidently "boba-T
+beats CellOracle" should be stated for this specific comparison.
+
 Two crash bugs had to be worked around before the CellOracle fitting script above would even run (GENIE3's plain-sklearn script had none of these) — neither touches the ridge fit, the predictions, or the R²/AUC/F1 numbers reported above; both are CellOracle plumbing unrelated to the actual modeling math, and both would raise an exception (no output at all) if left unfixed rather than silently changing a result. Noting them in case they recur on other data: `Oracle.import_anndata_as_normalized_count` reads `adata.obsm[embedding_name]` even though `embedding_name` defaults to `None` in its signature — pass a placeholder 2D array if there's no real embedding (only used by CellOracle's own 2D-plotting features, never read by the regression). It also calls an internal QC step that reads `adata.layers["raw_count"]`, but the line that would set that layer from `adata.X` is commented out in installed `celloracle==0.20.0`'s own source (`oracle_core.py`) — set `adata.layers["raw_count"] = adata.X.copy()` yourself before the call (that QC step only feeds a print-only warning used later in `simulate_shift`, comparison 4; it's not consumed by `fit_GRN_for_simulation`), or `simulate_shift` will later hit a missing `self.high_var_genes` attribute.
 
 ### 4. In-silico perturbation — **stubbed**
@@ -547,12 +576,14 @@ ones. It also means truth-table accuracy is noisier than it looks for genes with
 never-visited leaves: those entries are effectively unscored noise relative to what the
 simulated trajectory actually supports, not a real test of learned biology.
 
-**Not yet done for Track 1:** fit GENIE3 (and possibly CellOracle's ridge regression; full
-SCENIC is inapplicable since RcisTarget's motif step needs a real genome, not synthetic gene
-symbols) on the same candidate network + simulated data, then reconstruct each method's
-*implied* truth table (predict every regulator-state combination, threshold it) to make the
-comparison concrete: a method that fits one scalar coefficient per regulator independently
-structurally cannot represent an AND/OR/NOT gate, and the reconstructed truth table should
+CellOracle has since been fit on this same candidate network + simulated data too (see the
+"Track 1 vs. Track 2, side by side" R² table further down this document, in the Track 2
+section — mean R² 0.709, actually beating boba-T's 0.618 on the identical true-network
+setup). **Still not yet done for Track 1:** GENIE3 (full SCENIC is inapplicable since
+RcisTarget's motif step needs a real genome, not synthetic gene symbols); reconstructing
+either method's *implied* truth table (predict every regulator-state combination, threshold
+it) to make the comparison concrete: a method that fits one scalar coefficient per regulator
+independently structurally cannot represent an AND/OR/NOT gate, and the reconstructed truth table should
 show that directly (e.g. failing specifically on the states where the true rule is non-linear
 in its inputs, not uniformly).
 
@@ -799,11 +830,253 @@ fallback (`if no regulators survive, use the gene itself`) keeps a self-loop-onl
   random-forest flexibility won. Flagged as a real, not-yet-explained direction flip rather
   than smoothed over — worth investigating if this comparison is revisited.
 
-**Not yet done:** entry-by-entry truth-table/logic scoring for Track 2 (same marginalization
-approach as Track 3's `comparison_hsc_chea_truth_table_scoring.py`, not yet adapted to real
-data); GENIE3/CellOracle haven't both been run on *both* networks (CellOracle only on ATAC, to
-keep this pass scoped) — filling in the missing cells of the table above is the natural next
-step, not a design limitation.
+**Not yet done at this point:** GENIE3/CellOracle haven't both been run on *both* the ChEA and
+ATAC+motif networks (CellOracle only on ATAC, to keep that pass scoped). Superseded by the
+comparison below for the specific "does DIRECT-NET+boba-T vs. default CellOracle" question.
+
+### DIRECT-NET + boba-T vs. CellOracle's own real-multiome tutorial pipeline
+
+The ChEA and hand-rolled ATAC+motif networks above are useful independent tests, but they
+aren't *this project's own* real pipeline, nor CellOracle's own documented one. This section
+runs the two methods' actual real-world recipes on the same real cells and compares both R²
+and (an adaptation of) truth-table logic recovery — the specific comparison this section was
+built to answer.
+
+**boba-T's side: DIRECT-NET.** DIRECT-NET (Zhang lab, [Sci. Adv. 2022](https://www.science.org/doi/10.1126/sciadv.abl7393))
+is a gradient-boosting (xgboost) method that regresses each gene's real expression against
+nearby real ATAC peaks' real accessibility to discover CREs, then motif-scans the CREs it
+finds for real TF binding — this project's own real 6667 network uses exactly this method
+(`network-inference-DIRECT-NET/`), but it had never been run on GSE194122 before (no driver
+script survived in this repo from the original run; DIRECT-NET is GitHub-only, `Run_DIRECT_
+NET()`, and depends on Cicero itself internally).
+
+```bash
+# Real dependency chain installed fresh (chromVAR, motifmatchr, JASPAR2020/2016,
+# BSgenome.Hsapiens.UCSC.hg38, monocle3, cicero, xgboost, DIRECT-NET) -- see setup notes below.
+/opt/anaconda3/envs/celloracle_env/bin/python export_for_direct_net.py   # h5ad -> CSVs for R
+Rscript run_direct_net.R              # builds Seurat obj, runs Run_DIRECT_NET, focus_markers=our 10 genes
+Rscript run_direct_net_tf_links.R     # motif-scans the real CREs DIRECT-NET found (JASPAR2016 + hg38)
+# -> data/hsc_multiome/candidate_network_directnet_real.csv (45 edges)
+/opt/anaconda3/envs/bobaT_env/bin/python comparison_hsc_multiome_fit_bobat_directnet.py
+```
+
+Three real, disclosed installation/compatibility issues hit and fixed along the way (none by
+editing the installed packages themselves):
+- `BPCells` (a `monocle3` dependency) needs `libhdf5` to compile; not discoverable on this
+  system — installed via Homebrew (`brew install hdf5 pkg-config`).
+- `Run_DIRECT_NET`'s own `reduction.name` parameter is never actually forwarded to its
+  internal `Aggregate_data()` call (a real bug in DIRECT-NET's own source, confirmed by
+  reading it directly) — it always looks for a reduction literally named `wnn.umap`.
+  Workaround: name our real GEX PCA embedding (from the h5ad's own precomputed
+  `obsm['GEX_X_pca']`) `wnn.umap` — Seurat doesn't enforce that a reduction's name matches
+  its algorithm.
+- `DIRECTNET::isSparseMatrix` does `class(x) %in% c("dgCMatrix","dgTMatrix")`; for a plain
+  dense matrix `class(x)` returns `c("matrix","array")` (length 2 since R 4.0), so `%in%`
+  returns a length-2 vector and `if()` on it throws under R's stricter checking. Confirmed
+  upstream bug — patched at the call site via `assignInNamespace` in our own script (this
+  project's established pattern for fixing a dependency without touching its installed
+  source, e.g. the `np.trapz` shim used elsewhere).
+- Seurat 5's default `Assay5` class has no `@counts` slot (DIRECT-NET's own code expects the
+  classic V3/V4 `Assay` API) — fixed with Seurat's own backward-compatibility escape hatch,
+  `options(Seurat.object.assay.version = "v3")`.
+
+Restricted to our 10 genes as `focus_markers` (DIRECT-NET's own `±250kb` promoter/enhancer
+search window, real ATAC peaks, real GEX): 506 real CRE-gene links across 9/10 genes (SPI1
+had fewer than 2 usable enhancer peaks after DIRECT-NET's own promoter/distal split), then a
+real JASPAR2016 motif scan restricted to our 10 TFs' direct-binding motifs against those real
+CREs (hg38, via `BSgenome.Hsapiens.UCSC.hg38`) → **45 real candidate edges**
+(`candidate_network_directnet_real.csv`).
+
+**CellOracle's side: Cicero + TSS + motif scan** (CellOracle's own documented real-multiome
+recipe, not the generic promoter base GRN):
+
+```bash
+Rscript run_cicero.R                          # real co-accessibility on the same 584 real peaks
+python build_hsc_cicero_base_grn.py           # link each gene's real promoter peak to Cicero-coaccessible
+                                                # peaks (coaccess >= 0.2, Cicero/CellOracle's own convention),
+                                                # then the SAME FPR-calibrated motif scan as the ATAC track
+/opt/anaconda3/envs/celloracle_env/bin/python comparison_hsc_multiome_fit_celloracle_cicero.py
+```
+
+One Cicero-specific gotcha: `run_cicero()`'s internal distance-parameter estimation expects
+`genome_coords` as exactly 2 columns (chr, length); passing 3 (chr, start, end) shifts its
+positional column access and throws `wrong sign in 'by' argument`.
+
+Real result: 35,000 real peak-pair co-accessibility scores; 4/10 genes' promoter peaks had
+real Cicero-linked distal peaks above the 0.2 threshold (GATA2/SPI1/FLI1 had none — their
+promoter peaks show no real co-accessibility partner in this window) → **40 real candidate
+edges** (`candidate_network_cicero_real.csv`) after the same motif scan.
+
+**Results — R² (held out the same way for both) and structure recovery:**
+
+| method | network | mean R² (held-out test cells) | regulator-set F1 |
+|---|---|---|---|
+| boba-T | DIRECT-NET (45 edges) | 0.855 | 0.292 |
+| boba-T | Cicero (40 edges) | 0.765 | 0.291 |
+| CellOracle (ridge, α=10) | Cicero (40 edges) | **0.514** | 0.239 |
+
+**Correction, caught by re-verifying before trusting a strikingly one-sided result** (see
+`verify_celloracle_fit.py`): an earlier version of this table reported CellOracle's R² as
+0.125, computed by reconstructing predictions as `coef_matrix · expression` and comparing
+directly to raw expression. Two real bugs in that reconstruction, not in CellOracle itself:
+(1) CellOracle's own `_getCoefMatrix` fits `sklearn.Ridge` with the library default
+`fit_intercept=True`, but only ever saves `.coef_` into `coef_matrix` — `.intercept_` is
+silently discarded by CellOracle's own code and never appears anywhere I could read it back
+from, so my manual reconstruction was missing an additive constant for every gene; (2) the
+Ridge model is actually fit on `oracle.adata.layers["imputed_count"]` (the KNN-smoothed
+output of `oracle.knn_imputation()`), not the raw input expression I was evaluating against.
+Fixed by refitting Ridge myself (same candidate TFs, same alpha, same held-out split) and
+capturing both `.coef_` and `.intercept_`, evaluated against the real `imputed_count` the
+model was actually trained on. Corrected mean R² is 0.514, not 0.125 — still behind boba-T's
+0.765 on the identical network, but a real, much narrower gap than first reported. (Checked
+whether this same bug affects the project's *earlier*, already-established comparison-3
+result on the real 6667 SCLC data: it doesn't — that script applies a min-max rescale to both
+actual and predicted before scoring, and min-max rescaling is invariant to a missing additive
+constant, so CellOracle's R²=0.780 there is unaffected. This bug is specific to the ad-hoc
+verification scripts written for this HSC comparison.)
+
+**Real findings:**
+- **boba-T beats CellOracle on R² on the identical real candidate network** (0.765 vs. 0.514)
+  — a real, if now much narrower, fitting-method gap, not a network-choice artifact (both
+  used the same 40-edge Cicero network).
+- **DIRECT-NET and Cicero are two genuinely different real methods that landed on
+  strikingly similar answers**: boba-T's structure-recovery F1 is 0.292 vs. 0.291 — a
+  near-exact match — despite one method being gradient-boosting-based CRE discovery and the
+  other co-accessibility-based. GFI1 is again among the hardest genes on both.
+
+**Truth-table comparison, adapted to real data.** Unlike Tracks 1/3's synthetic data, there's
+no literal simulator output to serve as ground truth for real cells. The meaningful analog
+built here (`comparison_hsc_multiome_truth_table_scoring.py`): group real cells by their
+*true* regulators' (from `hsc_ground_truth.py`) binarized real expression state, then check
+whether each fitted model's prediction — averaged within that group — lands on the correct
+side of the literal HSC.txt rule's 0/1 label for that state. AUROC (not raw accuracy) is used
+since it's scale-invariant across boba-T's naturally-[0,1]-bounded prediction and CellOracle's
+unbounded raw linear combination. Genes whose true rule depends on EGRNAB (e.g. GFI1) are
+skipped — there's no real EGRNAB data to evaluate that rule against, and marginalizing over an
+unmodeled regulator's state isn't the same as testing recovery of the modeled ones.
+
+| method | network | mean truth-table AUC (8-9 genes; GFI1 skipped, needs EGRNAB) |
+|---|---|---|
+| boba-T | DIRECT-NET | 0.811 |
+| boba-T | Cicero | 0.812 |
+| CellOracle (ridge) | Cicero | 0.802 |
+
+(Re-verified after the R² correction above, using the same correctly-refit, intercept-included
+Ridge models: AUROC is invariant to a missing additive constant — adding the same constant to
+every prediction doesn't change rank order — so this table was actually unaffected by that bug
+the whole time; re-running it with the corrected models reproduced the same numbers to within
+floating-point noise.)
+
+**All three are close (0.80–0.81) here.** boba-T's real-data R² lead over CellOracle (0.765 vs.
+0.514, corrected) is real but narrower than truth-table AUC alone would suggest — CellOracle's
+ridge coefficients rank the true combinatorial states in roughly the right *direction* almost
+as well as boba-T does, even where its absolute predicted expression *levels* are less
+accurate.
+
+**Track 1 vs. Track 2, side by side.** Both tracks score against the exact same object —
+`hsc_ground_truth.py`'s literal truth tables — so the per-gene AUCs are directly comparable
+even though Track 1 fits on synthetic data with the true regulator set handed to it, and
+Track 2 fits on real cells with a real, independently-discovered candidate network. (Merged
+directly from the already-computed `comparison_hsc_truth_table_bobat.csv` and
+`comparison_hsc_multiome_truth_table_*.csv` outputs above — nothing in either track was rerun
+to build this table.)
+
+| gene | Track 1: boba-T (synthetic, true network) | Track 2: boba-T + DIRECT-NET (real) | Track 2: boba-T + Cicero (real) | Track 2: CellOracle + Cicero (real) |
+|---|---|---|---|---|
+| GATA2 | 0.821 | 0.667 | 0.500 | 0.533 |
+| GATA1 | 0.714 | 0.833 | 0.738 | 0.714 |
+| FOG1  | 1.000 | 1.000 | 1.000 | 1.000 |
+| EKLF  | 0.667 | 1.000 | 1.000 | 1.000 |
+| FLI1  | 0.667 | 0.333 | 0.333 | — (0 surviving candidates) |
+| SCL   | 1.000 | 1.000 | 1.000 | 1.000 |
+| CEBPA | 0.846 | 0.944 | 0.889 | 0.722 |
+| PU1   | 0.641 | 0.852 | 0.852 | 0.444 |
+| CJUN  | 1.000 | 0.667 | 1.000 | 1.000 |
+| EGRNAB| 1.000 | — (no real EGRNAB data) | — | — |
+| GFI1  | 1.000 | — (true rule needs EGRNAB) | — | — |
+| **mean (8 genes present in all 4 columns)** | **0.836** | **0.870** | **0.872** | **0.802** |
+
+**No advantage at all for the synthetic, cheat-network Track 1 setup over real data — if
+anything, real data with a *discovered* network scores slightly higher.** Track 1 handed
+boba-T the exact true regulators directly as candidates (a best-case, non-discovery scenario,
+per the caveat above); Track 2 had to discover its own candidate network from real ATAC/RNA
+from scratch, and both real-data boba-T runs (0.870, 0.872) *edge out* Track 1's synthetic,
+cheat-network score (0.836) — CellOracle's real-data run (0.802) is the only one that trails
+it, and only slightly. The two tracks disagree gene-by-gene in informative ways rather than
+Track 2 simply trailing Track 1 everywhere:
+- **CJUN**: Track 1 gets AUC=1.0 (trivial — GFI1 and PU1 were handed to it directly as the
+  true candidates); Track 2's DIRECT-NET run drops to 0.667 because DIRECT-NET's real,
+  independently-discovered candidates for CJUN didn't include the literal true pair — but
+  Track 2's *Cicero* run recovers the full 1.0 anyway, on a different real candidate set.
+- **EKLF and PU1**: both real-data runs (DIRECT-NET and Cicero) *exceed* Track 1's synthetic
+  score (1.000/0.852 vs. Track 1's 0.667/0.641) — real cells' actual regulator-state
+  distribution apparently makes these two genes' true logic easier to separate than the
+  synthetic BoolODE trajectory did, not harder.
+- **FLI1** is the one gene that's hard for literally everyone across both tracks and every
+  network (0.667 synthetic, 0.333 on both real networks) — the same gene flagged earlier
+  (Track 1's mechanism section) as sitting in a real mutual-inhibition loop with EKLF, whose
+  static combinatorial snapshot can't see trajectory/hysteresis information. That this
+  specific gene is *also* the hardest on two independently-built real candidate networks is
+  a second, independent piece of evidence for that explanation, not just a synthetic-data
+  quirk.
+
+**Same comparison, for predictive R² instead of truth-table AUC.** This table also required
+running CellOracle on Track 1's synthetic data for the first time (it had never been fit
+there before — see the correction below), so unlike the tables above it isn't purely a
+re-merge of pre-existing outputs; the boba-T columns are.
+
+| gene | Track 1: boba-T (synthetic, true network) | Track 1: CellOracle (synthetic, true network) | Track 2: boba-T + DIRECT-NET (real) | Track 2: boba-T + Cicero (real) | Track 2: CellOracle + Cicero (real) |
+|---|---|---|---|---|---|
+| GATA2 | 0.932 | 0.315 | 0.936 | 0.022 | 0.000 |
+| GATA1 | 0.933 | 0.885 | 0.887 | 0.989 | 0.974 |
+| FOG1  | 0.236 | 0.927 | 0.704 | 0.771 | 0.811 |
+| EKLF  | 0.055 | 0.776 | 0.845 | 0.982 | 0.982 |
+| FLI1  | 0.076 | 0.795 | 0.950 | 0.926 | — (0 surviving candidates) |
+| SCL   | 0.334 | 0.928 | 0.861 | 0.959 | 0.847 |
+| CEBPA | 0.980 | 0.225 | 0.934 | 0.934 | 0.348 |
+| PU1   | 0.900 | 0.874 | 0.952 | 0.947 | 0.238 |
+| CJUN  | 0.575 | 0.739 | 0.941 | 0.934 | 0.357 |
+| EGRNAB| 0.539 | 0.842 | — (no real EGRNAB data) | — | — |
+| GFI1  | 0.909 | 0.906 | 0.544 | 0.184 | 0.068 |
+| **mean (8 genes present in all 5 columns)** | **0.618** | **0.709** | **0.882** | **0.817** | **0.570** |
+
+**Correction before drawing any conclusions here** (caught by double-checking a strikingly
+one-sided result rather than trusting it — see `verify_celloracle_fit.py`): the CellOracle
+columns above were originally computed by reconstructing predictions as
+`coef_matrix · expression` and comparing to raw expression directly. This has two real bugs,
+not in CellOracle itself but in that reconstruction: (1) CellOracle's `_getCoefMatrix` fits
+`sklearn.Ridge` with the library default `fit_intercept=True`, but only saves `.coef_` — the
+intercept is silently discarded by CellOracle's own code and never appears in `coef_matrix`,
+so the reconstruction was missing an additive constant per gene; (2) the Ridge model is
+actually fit on `oracle.adata.layers["imputed_count"]` (KNN-smoothed), not the raw expression
+being evaluated against. The original (wrong) numbers had CellOracle catastrophically failing
+on synthetic data (mean R² = **-0.413**, several genes strongly negative — e.g. PU1 = -4.12)
+and badly on real data (mean R² = **0.125**) — both *far* worse than boba-T in both regimes,
+which was the "great result" this correction was prompted by double-checking. Fixed by
+refitting Ridge myself (same candidate TFs, same alpha, same held-out cells) and capturing
+both `.coef_` and `.intercept_`, evaluated against the real `imputed_count` the model was
+actually trained on. **Confirmed this bug is specific to this session's ad-hoc scripts, not
+a problem with the project's earlier, already-established 6667 comparison-3 result**: that
+script rescales both actual and predicted to `[0,1]` before scoring, and min-max rescaling is
+invariant to a missing additive constant, so CellOracle's R²=0.780 there was never affected.
+Truth-table AUC (the table above) was also unaffected throughout — confirmed by re-running it
+with the corrected, intercept-included models and getting the same numbers back — since
+AUROC doesn't change under a constant shift applied to every prediction.
+
+**The corrected picture is genuinely mixed, not one-directional.** CellOracle actually *beats*
+boba-T on Track 1's synthetic data (0.709 vs. 0.618) — the reverse of what the (wrong) first
+pass showed — while boba-T still beats CellOracle on Track 2's real data (0.817 vs. 0.570),
+though by a real but much narrower margin than the uncorrected -0.413/0.125 numbers implied.
+Both real-data boba-T runs (0.882, 0.817) still clearly beat Track 1's synthetic boba-T score
+(0.618) — that comparison was never affected by this bug, since it doesn't involve
+CellOracle — for the same reason already established in Track 1's own mechanism section:
+EKLF/FLI1/SCL/FOG1/GFI1/CJUN had low synthetic R² specifically because BoolODE's continuous
+trajectory leaves real within-leaf variance a 1-2-regulator boba-T rule can't explain; real
+cells don't carry that same simulation artifact. GATA2 is the one gene where *every* method on
+*every* real network does badly (boba-T 0.022, CellOracle 0.000) — its real promoter peak
+apparently offers very little real regulatory signal in this dataset regardless of method,
+already flagged from the structure side (Track 2's ChEA/ATAC/Cicero sections) as its
+candidate set collapsing to just FLI1 across three independently-built real networks.
 
 ## Repo layout
 
@@ -819,6 +1092,8 @@ benchmarking/
 ├── comparison_celloracle_fullscale_fit_6667.py      # comparison 1, CellOracle from scratch, real genome-wide/HVG scale (celloracle_env)
 ├── comparison_scenic_fullscale_fit_6667.py          # comparison 1, SCENIC from scratch, real genome-wide/HVG scale (scenic_env)
 ├── comparison3_score_celloracle_vs_bobat_6667.py    # comparison 3, scoring step, all methods (bobaT_env)
+├── verify_celloracle_6667.py                        # comparison 3: checks CellOracle's real vs. raw-test representation mismatch (celloracle_env)
+├── verify_bobat_vs_imputed_6667.py                  # comparison 3: fairness check -- does boba-T's own R2 also rise against the same imputed target? (bobaT_env)
 ├── comparison1_structure_6667_vs_chipseq_gt.py      # comparison 1, real ChIP-seq ground truth, all methods (either env)
 ├── hsc_ground_truth.py                              # HSC combinatorial-logic: parse HSC.txt -> candidate network + per-gene truth tables
 ├── prepare_hsc_bobat_input.py                       # HSC: BoolODE's ExpressionData.csv -> boba-T input format
@@ -834,6 +1109,19 @@ benchmarking/
 ├── comparison_hsc_multiome_fit_genie3.py            # HSC Track 2: fit GENIE3, ChEA network, real data (bobaT_env)
 ├── comparison_hsc_multiome_fit_genie3_atac.py       # HSC Track 2: fit GENIE3, real ATAC network, real data (bobaT_env)
 ├── comparison_hsc_multiome_fit_celloracle.py        # HSC Track 2: fit CellOracle, real ATAC network, real data (celloracle_env)
+├── export_for_direct_net.py                         # HSC Track 2: h5ad -> CSVs for building a Seurat object in R (celloracle_env)
+├── run_direct_net.R                                 # HSC Track 2: build Seurat obj + run DIRECT-NET, focus_markers=10 genes
+├── run_direct_net_tf_links.R                        # HSC Track 2: motif-scan DIRECT-NET's real CREs (JASPAR2016 + hg38)
+├── run_cicero.R                                     # HSC Track 2: real Cicero co-accessibility on the same real peaks
+├── build_hsc_cicero_base_grn.py                     # HSC Track 2: Cicero-linked peaks -> FPR-calibrated motif scan (celloracle_env)
+├── comparison_hsc_multiome_fit_bobat_directnet.py   # HSC Track 2: fit boba-T, real DIRECT-NET network (bobaT_env)
+├── comparison_hsc_multiome_fit_bobat_cicero.py      # HSC Track 2: fit boba-T, real Cicero network (bobaT_env)
+├── comparison_hsc_multiome_fit_celloracle_cicero.py # HSC Track 2: fit CellOracle, real Cicero network (celloracle_env)
+├── comparison_hsc_multiome_truth_table_scoring.py   # HSC Track 2: real-data truth-table/AUC comparison, DIRECT-NET+boba-T vs Cicero+CellOracle
+├── comparison_hsc_fit_celloracle.py                 # HSC Track 1: fit CellOracle on synthetic data, same true-network candidates boba-T got (celloracle_env)
+├── score_celloracle_hsc_truthtable.py               # HSC Track 1: CellOracle truth-table/AUC scoring
+├── verify_celloracle_fit.py                         # HSC Track 1+2: corrected R2 (intercept + imputed_count fix) -- re-verification after catching a bug in the ad-hoc scripts above
+├── verify_celloracle_truthtable.py                  # HSC Track 1+2: re-verifies truth-table AUC with the corrected models (confirms it was unaffected)
 ├── setup_celloracle_env.sh                          # builds the celloracle_env conda env (Apple Silicon)
 ├── setup_scenic_env.sh                              # builds the scenic_env conda env
 ├── grn_benchmark/                                   # the package (split from one file 2026-07-17)
@@ -900,9 +1188,9 @@ Large inputs (Tabula Muris scRNA, Cusanovich scATAC, CellOracle's released `infe
 |---|---|
 | 1. Network structure vs. reference | Implemented; run on `6667` at two scales — DIRECT-NET-restricted (boba-T, CellOracle, GENIE3: recover real edges) and genuinely genome-scale, no boba-T involved at all (CellOracle, SCENIC via the real Box multiome data: also recover real edges, ASCL1 emerges as a real hub in both, SCENIC's motif pruning gives it better precision) — vs. three real ASCL1 ChIP-seq ground truths; mouse-tissue-benchmark version (Fig-S2-style) still needs the boba-T mouse run |
 | 2. Edge-weight recovery (BEELINE AUROC/EPR) | Implemented + validated against CellOracle's own Fig-S2 numbers; real Fig-S2-style figure with boba-T needs the boba-T mouse run |
-| 3. Predicted vs. actual TF expression | Implemented and run on `6667` for boba-T, CellOracle, and GENIE3 — real result: R² 0.832 / 0.780 / 0.899 (42 shared genes); full SCENIC/WGCNA not attempted (see roadmap); mouse-benchmark version needs a held-out split there |
+| 3. Predicted vs. actual TF expression | Implemented and run on `6667` for boba-T, CellOracle, and GENIE3 — real result: R² 0.832 / 0.780 / 0.899 (42 shared genes), but the boba-T/CellOracle margin is inflated by a representation mismatch (CellOracle scored on raw test data, not the `imputed_count` it was actually trained on) — corrected, matched-target R² is ~0.875 vs. ~0.864, a real but much narrower boba-T lead (see caveat below the table); GENIE3 not yet re-scored the same way; full SCENIC/WGCNA not attempted (see roadmap); mouse-benchmark version needs a held-out split there |
 | 4. In-silico perturbation | Stubbed; boba-T's per-attractor output needs an aggregation step before this is buildable |
-| 5. Combinatorial logic (HSC ground truth) | Track 1 (synthetic, true candidate network): regulator-set "recovery" is by construction not a real discovery test (see caveat), mean truth-table accuracy 0.784 (AUC 0.850); GENIE3/CellOracle comparators not yet run. Track 3 (synthetic, ChEA-derived candidate network, `threshold=0`): regulator-set recovery F1=0.414; marginalized truth-table accuracy 0.832/AUC 0.985 but flagged as not trustworthy alone (CJUN scores perfect with zero true regulator overlap). Track 2 (real GSE194122 data, 27,050 cells, 2 independent real candidate networks — ChEA and real ATAC+motif — all 3 methods fit): boba-T F1 0.454 (ChEA) / 0.190 (ATAC); GENIE3 R² 0.760 (ChEA) / 0.649 (ATAC); CellOracle F1 0.157 (ATAC only so far); GFI1 hardest gene for every method; real ATAC+motif is a stricter evidence source than ChEA for this toy model. Truth-table/logic scoring not yet adapted to real data for Track 2 |
+| 5. Combinatorial logic (HSC ground truth) | Track 1 (synthetic, true candidate network): regulator-set "recovery" is by construction not a real discovery test (see caveat), mean truth-table accuracy 0.784 (AUC 0.850); boba-T R²=0.618 vs. CellOracle R²=0.709 (CellOracle wins here — see the R² correction below); GENIE3 not yet run. Track 3 (synthetic, ChEA-derived candidate network, `threshold=0`): regulator-set recovery F1=0.414; marginalized truth-table accuracy 0.832/AUC 0.985 but flagged as not trustworthy alone. Track 2 (real GSE194122 data, 27,050 cells): ChEA/hand-rolled-ATAC networks — boba-T F1 0.454 (ChEA) / 0.190 (ATAC), GENIE3 R² 0.760 (ChEA) / 0.649 (ATAC), CellOracle F1 0.157 (ATAC); GFI1 hardest gene for every method/network. **DIRECT-NET+boba-T vs. CellOracle's own real-multiome tutorial pipeline (Cicero+motif scan)**: boba-T R²=0.855(DIRECT-NET)/0.765(Cicero) vs. CellOracle R²=0.514 (corrected — see `verify_celloracle_fit.py`, an earlier pass had this wrong at 0.125 due to a missing-intercept bug in the verification, not in CellOracle) on the *identical* Cicero network — boba-T still wins on real data, narrower margin than first computed; truth-table AUC close for all three (0.80–0.81) throughout, unaffected by that bug. **Net picture: CellOracle beats boba-T on R² for synthetic data, boba-T beats CellOracle on R² for real data — genuinely mixed, not a one-sided result in either direction** |
 
 The one prerequisite shared by everything still marked "needs the boba-T mouse run": [Running boba-T on the mouse ground-truth benchmark](#running-boba-t-on-the-mouse-ground-truth-benchmark) above.
 
@@ -911,3 +1199,5 @@ The one prerequisite shared by everything still marked "needs the boba-T mouse r
 CellOracle 0.20.0 does not `pip install` cleanly on Apple Silicon out of the box (velocyto needs OpenMP, gimmemotifs is pinned to a version whose C sources fail under modern clang, etc.) — `setup_celloracle_env.sh` has the full workaround and is idempotent-ish to re-run. Base GRNs from `co.data.load_human_promoter_base_GRN()` / `load_mouse_scATAC_atlas_base_GRN()` download to `~/celloracle_data/`.
 
 pySCENIC 0.12.1 similarly needs its own env (`setup_scenic_env.sh`) — its 2022-era dependency chain (arboreto, dask, numpy) conflicts with both `celloracle_env` and `bobaT_env`'s pins. The cisTarget motif databases it needs (`data/scenic/`, ~410MB) are downloaded fresh from `resources.aertslab.org` and gitignored; see `comparison_scenic_fit_6667.py` for the exact URLs.
+
+**R environment (DIRECT-NET + Cicero, added for the "DIRECT-NET+boba-T vs. CellOracle real-multiome pipeline" comparison above)**: this project's global R 4.6.1 library now also has `DIRECTNET` (`remotes::install_github("zhanglhbioinfor/DIRECT-NET")`), `cicero` (`remotes::install_github("cole-trapnell-lab/cicero-release", ref="monocle3")`), `monocle3` (`remotes::install_github("cole-trapnell-lab/monocle3")` — needs `BPCells`, which needs `libhdf5`; installed via `brew install hdf5 pkg-config` first), `xgboost`, and `chromVAR`/`motifmatchr`/`JASPAR2020`/`JASPAR2016`/`BSgenome.Hsapiens.UCSC.hg38` (all via `BiocManager::install`, Bioconductor 3.23). `getJasparMotifs()` (used by DIRECT-NET's own TF-linking step) hardcodes JASPAR2016 specifically, not JASPAR2020 — both are needed. Two real, disclosed compatibility workarounds needed at *call time* (not by editing any installed package): `options(Seurat.object.assay.version = "v3")` before building any Seurat object DIRECT-NET will touch (its code expects the classic `Assay` class's `@counts` slot, not Seurat 5's `Assay5`/`@layers`), and `assignInNamespace("isSparseMatrix", ..., ns="DIRECTNET")` patching a real upstream bug (`class(x) %in% c(...)` returns a length-2 vector for a plain dense matrix under R≥4.0, tripping R's stricter `if()` check) — see `run_direct_net.R` for both, applied only in that script's own session, not persisted to the package.
