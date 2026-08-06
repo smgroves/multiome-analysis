@@ -68,6 +68,7 @@ ANCHOR_ARC_MAP = {
     "nonNE1": "Arc_4", "Generalist_nonNE": "Generalist_nonNE", "NE1": "Arc_5",
     "NE2": "Arc_6", "Secretory": "Arc_3", "nonNE2": "Arc_2",
 }
+# Colors matched to the user's reference figure (ref_hex).
 ANCHOR_COLORS = {
     "nonNE1": "tab:red", "Generalist_nonNE": "lightcoral", "NE1": "tab:purple",
     "NE2": "darkred", "Secretory": "tab:green", "nonNE2": "orange",
@@ -83,7 +84,7 @@ def load_archetype_indices(nodes):
 
 
 def hexagon_anchor_xy():
-    angles = {name: np.pi / 2 - i * (2 * np.pi / 6) for i, name in enumerate(ANCHOR_ORDER)}
+    angles = {name: np.pi / 2 + np.pi / 6 - i * (2 * np.pi / 6) for i, name in enumerate(ANCHOR_ORDER)}
     return {name: (np.cos(a), np.sin(a)) for name, a in angles.items()}
 
 

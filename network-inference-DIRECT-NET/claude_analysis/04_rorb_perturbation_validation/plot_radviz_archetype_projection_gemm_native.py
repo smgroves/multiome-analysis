@@ -45,13 +45,15 @@ WALK_PATH = f"{DIR_PREFIX}/6667/walks/long_walks/4000_step_walks"
 ATTRACTOR_DIR = f"{DIR_PREFIX}/6667/attractors/attractors_threshold_0.5"
 START_ARCHETYPE = "Arc_5"  # NE1 -- GEMM-native counterpart to organoid's 'Neuroendocrine1'
 STEP_STRIDE = 20
-T = 10.0  # softmax temperature (bits); matches the companion script
+T = float(sys.argv[1]) if len(sys.argv) > 1 else 10.0  # softmax temperature (bits); pass as CLI arg to override
+OUT_SUFFIX = f"_T{sys.argv[1]}" if len(sys.argv) > 1 else ""  # keeps the default-T output file untouched
 
 ANCHOR_ORDER = ["nonNE1", "Generalist_nonNE", "NE1", "NE2", "Secretory", "nonNE2"]
 ANCHOR_ARC_MAP = {
     "nonNE1": "Arc_4", "Generalist_nonNE": "Generalist_nonNE", "NE1": "Arc_5",
     "NE2": "Arc_6", "Secretory": "Arc_3", "nonNE2": "Arc_2",
 }
+# Colors matched to the user's reference figure (ref_hex).
 ANCHOR_COLORS = {
     "nonNE1": "tab:red", "Generalist_nonNE": "lightcoral", "NE1": "tab:purple",
     "NE2": "darkred", "Secretory": "tab:green", "nonNE2": "orange",
@@ -65,7 +67,7 @@ def load_archetype_indices(nodes):
 
 
 def hexagon_anchor_xy():
-    angles = {name: np.pi / 2 - i * (2 * np.pi / 6) for i, name in enumerate(ANCHOR_ORDER)}
+    angles = {name: np.pi / 2 + np.pi / 6 - i * (2 * np.pi / 6) for i, name in enumerate(ANCHOR_ORDER)}
     return {name: (np.cos(a), np.sin(a)) for name, a in angles.items()}
 
 
@@ -190,7 +192,7 @@ def main():
     axins.set_title("Zoomed inset -- same data, magnified\n(individual walks only legible at this scale)", fontsize=10)
 
     fig.suptitle(
-        "Hamming-distance RadViz projection onto 6 archetype anchors\n"
+        f"Hamming-distance RadViz projection onto 6 archetype anchors (softmax T={T:g})\n"
         f"Simulated RORA_RORB knockdown vs. unperturbed walk trajectories (GEMM-native {START_ARCHETYPE}/NE1 start)",
         fontsize=12, y=0.99,
     )
@@ -209,17 +211,17 @@ def main():
 
     note = (
         f"Note: starts are GEMM's own {START_ARCHETYPE} basin -- {len(member_idxs)} individually-discovered attractor member states, each seeding its own\n"
-        "set of long walks; all pooled here (unlike the organoid-seeded companion plot, which starts from one representative state). Every labeled\n"
-        "point (6 hexagon vertices + the 2 circles) is one of bobaT's 8 fitted archetype average states, projected by Hamming distance to the 6 vertex\n"
-        "archetypes (softmax, T=10) -- not the continuous archetype-signature scores used in the original reference figure."
+        f"set of long walks; all pooled here (unlike the organoid-seeded companion plot, which starts from one representative state). Every labeled\n"
+        f"point (6 hexagon vertices + the 2 circles) is one of bobaT's 8 fitted archetype average states, projected by Hamming distance to the 6 vertex\n"
+        f"archetypes (softmax, T={T:g}) -- not the continuous archetype-signature scores used in the original reference figure."
     )
     fig.text(0.5, 0.06, note, ha="center", va="center", fontsize=7.5,
               bbox=dict(boxstyle="round", facecolor="white", edgecolor="0.7"))
 
     for ext in ["png", "pdf"]:
-        fig.savefig(f"{OUT_DIR}/radviz_archetype_projection_gemm_{START_ARCHETYPE}.{ext}", dpi=150)
+        fig.savefig(f"{OUT_DIR}/radviz_archetype_projection_gemm_{START_ARCHETYPE}{OUT_SUFFIX}.{ext}", dpi=150)
     plt.close(fig)
-    print(f"Wrote {OUT_DIR}/radviz_archetype_projection_gemm_{START_ARCHETYPE}.{{png,pdf}}")
+    print(f"Wrote {OUT_DIR}/radviz_archetype_projection_gemm_{START_ARCHETYPE}{OUT_SUFFIX}.{{png,pdf}}")
 
 
 if __name__ == "__main__":

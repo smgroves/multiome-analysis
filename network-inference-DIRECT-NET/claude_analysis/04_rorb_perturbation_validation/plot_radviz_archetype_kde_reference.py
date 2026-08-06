@@ -55,17 +55,19 @@ ANCHOR_ARC_MAP = {
     "nonNE1": "Arc_4", "Generalist_nonNE": "Generalist_nonNE", "NE1": "Arc_5",
     "NE2": "Arc_6", "Secretory": "Arc_3", "nonNE2": "Arc_2",
 }
+# Colors matched to the user's reference figure (ref_hex).
 ANCHOR_COLORS = {
     "nonNE1": "tab:red", "Generalist_nonNE": "lightcoral", "NE1": "tab:purple",
     "NE2": "darkred", "Secretory": "tab:green", "nonNE2": "orange",
 }
 EXTRA_ARCHETYPE_MARKERS = [("Generalist_NE", "0.4"), ("Arc_1", "tab:blue")]
 
-# organoid's own predicted.id -> KDE contour color (qualitative palette, no purple/grey
-# reservation needed here since no walk paths are drawn on this plot).
+# organoid's own predicted.id -> KDE contour color, matched to ANCHOR_COLORS/
+# EXTRA_ARCHETYPE_MARKERS above (i.e. ref_hex) wherever a same-named archetype exists.
+# Stress has no ref_hex counterpart, so it keeps a distinct neutral color.
 PREDICTED_ID_COLORS = {
-    "Generalist NE": "tab:orange", "Intermediate": "tab:blue", "Neuroendocrine1": "tab:green",
-    "Neuroendocrine2": "tab:brown", "nonNE1": "tab:red", "Generalist nonNE": "tab:pink",
+    "Generalist NE": "0.4", "Intermediate": "tab:blue", "Neuroendocrine1": "tab:purple",
+    "Neuroendocrine2": "darkred", "nonNE1": "tab:red", "Generalist nonNE": "lightcoral",
     "Stress": "tab:gray",
 }
 
@@ -76,7 +78,7 @@ def load_archetype_indices(nodes):
 
 
 def hexagon_anchor_xy():
-    angles = {name: np.pi / 2 - i * (2 * np.pi / 6) for i, name in enumerate(ANCHOR_ORDER)}
+    angles = {name: np.pi / 2 + np.pi / 6 - i * (2 * np.pi / 6) for i, name in enumerate(ANCHOR_ORDER)}
     return {name: (np.cos(a), np.sin(a)) for name, a in angles.items()}
 
 
@@ -227,10 +229,9 @@ def main():
                markersize=8, label=f"organoid \"{pid}\" (n={len(sub)}, too few for KDE -- shown as points)")
         for pid, sub in scatter_groups.items()
     ] + [
-        Line2D([0], [0], marker="o", color="w", markerfacecolor="0.4", markeredgecolor="black", markersize=9,
-               label="GEMM Generalist_NE (archetype average state)"),
-        Line2D([0], [0], marker="o", color="w", markerfacecolor="tab:blue", markeredgecolor="black", markersize=9,
-               label="GEMM Intermediate/Arc_1 (archetype average state)"),
+        Line2D([0], [0], marker="o", color="w", markerfacecolor=color, markeredgecolor="black", markersize=9,
+               label=f"GEMM {arc_name} (archetype average state, color-matched to organoid \"{'Generalist NE' if arc_name == 'Generalist_NE' else 'Intermediate'}\")")
+        for arc_name, color in EXTRA_ARCHETYPE_MARKERS
     ]
     fig.legend(handles=legend_elements, loc="upper center", bbox_to_anchor=(0.5, 0.30), fontsize=7.5, ncol=3, frameon=True)
 
@@ -238,8 +239,9 @@ def main():
         "Note: each contour is the smallest region containing 50% of that organoid predicted.id group's estimated probability mass (2D Gaussian KDE\n"
         "over the group's Hamming-distance projection), evaluated on a shared grid so contours are directly comparable across groups. Groups with\n"
         f"<{MIN_GROUP_N} cells are shown as raw points instead, since a KDE from that few cells would be unreliable. Hexagon vertices + the 2 circles\n"
-        "are GEMM's own fitted archetype average states (see plot_radviz_archetype_projection.py for the full method and the confirmed\n"
-        "Generalist_NE centering divergence from the original reference figure)."
+        "are GEMM's own fitted archetype average states, colored to match their same-named organoid group where one exists (Secretory and nonNE2\n"
+        "have no organoid predicted.id counterpart here, so keep distinct colors). See plot_radviz_archetype_projection.py for the full projection\n"
+        "method and the confirmed Generalist_NE centering divergence from the original reference figure."
     )
     fig.text(0.5, 0.09, note, ha="center", va="center", fontsize=7.5,
               bbox=dict(boxstyle="round", facecolor="white", edgecolor="0.7"))
