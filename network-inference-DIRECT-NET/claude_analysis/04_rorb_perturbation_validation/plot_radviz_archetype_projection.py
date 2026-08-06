@@ -1,13 +1,23 @@
-"""RadViz-style projection of cells/states onto a hexagon of 6 archetype anchors
-(nonNE1/Arc_4, Generalist_nonNE, NE1/Arc_5, NE2/Arc_6, Secretory/Arc_3, nonNE2/Arc_2),
-matching the layout of the user's reference figure -- but positioned by HAMMING DISTANCE
-to each archetype's average discrete state (bobaT's own representation), not whatever
-continuous archetype-signature score the original figure used.
+"""RadViz-style projection of simulated walk trajectories onto a hexagon of 6 archetype
+anchors (nonNE1/Arc_4, Generalist_nonNE, NE1/Arc_5, NE2/Arc_6, Secretory/Arc_3,
+nonNE2/Arc_2), matching the layout of the user's reference figure -- but positioned by
+HAMMING DISTANCE to each archetype's average discrete state (bobaT's own representation),
+not whatever continuous archetype-signature score the original figure used.
 
-Method: for a state/cell's binarized 53-gene vector, compute Hamming distance to each of
-the 6 anchor archetypes, convert to softmax weights over -distance/T (closer archetypes
-get more weight), then position = weighted sum of the 6 anchors' hexagon coordinates
-(standard barycentric/RadViz combination).
+Method: for a state's binarized 53-gene vector, compute Hamming distance to each of the 6
+anchor archetypes, convert to softmax weights over -distance/T (closer archetypes get more
+weight), then position = weighted sum of the 6 anchors' hexagon coordinates (standard
+barycentric/RadViz combination).
+
+Every labeled point in this figure -- the 6 hexagon vertices AND the 2 circles inside
+(Generalist_NE, Intermediate/Arc_1) -- is one of bobaT's 8 fitted archetype average states
+(`6667/attractors/average_states.txt`), projected by this same Hamming-distance method.
+The hexagon vertices are 6 of those 8 states, chosen (per the reference figure's layout) to
+define the hexagon's corners; Generalist_NE and Arc_1/Intermediate are the remaining 2 of
+the 8 and are plotted as circles rather than corners, using the identical projection -- the
+circle marker is deliberately the same shape as the vertex markers to signal they're the
+same *kind* of reference point (a fitted archetype average state), just not used to anchor
+the hexagon's geometry.
 
 KNOWN DIVERGENCE FROM THE REFERENCE FIGURE (confirmed, not a bug): this method pulls
 Generalist_NE's own archetype average state toward the NE1/NE2 edge (it really is
@@ -18,9 +28,9 @@ which is a different construction than literal Hamming closeness. Kept as-is per
 decision -- an honest, different, and itself informative view of the discrete state space,
 not force-fit to visually match the reference.
 
-Plots organoid_shGFP's real cells (colored by their own predicted.id) as background,
-overlaid with the mean walk trajectory (organoid 'Neuroendocrine1' start, knockdown vs.
-unperturbed) as a time-colored path.
+Plots simulated walk trajectories only (organoid 'Neuroendocrine1' start, knockdown vs.
+unperturbed): all 100 individual walks per condition (thin, translucent) plus the bold
+mean path (time-colored, light->dark = early->late).
 
 Run in bobaT_env_py3.13:
     /opt/anaconda3/envs/bobaT_env_py3.13/bin/python claude_analysis/04_rorb_perturbation_validation/plot_radviz_archetype_projection.py
@@ -60,14 +70,9 @@ ANCHOR_COLORS = {
     "nonNE1": "tab:red", "Generalist_nonNE": "lightcoral", "NE1": "tab:purple",
     "NE2": "darkred", "Secretory": "tab:green", "nonNE2": "orange",
 }
-# organoid's own predicted.id -> plotting color. Deliberately AVOIDS purple/grey/black --
-# those are reserved for the knockdown/unperturbed path colormaps (Purples/Greys), so a
-# real-cell color can't be mistaken for a path color.
-PREDICTED_ID_COLORS = {
-    "Generalist NE": "gold", "Intermediate": "tab:blue", "Neuroendocrine1": "tab:green",
-    "Neuroendocrine2": "tab:brown", "nonNE1": "tab:red", "Generalist nonNE": "lightcoral",
-    "Stress": "tab:orange",
-}
+# The 2 of bobaT's 8 archetype average states not used as hexagon vertices (states #7-8,
+# using the ordering: Arc_2..Arc_6 + Generalist_nonNE = the 6 vertices = states #1-6).
+EXTRA_ARCHETYPE_MARKERS = [("Generalist_NE", "0.4"), ("Arc_1", "tab:blue")]
 
 
 def load_archetype_indices(nodes):
@@ -102,58 +107,34 @@ def main():
     archetype_idx = load_archetype_indices(nodes)
     anchor_xy = hexagon_anchor_xy()
 
-    # --- Real organoid_shGFP cells, binarized per-cell, projected ---
-    data = bb.load.load_data(
-        f"{DIR_PREFIX}/data/organoid/adata_organoid_shGFP_v3_RORA_RORB_ave.csv", nodes,
-        norm=0.3, delimiter=",", log1p=False, transpose=True, sample_order=False, fillna=0,
-    )
-    clusters = pd.read_csv(f"{DIR_PREFIX}/data/organoid/organoid_clusters.csv", index_col=0).reindex(data.index)
-
-    binaries = bb.utils.binarize_data_df(data, nodes, threshold=0.5)
-    cell_idx = binaries.apply(lambda row: int("".join(str(int(v)) for v in row), 2), axis=1)
-
-    print(f"Projecting {len(cell_idx)} real organoid_shGFP cells...")
-    real_xy = np.array([project(idx, archetype_idx, anchor_xy) for idx in cell_idx])
-    real_df = pd.DataFrame(real_xy, columns=["x", "y"], index=data.index)
-    real_df["predicted_id"] = clusters["predicted.id"].values
-
     # --- Simulated walk trajectories: organoid Neuroendocrine1 start ---
     walks_kd = parse_walk_file(f"{WALK_PATH}/{NE1_START_IDX}/results_RORA_RORB_kd.csv")
     walks_unpert = parse_walk_file(f"{WALK_PATH}/{NE1_START_IDX}/results.csv")
 
-    def mean_path(walks):
-        steps = walks[0][::STEP_STRIDE]
-        n_steps = len(steps)
-        xy_sum = np.zeros((n_steps, 2))
-        for w in walks:
-            substates = w[::STEP_STRIDE]
-            for i, s in enumerate(substates):
-                xy_sum[i] += project(s, archetype_idx, anchor_xy)
-        return xy_sum / len(walks)
+    def project_all(walks):
+        return [np.array([project(s, archetype_idx, anchor_xy) for s in w[::STEP_STRIDE]]) for w in walks]
 
-    print("Projecting simulated walk trajectories (mean path)...")
-    kd_path = mean_path(walks_kd)
-    unpert_path = mean_path(walks_unpert)
+    def mean_path(paths):
+        return np.mean(np.stack(paths, axis=0), axis=0)
 
-    # Zoom region for the inset: bounding box of the real cells + both paths, padded --
-    # computed from the ACTUAL data, not eyeballed, so the zoom box is honest about what
-    # it covers relative to the full hexagon.
-    all_x = np.concatenate([real_df["x"].values, kd_path[:, 0], unpert_path[:, 0]])
-    all_y = np.concatenate([real_df["y"].values, kd_path[:, 1], unpert_path[:, 1]])
+    print(f"Projecting {len(walks_kd)} knockdown + {len(walks_unpert)} unperturbed walks...")
+    kd_paths = project_all(walks_kd)
+    unpert_paths = project_all(walks_unpert)
+    kd_mean = mean_path(kd_paths)
+    unpert_mean = mean_path(unpert_paths)
+
+    # Zoom region for the inset: bounding box of all individual walk paths (both conditions),
+    # padded -- computed from the ACTUAL data, not eyeballed, so the zoom box is honest about
+    # what it covers relative to the full hexagon.
+    all_x = np.concatenate([p[:, 0] for p in kd_paths + unpert_paths])
+    all_y = np.concatenate([p[:, 1] for p in kd_paths + unpert_paths])
     pad_x = 0.08 * (all_x.max() - all_x.min())
     pad_y = 0.08 * (all_y.max() - all_y.min())
     zoom_xlim = (all_x.min() - pad_x, all_x.max() + pad_x)
     zoom_ylim = (all_y.min() - pad_y, all_y.max() + pad_y)
     print(f"Zoom region: x={zoom_xlim}, y={zoom_ylim}")
 
-    def draw_content(target_ax, point_size=4, path_lw=2.5, marker_s=80, marker_s_end=120):
-        for pid, color in PREDICTED_ID_COLORS.items():
-            sub = real_df[real_df["predicted_id"] == pid]
-            if len(sub) == 0:
-                continue
-            target_ax.scatter(sub["x"], sub["y"], s=point_size, alpha=0.35, color=color,
-                               label=f"organoid cells: {pid}", zorder=1)
-
+    def draw_content(target_ax, path_lw=2.5, spaghetti_lw=0.6, marker_s=80, marker_s_end=120, archetype_s=140):
         hexagon_pts = [anchor_xy[name] for name in ANCHOR_ORDER] + [anchor_xy[ANCHOR_ORDER[0]]]
         hx, hy = zip(*hexagon_pts)
         target_ax.plot(hx, hy, color="black", linewidth=1.2, zorder=2)
@@ -161,11 +142,18 @@ def main():
             x, y = anchor_xy[name]
             target_ax.scatter([x], [y], s=200, color=ANCHOR_COLORS[name], edgecolor="black", zorder=4)
 
-        for arc_name, color in [("Generalist_NE", "0.4"), ("Arc_1", "tab:blue")]:
+        for arc_name, color in EXTRA_ARCHETYPE_MARKERS:
             x, y = project(archetype_idx[arc_name], archetype_idx, anchor_xy)
-            target_ax.scatter([x], [y], s=140, color=color, edgecolor="black", marker="*", zorder=5)
+            target_ax.scatter([x], [y], s=archetype_s, color=color, edgecolor="black", marker="o", zorder=5)
 
-        for path, cmap in [(kd_path, plt.cm.Purples), (unpert_path, plt.cm.Greys)]:
+        # Individual walks: thin, translucent spaghetti showing the full spread.
+        for p in unpert_paths:
+            target_ax.plot(p[:, 0], p[:, 1], color="0.5", linewidth=spaghetti_lw, alpha=0.08, zorder=3)
+        for p in kd_paths:
+            target_ax.plot(p[:, 0], p[:, 1], color="tab:purple", linewidth=spaghetti_lw, alpha=0.08, zorder=3)
+
+        # Bold mean path per condition, time-colored light->dark = early->late.
+        for path, cmap in [(kd_mean, plt.cm.Purples), (unpert_mean, plt.cm.Greys)]:
             n = len(path)
             colors = cmap(np.linspace(0.3, 1.0, n))
             for i in range(n - 1):
@@ -188,7 +176,7 @@ def main():
     for name in ANCHOR_ORDER:
         x, y = anchor_xy[name]
         ax.text(x * 1.28, y * 1.28, name, fontsize=10, ha="center", va="center", fontweight="bold")
-    for arc_name, color in [("Generalist_NE", "0.4"), ("Arc_1", "tab:blue")]:
+    for arc_name, color in EXTRA_ARCHETYPE_MARKERS:
         x, y = project(archetype_idx[arc_name], archetype_idx, anchor_xy)
         label = "Intermediate (Arc_1)" if arc_name == "Arc_1" else arc_name
         ax.text(x, y - 0.06, label, fontsize=8.5, ha="center", va="top", fontweight="bold", color=color)
@@ -205,7 +193,7 @@ def main():
     ax.set_ylim(-1.55, 1.65)
     ax.set_title("Full projection (true scale)\ndashed box = region magnified at right", fontsize=10)
 
-    draw_content(axins, point_size=10, path_lw=3.5, marker_s=140, marker_s_end=200)
+    draw_content(axins, path_lw=3.5, spaghetti_lw=1.0, marker_s=140, marker_s_end=200, archetype_s=220)
     axins.set_xlim(*zoom_xlim)
     axins.set_ylim(*zoom_ylim)
     axins.set_xticks([])
@@ -213,26 +201,31 @@ def main():
     for spine in axins.spines.values():
         spine.set_edgecolor("black")
         spine.set_linewidth(1.5)
-    axins.set_title("Zoomed inset -- same data, magnified\n(paths/cells only legible at this scale)", fontsize=10)
+    axins.set_title("Zoomed inset -- same data, magnified\n(individual walks only legible at this scale)", fontsize=10)
 
     fig.suptitle(
         "Hamming-distance RadViz projection onto 6 archetype anchors\n"
-        "organoid_shGFP real cells (background) + simulated RORA_RORB knockdown walk trajectory (overlay)",
+        "Simulated RORA_RORB knockdown vs. unperturbed walk trajectories (organoid 'Neuroendocrine1' start)",
         fontsize=12, y=0.99,
     )
 
     legend_elements = [
-        Line2D([0], [0], color="tab:purple", lw=2.5, label="organoid 'Neuroendocrine1' start, RORA_RORB knockdown (light->dark = early->late)"),
-        Line2D([0], [0], color="0.5", lw=2.5, label="organoid 'Neuroendocrine1' start, unperturbed (light->dark = early->late)"),
+        Line2D([0], [0], color="tab:purple", lw=2.5, label="RORA_RORB knockdown: mean path (light->dark = early->late)"),
+        Line2D([0], [0], color="0.5", lw=2.5, label="Unperturbed: mean path (light->dark = early->late)"),
+        Line2D([0], [0], color="tab:purple", lw=1.0, alpha=0.4, label="RORA_RORB knockdown: 100 individual walks"),
+        Line2D([0], [0], color="0.5", lw=1.0, alpha=0.4, label="Unperturbed: 100 individual walks"),
         Line2D([0], [0], marker="o", color="w", markerfacecolor="grey", markeredgecolor="black", markersize=8, label="path start"),
         Line2D([0], [0], marker="s", color="w", markerfacecolor="grey", markeredgecolor="black", markersize=8, label="path end (step 4000)"),
+        Line2D([0], [0], marker="o", color="w", markerfacecolor="0.4", markeredgecolor="black", markersize=9, label="Generalist_NE (archetype average state, not a hexagon vertex)"),
+        Line2D([0], [0], marker="o", color="w", markerfacecolor="tab:blue", markeredgecolor="black", markersize=9, label="Intermediate/Arc_1 (archetype average state, not a hexagon vertex)"),
     ]
-    fig.legend(handles=legend_elements, loc="upper center", bbox_to_anchor=(0.5, 0.145), fontsize=8.5, ncol=2, frameon=True)
+    fig.legend(handles=legend_elements, loc="upper center", bbox_to_anchor=(0.5, 0.145), fontsize=8, ncol=2, frameon=True)
 
     note = (
-        "Note: this projection uses Hamming distance to each archetype's discrete Boolean average state (softmax, T=10), not the continuous\n"
-        "archetype-signature scores used in the original reference figure. Confirmed divergence: Generalist_NE's own state projects toward the\n"
-        "NE1/NE2 edge here (Hamming-close to both), not to the center as in the reference figure -- shown honestly via the grey star in both panels."
+        "Note: every labeled point (6 hexagon vertices + the 2 circles) is one of bobaT's 8 fitted archetype average states, projected by Hamming\n"
+        "distance to the 6 vertex archetypes (softmax, T=10) -- not the continuous archetype-signature scores used in the original reference figure.\n"
+        "Confirmed divergence: Generalist_NE's own state projects toward the NE1/NE2 edge here (Hamming-close to both), not to the center as in the\n"
+        "reference figure -- shown honestly via its own circle marker rather than forced to the center."
     )
     fig.text(0.5, 0.04, note, ha="center", va="center", fontsize=7.5,
               bbox=dict(boxstyle="round", facecolor="white", edgecolor="0.7"))
