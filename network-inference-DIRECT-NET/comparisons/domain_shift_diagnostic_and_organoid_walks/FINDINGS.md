@@ -670,3 +670,46 @@ Outputs: `organoid_seeded_walk_basin_occupancy.csv`, `walk_archetype_distance_sh
 `walk_temporal_ordering.csv`, `walk_temporal_distance_Neuroendocrine1_{kd,unperturbed}.png`
 (simulation), `organoid_rorb_archetype_shift.csv`,
 `organoid_predicted_id_proportions_by_condition.csv` (real data).
+
+**RadViz-style 2D projection** (`plot_radviz_archetype_projection.py`,
+`plot_radviz_archetype_kde_reference.py`): a hexagonal Hamming-distance projection onto 6
+of bobaT's 8 fitted archetype average states (vertices: `Arc_2/3/4/5/6` + `Generalist_
+nonNE`; `Generalist_NE` and `Arc_1`/Intermediate plotted as circles inside, not vertices,
+since they weren't chosen to anchor the hexagon). Two companion plots, deliberately kept
+separate so no single plot mixes "which condition" coloring with "which archetype"
+coloring:
+- `radviz_archetype_projection_Neuroendocrine1.png` — simulation only (100 individual
+  walks + mean path, knockdown vs. unperturbed, organoid `Neuroendocrine1` start); no real
+  cells plotted, so the only color-coded distinction is knockdown (purple) vs. unperturbed
+  (grey).
+- `radviz_archetype_kde_reference.png` — real organoid_shGFP cells only (no walks),
+  summarized as a 50%-highest-density-region contour per organoid `predicted.id` group
+  (`Generalist NE` n=6670, `Neuroendocrine1` n=1748, `Intermediate` n=423, `Neuroendocrine2`
+  n=28; `Generalist nonNE` n=16, `Stress` n=8, and `nonNE1` n=1 are too few for a KDE and
+  are shown as raw points instead), against the same fixed GEMM anchors.
+
+**Two notable divergences, both consistent with (not contradicting) findings already
+established above, not artifacts of this specific plot:**
+1. Organoid's own `Intermediate`-labeled cells project *away* from GEMM's own
+   `Arc_1`/Intermediate marker, and the NE-labeled groups (`Generalist NE`,
+   `Neuroendocrine1`, `Neuroendocrine2`) cluster together off to the `nonNE1`/`Generalist_
+   nonNE` side of the hexagon rather than near the `NE1`/`NE2` vertices. This is the same
+   genuine cross-context rewiring already established in §2/§3 (organoid's own regulatory
+   relationships don't project onto GEMM's specific fitted axes the way GEMM's own data
+   does) — expected, given the whole premise of this investigation, not a new problem.
+2. The simulated mean walk paths look visibly smoother/cleaner than the real-cell KDE
+   contours' shape. This is partly an artifact of what's being averaged, not evidence the
+   walk is "more real": the mean path is an average of 100 stochastic replicates that all
+   share one starting state and one fitted rule set (inherently low-variance — see how much
+   rougher the underlying 100 individual walks look in `radviz_archetype_projection_
+   Neuroendocrine1.png` before averaging), whereas the KDE contour is a density estimate
+   over thousands of genuinely heterogeneous real single cells with real biological and
+   technical noise. The two are not an apples-to-apples smoothness comparison; only the
+   *position* relative to the fixed GEMM anchors is directly comparable between them,
+   which is why the two plots share anchor geometry but were deliberately not overlaid into
+   one.
+- organoid_shGFP is the untreated control condition (no RORB knockdown), so nonNE
+  representation being almost absent here (`Generalist nonNE` n=16, `nonNE1` n=1) is
+  expected, not missing data — the dose-like shift toward nonNE/Intermediate only shows up
+  under `shRORB1`/`shRORB2` (per the (C) table above: `Generalist NE` 75%→67%→64%,
+  `Intermediate` 4.8%→14.4%→29.3%).

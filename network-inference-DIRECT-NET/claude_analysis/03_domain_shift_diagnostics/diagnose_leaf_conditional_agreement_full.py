@@ -34,7 +34,7 @@ NETWORK_PATH = (
     "networks/feature_selection/DIRECT-NET_network_2020db_0.1/"
     "combined_DIRECT-NET_network_2020db_0.1_Lasso_wo_sinks_RORA_RORB_combined.csv"
 )
-OUT_DIR = f"{DIR_PREFIX}/comparisons/domain_shift_diagnostic"
+OUT_DIR = f"{DIR_PREFIX}/comparisons/domain_shift_diagnostic_and_organoid_walks"
 MIN_CELLS_PER_LEAF = 10
 RESIDUAL_THRESHOLD = 0.15
 

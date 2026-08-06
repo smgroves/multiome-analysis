@@ -5,7 +5,7 @@ from the investigation into why shGFP organoid external validation (run `6667`) 
 as good as expected for a null/control condition — see
 `/Users/xpz5km/.claude/plans/it-is-looking-like-elegant-patterson.md` for the full
 narrative and `../comparisons/6667_vs_6668_norm_sweep/` /
-`../comparisons/domain_shift_diagnostic/FINDINGS.md` for the actual results referenced
+`../comparisons/domain_shift_diagnostic_and_organoid_walks/FINDINGS.md` for the actual results referenced
 below. Covers what's implemented today and what's designed-but-deferred; each deferred
 item is written as a full spec so the reasoning and the eventual code stay in sync.
 
@@ -170,7 +170,7 @@ pre-fit QC step, flagging genes for extra scrutiny rather than blocking the fit.
 ## 6. Domain-shift interpretation
 
 Low external-validation R² isn't automatically a rule-fitting problem — see
-`../comparisons/domain_shift_diagnostic/FINDINGS.md` for the full analysis (9 sections,
+`../comparisons/domain_shift_diagnostic_and_organoid_walks/FINDINGS.md` for the full analysis (9 sections,
 summarized here). Checked across all 33 of 6667's scored external samples (allografts,
 human tumors, organoid variants, mets_compiled), not just organoid:
 
@@ -249,7 +249,7 @@ regenerated under the fix.
 Before trusting a fitted rule set's predictions on a genuinely new dataset (a new
 cell-culture system, a new species, a new experimental condition), run these checks in
 order — cheapest/most diagnostic first. All are generalizations of scripts already built
-and run for organoid_shGFP/mets_compiled in `../comparisons/domain_shift_diagnostic/`
+and run for organoid_shGFP/mets_compiled in `../comparisons/domain_shift_diagnostic_and_organoid_walks/`
 (reusable, just point them at the new dataset).
 
 1. **Diversity ratio** (`diagnose_sample_diversity.py`, §6/§7's baseline check): compute
@@ -317,7 +317,7 @@ gives a way to say which.
    against sample metadata (culture vs. tissue, tumor subtype, technical depth) the way §3
    and §8 did for specific cases.
 4. **Done, at full scale (53 genes x 33 external samples)**: see
-   `../comparisons/domain_shift_diagnostic/FINDINGS.md` §10. Headline result: per-sample mean
+   `../comparisons/domain_shift_diagnostic_and_organoid_walks/FINDINGS.md` §10. Headline result: per-sample mean
    transferability correlates with that sample's mean R² at **r=0.96** — the strongest
    predictor found across this entire investigation, as expected since it directly
    measures rule-holds-in-this-sample with the composition confound removed by

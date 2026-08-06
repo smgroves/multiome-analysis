@@ -17,7 +17,7 @@ import pandas as pd
 from scipy.stats import mannwhitneyu
 
 DIR_PREFIX = "/Users/xpz5km/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET"
-OUT_DIR = f"{DIR_PREFIX}/comparisons/domain_shift_diagnostic"
+OUT_DIR = f"{DIR_PREFIX}/comparisons/domain_shift_diagnostic_and_organoid_walks"
 
 NE_SCORE_COLS = ["prediction.score.Generalist.NE", "NE1_score1", "NE2_score1"]
 INTERMEDIATE_SCORE_COLS = ["prediction.score.Intermediate", "Intermediate_score1"]

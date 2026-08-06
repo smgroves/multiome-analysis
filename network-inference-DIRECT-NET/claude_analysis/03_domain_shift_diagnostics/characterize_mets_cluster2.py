@@ -22,7 +22,7 @@ import pandas as pd
 from scipy.stats import mannwhitneyu
 
 DIR_PREFIX = "/Users/xpz5km/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET"
-OUT_DIR = f"{DIR_PREFIX}/comparisons/domain_shift_diagnostic"
+OUT_DIR = f"{DIR_PREFIX}/comparisons/domain_shift_diagnostic_and_organoid_walks"
 CLUSTER_OF_INTEREST = 2
 
 WORST_GENES = ["FOXO3", "RORA_RORB", "GRHL2", "ETS1", "NCAM1", "TBX15", "KMT2A", "ICAM1", "NFKB1", "SMAD3"]
