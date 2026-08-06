@@ -1,0 +1,9 @@
+organoid_start,condition,mean_step_closest_to_Arc1,mean_step_closest_to_nonNE,frac_walks_Arc1_before_nonNE,frac_walks_simultaneous,wilcoxon_p
+Neuroendocrine1,unperturbed,1207.4,2590.5,0.79,0.0,4.160729463106058e-11
+Neuroendocrine1,RORA_RORB_kd,876.0,2733.7,0.89,0.0,2.058425329373959e-14
+Generalist NE,unperturbed,1816.8,2186.4,0.57,0.0,0.05679697628831552
+Generalist NE,RORA_RORB_kd,1447.7,2543.7,0.74,0.0,8.711095639909774e-09
+Intermediate,unperturbed,1822.8,1175.5,0.44,0.0,0.00323000914229927
+Intermediate,RORA_RORB_kd,1936.9,980.2,0.36,0.0,1.1528839905169397e-06
+Neuroendocrine2,unperturbed,1125.3,1648.7,0.68,0.0,0.025085178131872853
+Neuroendocrine2,RORA_RORB_kd,690.3,1329.6,0.81,0.0,5.624680971814903e-05

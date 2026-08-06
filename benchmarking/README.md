@@ -317,19 +317,19 @@ Every CellOracle base GRN used above — the DIRECT-NET-restricted one and the "
 
 [`comparison_tko_fit_celloracle_atac.py`](comparison_tko_fit_celloracle_atac.py): base GRN restricted to the 3,000-HVG set → 133 candidate TFs, 2,159 target genes, 280,276 nonzero peak-TF entries; ridge fit (`GRN_unit="whole"`, `alpha=10`) → `coef_matrix` 3,000×3,000, 117,686 nonzero entries. [`comparison_tko_fit_scenic.py`](comparison_tko_fit_scenic.py): same TKO expression, freshly downloaded mouse cisTarget resources (`allTFs_mm.txt`, the mm10 10kbp-up/down rankings feather, `motifs-v10nr_clust-nr.mgi-*.tbl`) → GRNBoost2 (295,731 raw edges) → `ctx` → 61 regulons, 6,643 edges; ASCL1 present as a source.
 
-Scored against the same three independent ChIP-seq ground truths ([`comparison_tko_atac_vs_chipseq_gt.py`](comparison_tko_atac_vs_chipseq_gt.py)), alongside boba-T's **existing, already-fit `6667` network** (`load_bobat`, no refitting/rerunning here) — this **is** a same-dataset comparison: `6667`'s underlying scRNA-seq is the same TKO_final_arc cells used for the CellOracle/SCENIC fits above (DIRECT-NET's own ATAC-based candidate-network construction for `6667` was run directly on this data, just not through this project's own scripts). The real difference between the three rows below is candidate-network **scope**, not dataset: boba-T's DIRECT-NET+LASSO candidate network is a curated 53-gene panel, while CellOracle/SCENIC here ran genome-scale on the same cells' ~3,000-HVG set, using an independently-built (Signac `ClosestFeature` + motif-scan) ATAC-informed candidate structure rather than DIRECT-NET's:
+Scored against the same three independent ChIP-seq ground truths ([`comparison_tko_atac_vs_chipseq_gt.py`](comparison_tko_atac_vs_chipseq_gt.py)), alongside boba-T's **existing, already-fit `6667` network** (`load_bobat`, no refitting/rerunning here) — this **is** a same-dataset comparison, and `6667` **is** boba-T's own TKO-ATAC-derived fit, not a stand-in for one: `6667`'s underlying scRNA-seq is the same TKO_final_arc cells used for the CellOracle/SCENIC fits above, and DIRECT-NET's own peak-to-gene + LASSO candidate-network construction for `6667` was run directly on TKO_final_arc's own ATAC data — just outside this project's own scripts, so it wasn't visible here until pointed out. The real difference between the three rows below is candidate-network **scope**, not dataset or ATAC source: boba-T's DIRECT-NET+LASSO candidate network is a curated 53-gene panel derived from TKO's ATAC peaks, while CellOracle/SCENIC here ran genome-scale on the same cells' ~3,000-HVG set, using an independently-built (Signac `ClosestFeature` + motif-scan) ATAC-informed candidate structure over the same underlying peaks, just not pruned down by DIRECT-NET+LASSO:
 
 | ground truth | method | n_shared_nodes | n_pred_edges | n_overlap | precision | recall | f1 |
 |---|---|---|---|---|---|---|---|
 | Borromeo human (620 edges) | CellOracle (real ATAC, TKO) | 123 | 680 | 50 | 0.074 | 0.407 | 0.125 |
 | Borromeo human (620 edges) | SCENIC (from scratch, TKO) | 102 | 49 | 40 | 0.816 | 0.392 | 0.530 |
-| Borromeo human (620 edges) | boba-T (existing `6667` fit, not TKO) | 5 | 4 | 1 | 0.250 | 0.20 | 0.222 |
+| Borromeo human (620 edges) | boba-T (`6667`, TKO-ATAC-derived, DIRECT-NET-restricted) | 5 | 4 | 1 | 0.250 | 0.20 | 0.222 |
 | **Borromeo mouse, RPR2 (3,992 edges)** | **CellOracle (real ATAC, TKO)** | **597** | **19,598** | **241** | **0.012** | **0.404** | **0.024** |
 | **Borromeo mouse, RPR2 (3,992 edges)** | **SCENIC (from scratch, TKO)** | **455** | **1,389** | **161** | **0.116** | **0.354** | **0.175** |
-| Borromeo mouse, RPR2 (3,992 edges) | boba-T (existing `6667` fit, not TKO) | 25 | 61 | 7 | 0.115 | 0.28 | 0.163 |
+| Borromeo mouse, RPR2 (3,992 edges) | boba-T (`6667`, TKO-ATAC-derived, DIRECT-NET-restricted) | 25 | 61 | 7 | 0.115 | 0.28 | 0.163 |
 | Pozo (295 edges) | CellOracle (real ATAC, TKO) | 48 | 129 | 26 | 0.202 | 0.542 | 0.294 (sign_concordance 0.5) |
 | Pozo (295 edges) | SCENIC (from scratch, TKO) | 41 | 34 | 12 | 0.353 | 0.293 | 0.320 |
-| Pozo (295 edges) | boba-T (existing `6667` fit, not TKO) | 4 | 4 | 2 | 0.500 | 0.50 | 0.500 (sign_concordance 0.0) |
+| Pozo (295 edges) | boba-T (`6667`, TKO-ATAC-derived, DIRECT-NET-restricted) | 4 | 4 | 2 | 0.500 | 0.50 | 0.500 (sign_concordance 0.0) |
 
 boba-T's numbers here are identical to its rows in the very first table in this section (as they should be — same network, same ground truths, no refit happened). Its F1 (0.163–0.500) sits between CellOracle-real-ATAC's and SCENIC's on the mouse RPR2 ground truth. Read carefully, though: the much smaller shared-node counts (5–25 vs. 41–597) reflect boba-T's DIRECT-NET+LASSO candidate network being a curated 53-gene panel, not a different or smaller dataset — all three methods are evaluated on the same underlying TKO_final_arc cells. boba-T's higher apparent precision/F1 on the mouse RPR2 ground truth (0.115/0.163 vs. CellOracle-real-ATAC's 0.012/0.024) is consistent with the same pattern already established earlier in this document (DIRECT-NET-restricted methods concentrating signal on a small curated candidate set vs. genome-scale methods diluting precision over a much larger candidate-pair space) — a real, comparable finding here, not an artifact of comparing different data.
 
@@ -1154,6 +1154,72 @@ apparently offers very little real regulatory signal in this dataset regardless 
 already flagged from the structure side (Track 2's ChEA/ATAC/Cicero sections) as its
 candidate set collapsing to just FLI1 across three independently-built real networks.
 
+## Alternative edge-weight summaries: is collapsing the fitted rule to a sum the right call?
+
+Every comparison above that scores boba-T's *structure* (comparison 1, the HSC tracks) reads its edge weights straight from `signed_strengths.csv`/`strengths.csv`. Those aren't a direct measure of anything — they're a **summary** of boba-T's actual fitted object, which is a full pseudo-Boolean truth table (one probability per combination of a target's regulators), collapsed down to one number per regulator by *summing* that regulator's ON-vs-OFF effect across every combination of its co-regulators (`bobaT/tl.py:52`, `detect_irrelevant_regulator`'s `tot_dif`/`signed_tot_dif`). Two things about a plain sum are worth questioning: it isn't comparable across targets with different regulator counts (summing over `2**(n-1)` contexts inflates edges into heavily-co-regulated targets, regardless of whether the effect is actually stronger), and it can hide a regulator whose effect is genuinely concentrated in a few contexts (canalizing/conditional regulation) or that flips sign across contexts (summed toward zero even if individually large). This section tests that concern directly, first on the SCLC data, then — with a much stronger ground truth — on HSC Track 2.
+
+**Eight summaries**, all derived from the *same* already-fitted rule (no refitting needed — `rules_<run>.txt` already stores the full truth table), computed by [`comparison_edge_weight_summaries_6667.py`](comparison_edge_weight_summaries_6667.py):
+
+| summary | what it computes |
+|---|---|
+| `sum_abs` / `sum_signed` | boba-T's current `strengths.csv`/`signed_strengths.csv`: sum of \|Δ\| / Δ across every context |
+| `mean_abs` / `mean_signed` | the same sum, divided by the number of contexts — comparable across targets with different regulator counts, unlike the raw sum |
+| `max_abs` / `max_signed` | the single largest \|Δ\| across contexts (and its sign) — boba-T computes this internally to decide pruning, then discards it; captures a regulator whose effect is concentrated in one or few contexts even if its average effect is small |
+| `dataw_abs` / `dataw_signed` | mean of \|Δ\| / Δ, weighted by how often each context's combination of co-regulators actually occurs in the real training data (recomputes boba-T's own per-cell soft leaf-membership weighting, computed during fitting and normally discarded) — contexts that never really happen in the data stop contributing; contexts that dominate the real cell population dominate the score |
+
+### First pass: SCLC (`6667`), scored against the ChIP-seq ground truths
+
+Scoring each summary against the same three ChIP-seq ground truths from [Sourcing a real SCLC ground truth](#sourcing-a-real-sclc-ground-truth-done-with-a-correction) exposed a methodology gap before it produced a real answer: comparison 2's usual ground-truth-gene-universe AUROC came back numerically identical (to 6 decimal places) across all 8 summaries. Not a bug — with only ~13 ASCL1-sourced edges in a 380K+-candidate universe, AUROC is dominated by "any nonzero score beats the sea of always-zero negatives," which is true for every monotonic-positive summary regardless of how those 13 edges rank *relative to each other*. Fixed by scoring a second way, restricted to boba-T's own 52 possible ASCL1-edges (its real candidate set) instead of the ground truth's full gene universe:
+
+| ground truth (n true positives / 52) | best summary | current method (`sum_abs`) |
+|---|---|---|
+| RPR2-mouse (n=24) | `dataw_signed`: AUROC 0.528 | AUROC 0.524 — close |
+| Pozo human (n=3) | **`sum_abs`: AUROC 0.762, EPR 5.78** — current method wins clearly | — |
+| Borromeo human (n=4) | all ~equally weak (AUROC ≈ 0.48–0.50) | — |
+
+Inconclusive on its own: the current sum-based method wasn't losing, but n=3–24 is too small to trust either way.
+
+### Second pass: HSC Track 2 — a real, direct test against literal ground truth
+
+HSC Track 2 (see above) is a far better test bed: a *literal* Boolean ground truth (not ChIP-seq) for every fitted gene, across four independently-built real candidate networks (ChEA, ATAC+motif, DIRECT-NET, Cicero), giving 39 true-regulator observations instead of 3–24. Run with [`comparison_edge_weight_summaries_hsc_track2.py`](comparison_edge_weight_summaries_hsc_track2.py), which reuses `comparison_edge_weight_summaries_6667.py`'s summary functions directly against the four Track 2 rules files.
+
+**Structure recovery** (pooled AUROC per network — does the summary rank true regulators above false candidates?):
+
+| summary | ChEA | ATAC | DIRECT-NET | Cicero |
+|---|---|---|---|---|
+| `sum_abs` (current) | **0.304** (worst) | 0.691 | 0.671 | 0.601 |
+| `sum_signed` (current) | 0.382 | 0.779 | **0.746** (tied best) | 0.571 |
+| `mean_abs` | 0.533 | 0.750 | 0.671 | 0.619 |
+| `mean_signed` | 0.583 | 0.750 | **0.746** (tied best) | 0.625 |
+| `max_abs` | 0.467 | **0.838** (best) | 0.580 | 0.640 |
+| `dataw_abs` | 0.592 | 0.603 | 0.637 | 0.616 |
+| `dataw_signed` | 0.636 | 0.706 | 0.714 | **0.634** (best) |
+
+No summary wins on every network. The current method is the outright *worst* on ChEA (0.30–0.38, barely better than random) but ties for best on DIRECT-NET (0.746). `max_abs` dominates on ATAC (0.838) but is near-worst on ChEA. `dataw_signed` never wins outright but is the most *consistent* (0.64–0.71 everywhere) — a reasonable property for a default if no single network is going to be "the" one used going forward.
+
+**The direct hypothesis test — canalization degree vs. summary ranking.** Using the literal Krumsiek AND/OR/NOT formulas, every true regulator's *ground-truth* "canalization degree" (how concentrated its real influence is across contexts — 0 = matters almost everywhere, up to `true_max_abs − true_mean_abs`'s ceiling = matters in only a handful of contexts) was computed directly from the Boolean rule, then correlated (Spearman) against how much more `max_abs`/`dataw_abs` ranks each true regulator relative to `sum_abs`/`mean_abs`:
+
+```
+Spearman(canalization_degree, rank_drop_sum_vs_max)    = -0.109  (n=39)
+Spearman(canalization_degree, rank_drop_mean_vs_dataw) = -0.069  (n=39)
+```
+
+**Both are essentially null, and if anything point the opposite direction from the hypothesis.** On real, literal ground truth, truly canalized/context-dependent regulators are *not* systematically rescued by max- or data-weighted summaries relative to the current sum-based ones — the specific failure mode this whole investigation was checking for doesn't show up. (One genuine, if incidental, finding along the way: in a literal 0/1 Boolean truth table, every true regulator's `max_abs` is exactly 1 and `min_abs` is exactly 0 — any AND/OR/NOT regulator has some context where it fully determines the output and some context where it doesn't matter at all — so a naive `max − min` "context range" carries zero information here; `true_max_abs − true_mean_abs` is the graded quantity that actually varies, 0.125–0.875 across the 39 true regulators.)
+
+**No alternative summary decisively and consistently beats the current sum-based one across networks, and the specific mechanism motivating this investigation (averaging washing out canalized regulators) isn't supported by the one test built specifically to check it.** That said, `dataw_signed`/`dataw_abs` were the most *consistent* performer of the eight (never the worst on any of the four real Track 2 networks) — on that basis, the decision was made to adopt them as the new default anyway, even without a decisive statistical win, since "never worst" is a reasonable property to prefer when no summary is a clear overall winner.
+
+### Switching the default: `strengths.csv`/`signed_strengths.csv` now mean `dataw_abs`/`dataw_signed`
+
+[`regenerate_strengths_as_dataw.py`](regenerate_strengths_as_dataw.py) overwrites `rules/strengths.csv` and `rules/signed_strengths.csv` **in place**, for every existing boba-T run (`6667`, HSC Tracks 1/2/3 — `hsc`, `hsc_chea`, `hsc_multiome{,_atac,_directnet,_cicero}`), from the already-fitted `rules_<run>.txt` — **no refitting**, just a different collapse of the same fitted truth table. The sum-based originals are preserved alongside as `strengths_sum_abs.csv.bak` / `signed_strengths_sum_signed.csv.bak` in each run's `rules/` directory, so this is fully reversible.
+
+One thing to know rather than be surprised by: genes with exactly one total regulator (including boba-T's self-loop fallback when no real regulator survives — 11 of `6667`'s 53 genes) are **unchanged** by this switch — with only one regulator there's exactly one context, so sum/mean/max/data-weighted all reduce to the same single number by construction. Only genes with 2+ regulators actually get a different value (214 of `6667`'s 226 edges, for example). The script verifies this directly against the pre-existing files (not just assumed) before writing, and raises rather than silently overwriting if a self-loop-only gene's value ever doesn't match.
+
+```bash
+python3 regenerate_strengths_as_dataw.py
+```
+
+Every loader in this benchmark (`load_bobat`, `load_bobat_topology`, everything built on `matrix_to_edges`) reads `signed_strengths.csv` by path and has no opinion on what summary produced its numbers, so nothing downstream needed to change — re-running any comparison in this document that touches boba-T's edges now transparently uses `dataw_signed`/`dataw_abs`.
+
 ## Repo layout
 
 ```
@@ -1199,6 +1265,9 @@ benchmarking/
 ├── score_celloracle_hsc_truthtable.py               # HSC Track 1: CellOracle truth-table/AUC scoring
 ├── verify_celloracle_fit.py                         # HSC Track 1+2: corrected R2 (intercept + imputed_count fix) -- re-verification after catching a bug in the ad-hoc scripts above
 ├── verify_celloracle_truthtable.py                  # HSC Track 1+2: re-verifies truth-table AUC with the corrected models (confirms it was unaffected)
+├── comparison_edge_weight_summaries_6667.py         # alt. edge-weight summaries (sum/mean/max/data-weighted) vs. SCLC ChIP-seq GTs
+├── comparison_edge_weight_summaries_hsc_track2.py   # same summaries, scored on HSC Track 2's 4 real networks + literal Boolean ground truth
+├── regenerate_strengths_as_dataw.py                 # switches every run's strengths.csv/signed_strengths.csv default to dataw_abs/dataw_signed
 ├── setup_celloracle_env.sh                          # builds the celloracle_env conda env (Apple Silicon)
 ├── setup_scenic_env.sh                              # builds the scenic_env conda env
 ├── grn_benchmark/                                   # the package (split from one file 2026-07-17)

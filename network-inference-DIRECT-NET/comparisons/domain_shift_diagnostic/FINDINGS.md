@@ -82,7 +82,7 @@ genes only) sits distinctly closer to, or further from, any of 6667's 8 characte
 attractors (`6667/attractors/average_states.txt`: `Generalist_NE`/`Generalist_nonNE`/
 `Arc_1`-`Arc_6`) than the rest of mets_compiled does. It doesn't — cluster 2's and the
 rest's distances to every attractor are within ~0.15 of each other, both closest to `Arc_3`
-then `Generalist_NE`, in the same rank order. So this isn't a case of a genuinely novel
+(Secretory) then `Generalist_NE`, in the same rank order. So this isn't a case of a genuinely novel
 biological state that a correctly-generalizing Boolean network should still resolve to a
 known attractor (the claim BoBa-T makes about unseen clusters) — cluster 2 isn't
 "unseen" in that sense at all. It's the *same* underlying identity as the rest of the
@@ -475,6 +475,13 @@ genes, r=0.06-0.42). That result doesn't resolve the user's actual claim, which 
 toward Intermediate archetypes." Two independent checks, deliberately kept separate so
 they can agree or disagree informatively:
 
+**Terminology note**: the rest of this section uses the network's original `Arc_N`
+labels throughout the prose (as they appear in `6667/attractors/`), but the archetypes
+have confirmed biological names: `Arc_1`=**Intermediate**, `Arc_2`=**nonNE2**,
+`Arc_3`=**Secretory**, `Arc_4`=**nonNE1**, `Arc_5`=**NE1**, `Arc_6`=**NE2** (`Generalist_NE`/
+`Generalist_nonNE` keep their own names). The walk plots (`walk_axis_position_*.png`)
+label archetypes with these biological names directly.
+
 **(A) GEMM's own archetype-level perturbation data, re-examined.** `attractors_filtered.txt`
 (the basin set used for every perturbation/walk analysis on this network) has 5 usable
 basins: `Generalist_NE`, `Generalist_nonNE`, `Arc_3`, `Arc_5`, `Arc_6` (`Arc_1`/`2`/`4`,
@@ -525,15 +532,103 @@ state gives the same direction but a much smaller magnitude** (1.43%→0.21% `Ge
 consistent with that state simply starting farther from any GEMM basin to begin with (per
 the face-validity check).
 
-**Honest caveat**: none of the organoid-seeded walks land cleanly on a *specific* named
-alternative GEMM basin — occupancy mostly shifts into `"None"` (unclassified state-space
-region, e.g. `Neuroendocrine1`'s `None` share rises from 84.0% to 98.4%) rather than
-converging on `Generalist_nonNE`/`Arc_3` specifically. Consistent with §9's rewiring
-finding: **the destabilization *direction* transfers from GEMM to organoid's real states,
-but organoid's states don't correspond closely enough to any single GEMM-defined basin for
-the walk to converge cleanly onto a named alternative.** This is a more nuanced, but still
-genuinely positive, result than a clean "NE → Intermediate" attractor-to-attractor
-transition would be.
+**Caveat that motivated a follow-up**: none of the organoid-seeded walks land cleanly on a
+*specific* named alternative GEMM basin within the fixed radius — occupancy mostly shifts
+into `"None"` (unclassified state-space region, e.g. `Neuroendocrine1`'s `None` share rises
+from 84.0% to 98.4%) rather than converging on `Generalist_nonNE`/`Arc_3` specifically. That
+leaves open a real question: does "moving into None" mean the walk drifts *randomly* away
+from NE, or does it move measurably *toward* a specific archetype without quite reaching
+it (including the 3 archetypes excluded from the filtered basin set — `Arc_1`, ad-hoc
+-labeled "Intermediate" in one script, `Arc_2`, `Arc_4` — which still have a well-defined
+theoretical average state to measure distance to, per `6667/attractors/average_states.txt`,
+even though they were never used as basins).
+
+**Follow-up (`diagnose_walk_archetype_distance.py`): it moves toward a specific cluster,
+but not the one informally called "Intermediate."** For every walk (100 per condition),
+computed the mean Hamming distance across the whole trajectory to each of the network's
+8 archetype average states, and the minimum (closest-approach) distance reached; compared
+unperturbed vs. knockdown per archetype via Mann-Whitney U, Bonferroni-corrected across
+the 8 archetypes. Result, consistent across 3 of the 4 organoid starting states
+(`Neuroendocrine1`, `Generalist NE`, `Neuroendocrine2`):
+
+- **Significantly closer under knockdown** (both by mean distance across the walk and by
+  closest approach, p as low as 1e-13): `Generalist_nonNE`, `Arc_2`, `Arc_4`.
+- **Significantly farther under knockdown**: `Generalist_NE`, `Arc_5`, `Arc_6`, and —
+  notably — **`Arc_1` itself** (e.g. `Neuroendocrine1` start: distance to `Arc_1` goes
+  from 21.3 to 25.6, p=7e-11; `Generalist NE` start: 24.2 to 28.3, p=2e-12).
+- `Arc_3` shows no consistent signal (significant but tiny for one start, not significant
+  for others).
+- Starting from organoid's own `Intermediate`-labeled state, no archetype shows a
+  significant shift either direction — consistent with that population already sitting
+  wherever it's going to sit.
+
+**Resolved by placing every archetype on one shared NE↔nonNE axis, rather than treating
+Hamming distance to each archetype as independent.** `Arc_1` is confirmed (by the user,
+who has direct knowledge of this network's archetype identities) to genuinely be
+"Intermediate" — not an unvalidated ad-hoc label as an earlier draft of this section
+assumed. Defined the NE↔nonNE combinatorial axis as the 46 genes where `Generalist_NE`
+and `Generalist_nonNE` actually differ (of the network's 53), and positioned every
+archetype along it by % agreement with `Generalist_NE` on those 46 genes:
+
+| archetype | % NE-like along the axis |
+|---|---|
+| `Generalist_NE` | 100% |
+| `Arc_6` | 95.7% |
+| `Arc_5` | 91.3% |
+| **`Arc_1` ("Intermediate")** | **65.2%** |
+| `Arc_3` | 58.7% |
+| `Arc_4` | 6.5% |
+| `Arc_2` | 4.3% |
+| `Generalist_nonNE` | 0% |
+
+All 8 archetypes fall on a single ordered spectrum — `Arc_1` genuinely sits about
+two-thirds of the way from NE toward nonNE, confirming it as a real intermediate point,
+not an isolated or unrelated state. **The walks' apparent movement "away from `Arc_1`
+and toward `Generalist_nonNE`/`Arc_2`/`Arc_4` instead" is not a different destination — it's
+the *same axis*, same direction, just traveling past the 65% way-point all the way to the
+~95-100% nonNE end.** A 4000-step unconstrained walk has time to reach much further along
+this trajectory than `Arc_1` represents. This resolves the geometric puzzle too: a point
+65% along a 46-bit-long combinatorial path is still 16 bits from one end and 30 from the
+other in raw Hamming terms (both individually large numbers) even though it is a genuine,
+correctly-ordered interpolation — a continuous PCA/UMAP embedding compresses that same
+46-dimensional path into 1-2 visual dimensions, where "65% along" simply looks "roughly in
+the middle"; there's no contradiction, just what happens when a long high-dimensional path
+gets projected onto a low-dimensional picture.
+
+**Directly confirmed by tracking walk trajectories over time, not just whole-walk summary
+stats (`diagnose_walk_temporal_ordering.py`).** If the walk genuinely passes *through*
+`Arc_1` en route to the nonNE cluster, distance-to-`Arc_1` should dip to a minimum
+*earlier* in the walk than distance-to-nonNE-cluster does. Tested directly: for every
+walk, found the step of closest approach to `Arc_1` and to the nonNE cluster
+(`Generalist_nonNE`/`Arc_2`/`Arc_4`, min distance), and compared their timing
+(Wilcoxon signed-rank, paired within each walk). Confirmed for all three NE-starting
+organoid populations under knockdown: `Neuroendocrine1` (89% of 100 walks reach `Arc_1`
+first, mean step 876 vs. 2734, p=2e-14), `Generalist NE` (74%, step 1448 vs. 2544,
+p=9e-9), `Neuroendocrine2` (81%, step 690 vs. 1330, p=6e-5). The mean distance-vs-step
+curve (plotted for `Neuroendocrine1`) shows the expected shape directly: distance to
+`Arc_1` dips to a minimum around step ~900, then *rises again* after step ~2000 as the
+walk continues past it, while distance to the nonNE cluster keeps decreasing the whole
+time and only bottoms out much later — a visually and statistically clean "passes through
+Intermediate on the way to nonNE," not a coincidental proximity along the axis. The same
+ordering appears (more weakly) in the *unperturbed* walk too, with much smaller amplitude
+(NE-cluster distance only rises to ~19 vs. ~28 under knockdown; nonNE-cluster distance
+only falls to ~31 vs. ~23) — knockdown doesn't create this temporally-ordered passage, it
+amplifies it, letting the walk actually complete the transit instead of mostly wobbling
+near its NE-like starting region. (One exception: starting *from* organoid's own
+`Intermediate`-labeled state shows the reverse timing — unsurprising, since that
+population doesn't need to travel through `Arc_1`'s neighborhood again, and its own
+representative state isn't itself especially close to `Arc_1` specifically to begin with.)
+
+**Updated read**: GEMM's simulated dynamics, applied to organoid's real states, correctly
+identify *both* the right axis (NE↔nonNE) *and* the right direction (toward nonNE) under
+RORA_RORB knockdown, *and* visit the Intermediate way-point in the correct temporal order
+before continuing on — they just don't stop at the `Arc_1`/"Intermediate" way-point within
+this walk length, continuing on to a near-complete nonNE identity instead. A plausible
+reading: the long simulated walk approximates the *asymptotic* fate of sustained RORB
+loss, while the real, finite-duration shRNA experiment (§C, below) captures a partial,
+earlier snapshot along the same trajectory — consistent with, not contradicting, (C)'s
+finding of a real but incomplete (not yet 100%) shift toward Intermediate in the real
+data.
 
 **(C) Independent, non-simulation check in organoid's own real data — result: a real,
 substantial, statistically robust shift.** Fully decoupled from BoBa-T's rules: compared
@@ -553,19 +648,21 @@ A negative control (randomly splitting shGFP into two halves and running the ide
 test) gives 0/5 significant results, confirming this isn't a large-N statistical
 artifact.
 
-**Overall verdict**: (C) firmly confirms the premise — organoid's real RORB knockdown
-data does show a real, substantial, dose-like shift from NE-like toward Intermediate
-identity. (B) shows GEMM's fitted rules, applied to organoid's own real starting states
-(not just GEMM's own attractor states), correctly reproduce the *direction* of
-NE-basin destabilization under knockdown — a genuine, non-trivial confirmation that the
-rule set's perturbation-response logic transfers at the archetype level, even though
-§9 already established it doesn't transfer at the absolute-expression-value level. What
-doesn't fully resolve: whether the walks' destination specifically corresponds to
-organoid's own "Intermediate" identity, since (i) GEMM's usable basin set has no clean
-"Intermediate" analog (`Arc_1` was filtered out, per (A)), and (ii) the simulated walks
-mostly move into unclassified state-space rather than a named basin. The direction
-matches; the specific destination isn't independently verifiable against GEMM's current
-attractor set.
+**Overall verdict**: (C) firmly confirms the premise in organoid's real data — a
+substantial, dose-like shift from NE-like toward Intermediate identity. (B) shows GEMM's
+fitted rules, applied to organoid's own real starting states, correctly identify both the
+right axis and the right direction under knockdown: measurable, statistically significant
+movement away from NE-associated archetypes (`Generalist_NE`/`Arc_5`/`Arc_6`) and toward
+the nonNE end of the *same* NE↔nonNE spectrum that `Arc_1`/"Intermediate" sits on (65%
+of the way along it) — the walks simply travel further along that spectrum (to
+`Generalist_nonNE`/`Arc_2`/`Arc_4`, ~95-100% nonNE) than the `Arc_1` way-point within a
+4000-step simulation, plausibly approximating a more complete/asymptotic version of the
+same shift the real, finite-duration knockdown only partially achieves. This is a genuine,
+non-trivial confirmation that the rule set's perturbation-response logic transfers at the
+archetype level — both the axis and the direction — even though §9 already established it
+doesn't transfer at the absolute-expression-value level.
 
-Outputs: `organoid_seeded_walk_basin_occupancy.csv` (simulation), `organoid_rorb_
-archetype_shift.csv`, `organoid_predicted_id_proportions_by_condition.csv` (real data).
+Outputs: `organoid_seeded_walk_basin_occupancy.csv`, `walk_archetype_distance_shift.csv`,
+`walk_temporal_ordering.csv`, `walk_temporal_distance_Neuroendocrine1_{kd,unperturbed}.png`
+(simulation), `organoid_rorb_archetype_shift.csv`,
+`organoid_predicted_id_proportions_by_condition.csv` (real data).
