@@ -10,6 +10,18 @@ There are three datasets in play, and it matters which one a given quickstart us
 - **The mouse ground-truth benchmark** — Tabula Muris scRNA + Cusanovich scATAC + ChIP-Atlas ground truth, the data CellOracle's own paper used for Fig. S2, already downloaded (see [`data/README.md`](data/README.md)). This is the one with a real, independent gold standard, so it's the one that can produce an actual Fig.-S2-style AUROC/EPR figure — but boba-T has never been run on it, and doing so needs a real decision about where its candidate network comes from, since there's no paired multiome ATAC+RNA here the way DIRECT-NET expects. That decision, and the full pipeline to get there, is in [Running boba-T on the mouse ground-truth benchmark](#running-boba-t-on-the-mouse-ground-truth-benchmark).
 - **BEELINE's synthetic GSD dataset** (bundled at `data/beeline/GSD/`) — a third, independent dataset, unrelated to CellOracle or your SCLC data. It's synthetic single-cell data simulated from a *literally known* Boolean network (via BoolODE, the BEELINE paper's simulator), so its ground truth is exact rather than ChIP-Atlas-inferred. Right now it's only used to sanity-check the harness itself (`run_beeline_selftest`, with synthetic `perfect`/`random` baselines, no real method) — it isn't wired to CellOracle or boba-T. It's flagged here because, in principle, it's arguably a *better*-suited ground truth for boba-T than the mouse benchmark: it's Boolean-model-generated data being scored against a Boolean network, which is boba-T's own modeling paradigm, not CellOracle's linear-regression one. Nobody has run boba-T on it; that would be new work, parallel to (not a prerequisite for) the mouse-benchmark plan below — full plan in [Running boba-T on BEELINE's synthetic GSD dataset](#running-boba-t-on-beelines-synthetic-gsd-dataset).
 
+## What boba-T and CellOracle are actually trying to do — and why that changes how to read every ChIP-seq-scored number below
+
+boba-T (BooleaBayes) and CellOracle are not trying to solve the same problem, and comparison 1 (network structure vs. a ChIP-seq/ChIP-Atlas reference) and the Fig.-S2-style AUROC/EPR reproduction both score them as if they were.
+
+boba-T's whole design starts from a deliberately small, curated candidate network (here, DIRECT-NET+LASSO's 53-gene, 228-edge panel for `6667`) — genes chosen because they're believed to drive a specific, coarse-grained phenotypic transition (NE ↔ non-NE state switching, in this project), then fits Boolean-ish rules whose job is to reproduce and predict *that* dynamical behavior — attractor states, basins, perturbation responses — not to comprehensively enumerate every real TF→target binding event in the genome. Success for boba-T looks like comparison 3 (predicted vs. actual expression, on its own curated genes): does the fitted rule set correctly predict expression state for the genes it was built to model.
+
+CellOracle (and, as run here, SCENIC/GENIE3 "from scratch") is explicitly a broad, genome-scale GRN-inference method — its own validation paradigm, the Fig. S2 benchmark this harness reproduces, literally *is* "how many ChIP-Atlas/ChIP-seq-confirmed edges did you recover, across as much of the genome as your candidate set allows." ChIP-seq edge recovery isn't just *a* metric CellOracle happens to do reasonably on — it's close to the metric CellOracle was built and evaluated against in its own paper.
+
+So scoring both against a ChIP-seq ground truth's full edge list structurally favors whichever method is trying to maximize genome-wide edge recovery — which is CellOracle/SCENIC by design, not boba-T. The small shared-node counts for boba-T seen throughout this document (5 on the human GTs, 25 on the RPR2-mouse GT, vs. CellOracle/SCENIC's 41–597 on the same TKO/`6667` cells) aren't evidence boba-T "only recovers a sliver" of the real regulatory network — boba-T was never trying to model most of those genes at all; its candidate network was deliberately restricted to the curated phenotype-driving panel before any fitting happened. Scoring a 53-gene, phenotype-focused dynamical model's recall against a 3,992-edge genome-wide ChIP-seq list and reading a low number as "worse" is close to a category error.
+
+This doesn't make comparison 1 or the Fig.-S2 reproduction useless — "of the edges each method commits to, how many are independently real" is still a meaningful precision/recall question, and it's the reason boba-T's DIRECT-NET-restricted numbers (e.g. F1 0.163–0.500 on the mouse RPR2 GT) hold up reasonably well against CellOracle's ATAC-restricted variants scored the same way — both are working from a similarly curated candidate set there, so the comparison is closer to fair. It just means: whenever a from-scratch/genome-scale CellOracle or SCENIC run is shown recovering more absolute ChIP-seq edges, more of the ground truth, or a higher raw n_overlap than boba-T on the *same* ground truth, that's expected by construction — those methods were pointed at genome-wide recovery and boba-T was not — and it says nothing about whether boba-T's actual job (predicting the phenotype-relevant dynamics of its own curated genes) is being done well or poorly. The one comparison in this document that actually tests boba-T on its own terms is [comparison 3, predicted vs. actual expression](#3-predicted-vs-actual-expression--implemented-and-run-on-6667) — read that, not the ChIP-seq structure numbers, as the "is boba-T doing its job" answer.
+
 ## The comparison points
 
 ### 1. Network structure vs. a reference — **implemented**
@@ -17,6 +29,8 @@ There are three datasets in play, and it matters which one a given quickstart us
 Do two methods (or a method and a reference) agree on which edges/hubs exist? `metrics.structure_metrics` restricts both networks to their shared node universe, then reports edge Jaccard / precision / recall / F1, degree-profile Spearman correlation, and sign concordance (activator vs. repressor) on edges present in both. `metrics.pairwise_jaccard` gives the same edge-overlap number method-vs-method with no reference required.
 
 Note on scope: this is edge/degree agreement, not the network-science centrality comparison (betweenness, eigenvector centrality, scale-free-ness) that CellOracle's `Links.get_network_score()` / `plot_degree_distributions()` produce internally. Those are available if a deeper topology comparison is wanted later, but the harness doesn't need to reimplement them — CellOracle computes them on its own `Links` object.
+
+**Read this comparison with [the caveat above](#what-boba-t-and-celloracle-are-actually-trying-to-do--and-why-that-changes-how-to-read-every-chip-seq-scored-number-below) in mind whenever the reference is a ChIP-seq/ChIP-Atlas ground truth**: it tells you "of the edges each method commits to, how many are independently real," which is fair when both methods start from a similarly curated candidate set, but structurally favors whichever method is trying to maximize genome-wide edge recovery when they don't.
 
 **Roadmap:**
 
@@ -65,6 +79,8 @@ print(run_structure_comparison({"boba-T": bobat_edges, "CellOracle": co_edges}, 
 `celloracle_cluster_mouseAtacBaseGRN` is the released CellOracle variant to compare against, specifically because it uses the *same* mouse-scATAC-atlas base GRN that the boba-T run below is built on — the other released variants (`celloracle_cluster_promoterBaseGRN`, `celloracle_cluster_scrambledPromoterBaseGRN`, `DCOL`, `SCENIC_10kb`) use different priors and aren't a same-base-GRN comparison.
 
 ### 2. Edge-weight recovery, BEELINE-style (AUROC / EPR) — **implemented**
+
+**This entire comparison inherits its yardstick directly from CellOracle's own paper** — see [the caveat above](#what-boba-t-and-celloracle-are-actually-trying-to-do--and-why-that-changes-how-to-read-every-chip-seq-scored-number-below) before treating a future boba-T-vs-CellOracle Fig.-S2-style number as a verdict: AUROC/EPR against a genome-wide ChIP-Atlas ground truth is close to the exact metric CellOracle was designed and evaluated to do well on, not a neutral third-party test either method was aiming for equally.
 
 CellOracle's Supplementary Fig. S2 treats each method's edge list as a binary classifier of "is this TF→target edge real" against a ground-truth network, following the [BEELINE](https://github.com/Murali-group/Beeline) paradigm (Pratapa et al., *Nat Methods* 2020):
 
@@ -120,7 +136,7 @@ To put CellOracle on the same footing: after `oracle.fit_GRN_for_simulation(...)
 4. **Not attempted** — full SCENIC and WGCNA. SCENIC's network-inference step is itself GENIE3 (or GRNBoost2, the same algorithm) — already covered above — but SCENIC's regulon-*pruning* step (RcisTarget, motif-enrichment-based) needs species-specific cisTarget ranking databases (multi-GB downloads for human) not present in either conda env; running that step wasn't attempted. WGCNA builds an undirected soft-thresholded co-expression network (R package), which doesn't naturally produce a predictive model to apply to held-out cells the way Ridge/RF do — it would need a different comparison design (e.g. module-membership-based prediction) to fit this comparison's shape at all, so it wasn't attempted here; it may still be usable for comparison 1 (structure) directly.
 5. **Not done** — the same comparison on the mouse ground-truth data. Needs an explicit train/test split there first (CellOracle's own released `inference_results` are fit on *all* cells for that sample, so they can't be reused for a held-out comparison) — a smaller variant of the per-tissue pipeline in the mouse-benchmark section, once that exists.
 
-**Real result**, 42 genes with surviving regulators in all three networks (of 53 total in the `6667` network):
+**Original result**, 42 genes with surviving regulators in all three networks (of 53 total in the `6667` network):
 
 | metric | boba-T | CellOracle | GENIE3 |
 |---|---|---|---|
@@ -128,36 +144,66 @@ To put CellOracle on the same footing: after `oracle.fit_GRN_for_simulation(...)
 | ROC-AUC | 0.968 | 0.965 | **0.978** |
 | F1 | 0.913 | 0.909 | **0.941** |
 
-GENIE3's random forest comes out ahead of both boba-T and CellOracle on every metric here — plausible on its own terms: an RF is a much more flexible, nonlinear predictor than either boba-T's Boolean rules or CellOracle's linear ridge, so on a pure held-out-prediction-accuracy question it has room to fit patterns the other two structurally can't. That's a real result, not an artifact — the held-out split, base GRN, and shared-node rule are identical to the boba-T/CellOracle comparison — but it says more about raw predictive flexibility than about which method recovers the "right" regulatory structure (that's comparison 1's job, not this one's); a highly flexible model winning a pure prediction contest while still getting the causal structure wrong is a very ordinary failure mode, not ruled out by this number. `alpha=10` for CellOracle and `n_estimators=1000` for GENIE3 were both left at defaults, not tuned — a fairer three-way race would sweep both. Full per-gene numbers: `benchmarking_out/comparison3_all_methods_vs_bobat_6667.csv`.
+**Correction — this table understated CellOracle specifically, and has been superseded by
+the fair re-score below.** Found while re-verifying a similar CellOracle comparison built for
+the HSC combinatorial-logic work: `comparison3_fit_celloracle_6667.py` applies the
+train-fitted `coef_matrix` to `test_t0combined.csv` — the **raw**, un-imputed test values —
+but CellOracle's own `fit_GRN_for_simulation` actually fits its Ridge models on
+`oracle.adata.layers["imputed_count"]` (the KNN-smoothed output of `knn_imputation()`), not on
+the raw values it was given. Evaluating on a different representation than the model was
+trained for understates its held-out accuracy. (A second, separate bug — a missing Ridge
+intercept — was also found and fixed in the HSC work, but does *not* affect this specific
+script: `to01()`'s min-max rescaling here happens to be invariant to a missing additive
+constant, so that part of the original 0.780 figure was always safe.)
 
-**Caveat on the boba-T vs. CellOracle R² margin specifically, found while re-verifying a
-similar CellOracle comparison built for the HSC combinatorial-logic work** (see
-`verify_celloracle_6667.py`): `comparison3_fit_celloracle_6667.py` applies the train-fitted
-`coef_matrix` to `test_t0combined.csv` — the **raw**, un-imputed test values — but CellOracle's
-own `fit_GRN_for_simulation` actually fits its Ridge models on `oracle.adata.layers[
-"imputed_count"]` (the KNN-smoothed output of `knn_imputation()`), not on the raw values it
-was given. Evaluating on a different representation than the model was trained for
-understates its held-out accuracy. (This is a different issue from a second bug found and
-fixed in the HSC work — a missing Ridge intercept — which does *not* affect this script:
-`to01()`'s min-max rescaling here happens to be invariant to a missing additive constant, so
-that part of the R²=0.780 figure is safe.)
+**Fair re-score** (`redo_comparison3_6667_fair.py`): rather than picking whichever
+representation happens to favor one method, all three methods are refit/re-evaluated against
+a single, identical target — the real `imputed_count` from one shared `Oracle` object built on
+train+test combined. boba-T's already-fitted rule and CellOracle's coefficients (now with the
+intercept included) are simply re-evaluated against it; GENIE3 is refit fresh on the same
+imputed training data, since it had never previously been evaluated against this
+representation either. Restricted to the identical 42-gene "shared candidates in all three
+methods" set the original comparison used — confirmed by getting exactly 42 genes again,
+independently, not by construction:
 
-Checked whether this representation mismatch actually moves the number by refitting Ridge
-directly on the real `imputed_count` (same candidate network, same alpha, same held-out
-split) and evaluating CellOracle's coefficients against the *matching* imputed test cells
-instead of the raw ones: **mean R² rises from 0.780 to 0.864** — a real, substantial jump, not
-noise (my reproduction of the original method scored 0.781, essentially exact agreement,
-confirming this isn't a different setup). But smoothing the evaluation target should help
-*any* reasonable model a little, not just CellOracle — so the fair question is what happens to
-boba-T's own R² against that identical smoothed target. Checked directly: boba-T's R² moves
-from 0.856 to 0.875 (+0.019) against the same imputed test cells, far less than CellOracle's
-jump (+0.084). **On a single, consistent evaluation target, the gap that was reported as
-0.832 vs. 0.780 (a 0.052 margin) narrows to roughly 0.875 vs. 0.864 (a 0.011 margin) — boba-T
-is still narrowly ahead, but nowhere near as decisively as the original table alone suggests.**
-Not yet corrected in the table above (would need redoing GENIE3's evaluation on the same
-matched imputed target too, for a genuinely fair three-way re-score) — flagged here rather
-than silently left as originally reported, since it materially changes how confidently "boba-T
-beats CellOracle" should be stated for this specific comparison.
+| metric | boba-T | CellOracle | GENIE3 |
+|---|---|---|---|
+| R² | 0.858 | **0.864** | **0.963** |
+| ROC-AUC | 0.975 | 0.973 | **0.992** |
+| F1 | 0.918 | 0.922 | **0.974** |
+
+**boba-T and CellOracle are now essentially tied on R² (0.858 vs. 0.864 — CellOracle a hair
+ahead) — the opposite of the originally reported 0.832 vs. 0.780 "boba-T wins" margin.**
+AUC/F1 stay close to their original values for both (the representation mismatch mattered far
+more for R², which is sensitive to exact calibrated values, than for the 0.5-thresholded
+classification metrics). GENIE3 remains the clear overall winner and its lead over both other
+methods actually *widens* under fair scoring (R² 0.899→0.963) — the same "predictive
+flexibility, not structural correctness" caveat from below still applies to it. `alpha=10` for
+CellOracle and `n_estimators=1000` for GENIE3 were both left at defaults, not tuned — a fairer
+three-way race would still sweep both.
+
+**This tie is arguably the single most flattering result for boba-T in this whole document, and it's worth being precise about *why*, rather than just noting the R² numbers match.** It is not that boba-T uses dramatically fewer regulators per gene than a *DIRECT-NET-restricted* CellOracle — checked directly, not assumed: boba-T's fitted rules use a mean of 4.26 regulators/gene (range 1–8) across these same 42 genes, vs. CellOracle's ridge model drawing on a mean of 5.43 candidate regulators/gene (range 2–8) from the identical DIRECT-NET network — comparable, not "far fewer." The real distinction *at this restricted scale* is **model class**, not parameter count: boba-T's rule is a constrained, interpretable Boolean/threshold-style function, purpose-built to reproduce discrete phenotype-state dynamics (see [the section above on what boba-T and CellOracle are actually trying to do](#what-boba-t-and-celloracle-are-actually-trying-to-do--and-why-that-changes-how-to-read-every-chip-seq-scored-number-below)), while CellOracle's is a dense, unconstrained continuous ridge regression with one free coefficient per candidate regulator. Matching CellOracle's accuracy with that more constrained functional form — on a task CellOracle's model class has no particular structural disadvantage at — is a genuinely meaningful result: the coarser, dynamically-interpretable Boolean rule isn't leaving real predictive accuracy on the table relative to an unconstrained linear fit *when both are given the same small, curated candidate set*. It doesn't extend to GENIE3's win, whose random-forest regressors are a strictly more flexible model class than either — that gap (R² 0.963) is nonlinear/flexible vs. constrained, not evidence against boba-T specifically.
+
+**But that "comparable regulator count" is itself an artifact of restricting CellOracle to DIRECT-NET's network — not how CellOracle would actually be run.** In practice, CellOracle builds its own base GRN from a dataset's real ATAC peaks and lets the ridge fit find structure across everything that base GRN allows, the way [`comparison_tko_fit_celloracle_atac.py`](comparison_tko_fit_celloracle_atac.py) already does for TKO's genome-scale HVG panel above. Since TKO_final_arc's scRNA-seq is the same underlying cells behind `6667` ([see the TKO section](#tko_final_arc-a-real-dataset-specific-atac-informed-base-grn-not-a-promoter-scan)), that same real ATAC-informed base GRN can be applied directly to `6667`'s own 53-gene train/test split instead of DIRECT-NET's candidate set — [`redo_comparison3_6667_fair_with_realatac.py`](redo_comparison3_6667_fair_with_realatac.py) does exactly this, reusing the identical fair-scoring `imputed_count` target from above. Restricting the real ATAC base GRN to `6667`'s 53 genes (47/53 TFs, 52/53 targets matched — only `RORA_RORB` missing, expected) gives a mean of **30.15 candidate regulators/gene** (range 10–46) *before* any sparsity-inducing selection — about 7× denser than DIRECT-NET's LASSO-pruned 5.43/gene, and about 7× denser than boba-T's own fitted 4.26/gene:
+
+| method | n_genes | regulators/gene (mean) | R² | AUC | F1 |
+|---|---|---|---|---|---|
+| boba-T | 42 | 4.26 | 0.858 | 0.975 | 0.918 |
+| CellOracle (DIRECT-NET base) | 42 | 5.43 | 0.864 | 0.973 | 0.922 |
+| **CellOracle (real ATAC base, not DIRECT-NET-restricted)** | **41** | **30.15** | **0.957** | **0.993** | **0.965** |
+| GENIE3 (DIRECT-NET-restricted) | 42 | 5.43 | 0.963 | 0.992 | 0.974 |
+
+**This is the real "how would CellOracle actually be used" comparison, and it resolves the earlier tie: given its own realistic, ATAC-derived candidate breadth instead of DIRECT-NET's curated 53-gene starting point, CellOracle's R² jumps from 0.864 to 0.957 — nearly closing the entire gap to GENIE3's flexible random-forest fit (0.963), using the *same* ridge-regression model class as the DIRECT-NET-restricted run, just ~7× more candidate regulators per gene.** That's an important disentangling of the two things that were previously confounded in "GENIE3 wins": model flexibility (ridge vs. random forest, same small candidate set: 0.864→0.963) and candidate breadth (ridge, small vs. large candidate set: 0.864→0.957) turn out to independently explain most of the same-sized gap — breadth alone gets CellOracle nearly all the way to GENIE3's number, without changing model class at all. Read together with the parsimony paragraph above: boba-T's Boolean rule ties a *comparably-restricted* CellOracle, but a CellOracle actually run the way it's designed to be run — with real ATAC breadth, not an artificially small curated candidate set — clearly outpredicts boba-T's 53-gene panel, at the cost of roughly 7× more regulators per gene and a model with no coarse-grained phenotypic-dynamics interpretation the way boba-T's rules have. Neither framing is "wrong" — they answer different questions ("does boba-T's constrained rule lose accuracy on a fixed candidate set" vs. "does boba-T's whole curated-53-gene approach lose raw predictive accuracy to CellOracle used at realistic scope"), and this document now has the numbers for both.
+
+**Limitation, stated plainly**: boba-T's small, curated candidate network means it structurally cannot compete with CellOracle run at realistic ATAC-informed breadth on raw predictive accuracy (R² 0.858 vs. 0.957) — it was never given access to that candidate-regulator breadth in the first place, so any comparison on this axis alone will favor genome/ATAC-scale methods by construction.
+
+**The advantage that same limitation buys**: that small network is exactly what makes boba-T's fitted rules a phenotypic-dynamics model, not just a predictor. Each gene's rule is a compact, human-readable function over a handful of regulators — small enough to support attractor/basin analysis and in-silico perturbation simulation of coarse-grained phenotypic state transitions (e.g. NE↔non-NE), the actual scientific question this project cares about. A 30-regulator-per-gene ridge fit has no comparable notion of a discrete cell state, an attractor, or a basin to perturb — it predicts expression well, but doesn't give you a dynamical model of phenotype switching to interrogate. The two methods aren't competing on the same axis: CellOracle-at-scale wins on genome-wide predictive accuracy, boba-T's small network is what makes phenotypic-dynamics interpretability possible at all.
+
+Full re-scored per-gene numbers:
+`benchmarking_out/comparison3_all_methods_vs_bobat_6667_fair_imputed_target.csv` (3-method,
+DIRECT-NET-restricted) and `benchmarking_out/comparison3_all_methods_vs_bobat_6667_fair_imputed_target_with_realatac.csv`
+(adds the real-ATAC CellOracle row above); original per-gene numbers (superseded, kept for
+reference): `benchmarking_out/comparison3_all_methods_vs_bobat_6667.csv`.
 
 Two crash bugs had to be worked around before the CellOracle fitting script above would even run (GENIE3's plain-sklearn script had none of these) — neither touches the ridge fit, the predictions, or the R²/AUC/F1 numbers reported above; both are CellOracle plumbing unrelated to the actual modeling math, and both would raise an exception (no output at all) if left unfixed rather than silently changing a result. Noting them in case they recur on other data: `Oracle.import_anndata_as_normalized_count` reads `adata.obsm[embedding_name]` even though `embedding_name` defaults to `None` in its signature — pass a placeholder 2D array if there's no real embedding (only used by CellOracle's own 2D-plotting features, never read by the regression). It also calls an internal QC step that reads `adata.layers["raw_count"]`, but the line that would set that layer from `adata.X` is commented out in installed `celloracle==0.20.0`'s own source (`oracle_core.py`) — set `adata.layers["raw_count"] = adata.X.copy()` yourself before the call (that QC step only feeds a print-only warning used later in `simulate_shift`, comparison 4; it's not consumed by `fit_GRN_for_simulation`), or `simulate_shift` will later hit a missing `self.high_var_genes` attribute.
 
@@ -258,6 +304,36 @@ SCENIC's genome-scale run ([`comparison_scenic_fullscale_fit_6667.py`](compariso
 **Overall verdict on "run from the beginning" for `6667`, now actually checked at real scale**: neither CellOracle nor SCENIC is fundamentally incapable of recovering ASCL1's real regulatory targets — the earlier zero-overlap result was a genuine artifact of the 53-gene universe, not a property of either method. At real scale, both recover real signal on all three independent ChIP-seq ground truths, ASCL1 emerges as a real regulatory hub in both, and SCENIC's motif-pruning step gives it a real precision advantage over CellOracle's ridge-only approach in this specific from-scratch setting. What still hasn't been tested: whether boba-T, given the same real genome-scale data (rather than its own 53-gene DIRECT-NET export), would show the same pattern — that's a different, not-yet-attempted experiment, since boba-T's candidate network is fundamentally tied to DIRECT-NET's peak-to-gene output rather than an HVG selection.
 
 Not yet tried: feeding any of these ground truths into `run_beeline_comparison` (comparison 2) instead of `run_structure_comparison` — all three are real independent references, so AUROC/EPR would be as legitimate here as the structure numbers above (and the mouse one, with 25 shared nodes, has enough of a candidate universe to make AUROC less noisy than on the two human ones).
+
+### TKO_final_arc: a real, dataset-specific ATAC-informed base GRN (not a promoter scan)
+
+Every CellOracle base GRN used above — the DIRECT-NET-restricted one and the "from scratch" human-promoter-scan one — is either tied to a candidate network boba-T also uses, or built from a generic genome-wide promoter motif scan, not this dataset's own chromatin accessibility. `TKO_final_arc.rds` (a real mouse RPR2 — *Trp53;Rb1;Rbl2* triple-knockout, i.e. genotype-matched to the Borromeo mouse ground truth — multiome object, with its own `peaks` ChromatinAssay) makes a genuinely ATAC-informed base GRN possible: build it from this dataset's own peaks, not a reference-genome promoter scan.
+
+[`extract_tko_atac.R`](../network-inference-DIRECT-NET/extract_tko_atac.R) pulls the `peaks` assay (mm10, 158,859 peaks) and assigns each peak to its nearest gene within 10kb (Signac's `ClosestFeature` — the simpler documented alternative to Cicero co-accessibility, not attempted here): 115,027 peaks within 10kb of a gene, 19,455 unique genes. [`comparison_tko_atac_base_grn.py`](comparison_tko_atac_base_grn.py) motif-scans those peaks against the real mm10 genome (`celloracle.motif_analysis.TFinfo`, gimmemotifs, `fpr=0.02`) → a 115,027-peak × 1,093-TF × 19,455-target-gene base GRN, CellOracle's own convention, genuinely ATAC-derived this time. [`preprocess_tko_rna.py`](preprocess_tko_rna.py) applies the same CellOracle-paper HVG recipe used for `6667`'s genome-scale run (`filter_genes` → `normalize_per_cell` → `filter_genes_dispersion` cell_ranger top 3,000 → `log1p`) to TKO's own RNA: 8,779 cells × 32,285 genes → 3,000 HVGs, ASCL1 included.
+
+**Two real problems hit and fixed while building this, worth recording**:
+- The gimmemotifs scan takes about an hour and was twice lost mid-run when this session's background shell was killed by an unrelated Claude Code restart — the process was reparented to `launchd` (`nohup` + backgrounding without a controlling shell) so a third restart can't repeat this, and a `tfi.to_hdf5(...)`/`co.motif_analysis.load_TFinfo(...)` checkpoint was added right after the scan completes (before the slower `to_dataframe()` aggregation step) so a crash there doesn't force a full rescan again. (`to_hdf5` also silently requires the filename to literally end in `.celloracle.tfinfo` — a `ValueError` that cost one more full rescan before it was caught.)
+- SCENIC's `ctx` step (RcisTarget) failed almost completely on the first attempt — a 202-byte, essentially empty output — because this repo's usual upper-cased gene-symbol convention (`ASCL1`, matching the ChIP-seq ground truths and used freely elsewhere, including on CellOracle's side of this exact run) doesn't match the mm10 rankings database's real mouse-case symbols (`Ascl1`, `0610005C13Rik`); RcisTarget does exact string matching, so every module failed the "genes map to the rankings" check. Fixed by reconstructing an exact upper-case → original-case mapping from TKO's pre-upper-cased gene list (replicating anndata's `var_names_make_unique()` suffixing so the 3,000 HVG names line up exactly) and rerunning GRNBoost2 + `ctx` with proper mouse-case symbols throughout; edges are only upper-cased again at the final scoring step, to match the ground truths' convention.
+
+[`comparison_tko_fit_celloracle_atac.py`](comparison_tko_fit_celloracle_atac.py): base GRN restricted to the 3,000-HVG set → 133 candidate TFs, 2,159 target genes, 280,276 nonzero peak-TF entries; ridge fit (`GRN_unit="whole"`, `alpha=10`) → `coef_matrix` 3,000×3,000, 117,686 nonzero entries. [`comparison_tko_fit_scenic.py`](comparison_tko_fit_scenic.py): same TKO expression, freshly downloaded mouse cisTarget resources (`allTFs_mm.txt`, the mm10 10kbp-up/down rankings feather, `motifs-v10nr_clust-nr.mgi-*.tbl`) → GRNBoost2 (295,731 raw edges) → `ctx` → 61 regulons, 6,643 edges; ASCL1 present as a source.
+
+Scored against the same three independent ChIP-seq ground truths ([`comparison_tko_atac_vs_chipseq_gt.py`](comparison_tko_atac_vs_chipseq_gt.py)), alongside boba-T's **existing, already-fit `6667` network** (`load_bobat`, no refitting/rerunning here) — this **is** a same-dataset comparison: `6667`'s underlying scRNA-seq is the same TKO_final_arc cells used for the CellOracle/SCENIC fits above (DIRECT-NET's own ATAC-based candidate-network construction for `6667` was run directly on this data, just not through this project's own scripts). The real difference between the three rows below is candidate-network **scope**, not dataset: boba-T's DIRECT-NET+LASSO candidate network is a curated 53-gene panel, while CellOracle/SCENIC here ran genome-scale on the same cells' ~3,000-HVG set, using an independently-built (Signac `ClosestFeature` + motif-scan) ATAC-informed candidate structure rather than DIRECT-NET's:
+
+| ground truth | method | n_shared_nodes | n_pred_edges | n_overlap | precision | recall | f1 |
+|---|---|---|---|---|---|---|---|
+| Borromeo human (620 edges) | CellOracle (real ATAC, TKO) | 123 | 680 | 50 | 0.074 | 0.407 | 0.125 |
+| Borromeo human (620 edges) | SCENIC (from scratch, TKO) | 102 | 49 | 40 | 0.816 | 0.392 | 0.530 |
+| Borromeo human (620 edges) | boba-T (existing `6667` fit, not TKO) | 5 | 4 | 1 | 0.250 | 0.20 | 0.222 |
+| **Borromeo mouse, RPR2 (3,992 edges)** | **CellOracle (real ATAC, TKO)** | **597** | **19,598** | **241** | **0.012** | **0.404** | **0.024** |
+| **Borromeo mouse, RPR2 (3,992 edges)** | **SCENIC (from scratch, TKO)** | **455** | **1,389** | **161** | **0.116** | **0.354** | **0.175** |
+| Borromeo mouse, RPR2 (3,992 edges) | boba-T (existing `6667` fit, not TKO) | 25 | 61 | 7 | 0.115 | 0.28 | 0.163 |
+| Pozo (295 edges) | CellOracle (real ATAC, TKO) | 48 | 129 | 26 | 0.202 | 0.542 | 0.294 (sign_concordance 0.5) |
+| Pozo (295 edges) | SCENIC (from scratch, TKO) | 41 | 34 | 12 | 0.353 | 0.293 | 0.320 |
+| Pozo (295 edges) | boba-T (existing `6667` fit, not TKO) | 4 | 4 | 2 | 0.500 | 0.50 | 0.500 (sign_concordance 0.0) |
+
+boba-T's numbers here are identical to its rows in the very first table in this section (as they should be — same network, same ground truths, no refit happened). Its F1 (0.163–0.500) sits between CellOracle-real-ATAC's and SCENIC's on the mouse RPR2 ground truth. Read carefully, though: the much smaller shared-node counts (5–25 vs. 41–597) reflect boba-T's DIRECT-NET+LASSO candidate network being a curated 53-gene panel, not a different or smaller dataset — all three methods are evaluated on the same underlying TKO_final_arc cells. boba-T's higher apparent precision/F1 on the mouse RPR2 ground truth (0.115/0.163 vs. CellOracle-real-ATAC's 0.012/0.024) is consistent with the same pattern already established earlier in this document (DIRECT-NET-restricted methods concentrating signal on a small curated candidate set vs. genome-scale methods diluting precision over a much larger candidate-pair space) — a real, comparable finding here, not an artifact of comparing different data.
+
+**The RPR2-mouse row is the most directly relevant of the three here** — TKO's own genotype (*Trp53;Rb1;Rbl2* triple-knockout) is an exact match to the Borromeo RPR2-mouse tumor's genotype, not just an ortholog-matched human comparison. And the pattern is the same one already found for `6667`'s genome-scale from-scratch run, now with a genuinely dataset-specific ATAC base GRN instead of a generic promoter scan: **CellOracle has consistently higher recall** (0.35–0.54 vs. SCENIC's 0.29–0.39 across all three ground truths) **but far lower precision** (0.01–0.20 vs. SCENIC's 0.12–0.82), and SCENIC wins on F1 for the two ground truths with the most shared nodes (human, mouse RPR2) while CellOracle edges it out narrowly on Pozo. Swapping a real, dataset-specific chromatin-accessibility prior in for CellOracle's generic promoter scan did not change this qualitative result: CellOracle's ridge regression still has no analogue of RcisTarget's independent motif-enrichment filter, so real ATAC-derived candidate peaks still get regularized down to a large, comparatively low-precision edge set rather than a small, high-precision one. The real-ATAC prior appears to matter for *which* genes get access to the candidate-regulator pool (2,159 target genes here, vs. the human-promoter-scan run's coverage) more than it does for the precision/recall trade-off itself, which seems to be a property of the two methods' downstream filtering, not of the base GRN's source.
 
 ## Running boba-T on the mouse ground-truth benchmark
 
@@ -1094,6 +1170,7 @@ benchmarking/
 ├── comparison3_score_celloracle_vs_bobat_6667.py    # comparison 3, scoring step, all methods (bobaT_env)
 ├── verify_celloracle_6667.py                        # comparison 3: checks CellOracle's real vs. raw-test representation mismatch (celloracle_env)
 ├── verify_bobat_vs_imputed_6667.py                  # comparison 3: fairness check -- does boba-T's own R2 also rise against the same imputed target? (bobaT_env)
+├── redo_comparison3_6667_fair.py                    # comparison 3: full fair re-score, all 3 methods vs. one shared imputed_count target (celloracle_env)
 ├── comparison1_structure_6667_vs_chipseq_gt.py      # comparison 1, real ChIP-seq ground truth, all methods (either env)
 ├── hsc_ground_truth.py                              # HSC combinatorial-logic: parse HSC.txt -> candidate network + per-gene truth tables
 ├── prepare_hsc_bobat_input.py                       # HSC: BoolODE's ExpressionData.csv -> boba-T input format
@@ -1188,7 +1265,7 @@ Large inputs (Tabula Muris scRNA, Cusanovich scATAC, CellOracle's released `infe
 |---|---|
 | 1. Network structure vs. reference | Implemented; run on `6667` at two scales — DIRECT-NET-restricted (boba-T, CellOracle, GENIE3: recover real edges) and genuinely genome-scale, no boba-T involved at all (CellOracle, SCENIC via the real Box multiome data: also recover real edges, ASCL1 emerges as a real hub in both, SCENIC's motif pruning gives it better precision) — vs. three real ASCL1 ChIP-seq ground truths; mouse-tissue-benchmark version (Fig-S2-style) still needs the boba-T mouse run |
 | 2. Edge-weight recovery (BEELINE AUROC/EPR) | Implemented + validated against CellOracle's own Fig-S2 numbers; real Fig-S2-style figure with boba-T needs the boba-T mouse run |
-| 3. Predicted vs. actual TF expression | Implemented and run on `6667` for boba-T, CellOracle, and GENIE3 — real result: R² 0.832 / 0.780 / 0.899 (42 shared genes), but the boba-T/CellOracle margin is inflated by a representation mismatch (CellOracle scored on raw test data, not the `imputed_count` it was actually trained on) — corrected, matched-target R² is ~0.875 vs. ~0.864, a real but much narrower boba-T lead (see caveat below the table); GENIE3 not yet re-scored the same way; full SCENIC/WGCNA not attempted (see roadmap); mouse-benchmark version needs a held-out split there |
+| 3. Predicted vs. actual TF expression | Implemented and run on `6667` for boba-T, CellOracle, and GENIE3, then fully re-scored against a single fair, consistent target (42 shared genes both times) after finding CellOracle's original R² was computed on the wrong data representation — **corrected result: R² 0.858 (boba-T) / 0.864 (CellOracle, now essentially tied) / 0.963 (GENIE3, still the clear winner)**, vs. the original, now-superseded 0.832/0.780/0.899; full SCENIC/WGCNA not attempted (see roadmap); mouse-benchmark version needs a held-out split there |
 | 4. In-silico perturbation | Stubbed; boba-T's per-attractor output needs an aggregation step before this is buildable |
 | 5. Combinatorial logic (HSC ground truth) | Track 1 (synthetic, true candidate network): regulator-set "recovery" is by construction not a real discovery test (see caveat), mean truth-table accuracy 0.784 (AUC 0.850); boba-T R²=0.618 vs. CellOracle R²=0.709 (CellOracle wins here — see the R² correction below); GENIE3 not yet run. Track 3 (synthetic, ChEA-derived candidate network, `threshold=0`): regulator-set recovery F1=0.414; marginalized truth-table accuracy 0.832/AUC 0.985 but flagged as not trustworthy alone. Track 2 (real GSE194122 data, 27,050 cells): ChEA/hand-rolled-ATAC networks — boba-T F1 0.454 (ChEA) / 0.190 (ATAC), GENIE3 R² 0.760 (ChEA) / 0.649 (ATAC), CellOracle F1 0.157 (ATAC); GFI1 hardest gene for every method/network. **DIRECT-NET+boba-T vs. CellOracle's own real-multiome tutorial pipeline (Cicero+motif scan)**: boba-T R²=0.855(DIRECT-NET)/0.765(Cicero) vs. CellOracle R²=0.514 (corrected — see `verify_celloracle_fit.py`, an earlier pass had this wrong at 0.125 due to a missing-intercept bug in the verification, not in CellOracle) on the *identical* Cicero network — boba-T still wins on real data, narrower margin than first computed; truth-table AUC close for all three (0.80–0.81) throughout, unaffected by that bug. **Net picture: CellOracle beats boba-T on R² for synthetic data, boba-T beats CellOracle on R² for real data — genuinely mixed, not a one-sided result in either direction** |
 

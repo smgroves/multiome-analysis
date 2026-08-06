@@ -97,3 +97,12 @@ benchmarking/data/sclc_full/
 *.tbl
 *.mtx
 benchmarking/data/tko_full/raw_counts_hvg.csv
+
+# Mouse cisTarget databases (~350MB, resources.aertslab.org, re-downloadable — see
+# comparison_tko_fit_scenic.py) and its GRNBoost2/ctx run intermediates.
+benchmarking/data/scenic_mouse/
+
+# TKO real-ATAC CellOracle base-GRN build intermediates (~400MB) — regenerate from
+# TKO_final_arc.rds via extract_tko_atac.R + comparison_tko_atac_base_grn.py.
+network-inference-DIRECT-NET/data/tko_atac/*.celloracle.tfinfo
+network-inference-DIRECT-NET/data/tko_atac/tko_atac_base_grn.parquet

@@ -463,3 +463,109 @@ than presented as a general claim.
 Outputs: `leaf_conditional_transferability_matrix.csv` (full per-gene x per-sample
 matrix), `leaf_conditional_robust_core_per_gene.csv` (per-gene summary),
 `leaf_conditional_per_sample_summary.csv` (per-sample summary + r=0.96 check).
+
+## 11. Validating "RORB knockdown moves NE toward Intermediate": archetype-level walk simulation + real organoid data (`run_organoid_perturbation_walks.py`, `validate_organoid_rorb_archetype_shift.py`)
+
+§9's leaf-conditional test showed genuine rewiring at the gene level; a follow-up direct
+simulation of RORA_RORB's 9 fitted target genes (`diagnose_rorb_perturbation_transfer.py`,
+not in this file's numbered sections) found only weak, non-significant sign agreement
+between GEMM's predicted per-gene shift and organoid's real shGFP-vs-shRORB shift (6/9
+genes, r=0.06-0.42). That result doesn't resolve the user's actual claim, which is at the
+**archetype/state-space level**, not the single-gene level: "RORB knockdown moves NE
+toward Intermediate archetypes." Two independent checks, deliberately kept separate so
+they can agree or disagree informatively:
+
+**(A) GEMM's own archetype-level perturbation data, re-examined.** `attractors_filtered.txt`
+(the basin set used for every perturbation/walk analysis on this network) has 5 usable
+basins: `Generalist_NE`, `Generalist_nonNE`, `Arc_3`, `Arc_5`, `Arc_6` (`Arc_1`/`2`/`4`,
+including an ad-hoc, unreplicated `Arc_1`="Intermediate" label found in one unrelated
+plotting script, were excluded by the existing filtering step and have no computed
+perturbation data). RORA_RORB knockdown significantly destabilizes `Generalist_NE`
+(-0.334) and `Arc_5` (-0.415) per `6667/perturbations/.../perturbation_stats.csv`, and
+existing long-walk population dynamics (`6667/walks/long_walks/4000_step_walks/`) starting
+from `Arc_5` show unperturbed occupancy of 12.8% `Arc_5`/9.7% `Generalist_NE` collapsing to
+2.8%/0.6% under knockdown — a near-total collapse of NE-basin occupancy. No walk starting
+from `Generalist_NE` itself was ever aggregated (documented as a future option, not
+executed, per direct feedback — the Arc archetypes are the more interesting comparison
+point and this isn't needed for what follows).
+
+**(B) Seeding BoBa-T's actual walk/perturbation machinery with organoid_shGFP's own real
+cells, under GEMM's fitted rules — result: the destabilization direction reproduces.**
+Bypassed the `parent_heatmap` continuous-validation machinery entirely and used
+`bb.rw.long_random_walks` (the discrete async walk BoBa-T actually uses for perturbation
+simulation) seeded from real organoid data: binarized organoid_shGFP cells grouped by
+organoid's own `predicted.id` label (Seurat-based archetype calls), collapsed to one
+representative discrete state per label (`bb.tl.find_avg_states`), then walked forward
+4000 steps x 100 iterations under GEMM's fitted rules — unperturbed and with `RORA_RORB`
+clamped off for the whole walk — measuring occupancy against GEMM's fixed 5-basin
+`attractor_dict` (same basins as (A), not a new organoid-specific attractor set).
+
+Face-validity check first: organoid's own `Neuroendocrine1`-labeled state turns out to be
+*closer* to GEMM's `Generalist_NE`/`Arc_5` basins (Hamming distance 10) than organoid's own
+`Generalist NE`-labeled state is (distance 20) — organoid's broader "Generalist NE" label
+apparently captures a less extreme NE identity than its "Neuroendocrine1" label does, at
+least in this Boolean-state-space sense.
+
+Result, starting from `Neuroendocrine1` (the organoid state closest to GEMM's NE basins):
+
+| basin | unperturbed | RORA_RORB knockdown |
+|---|---|---|
+| `Generalist_NE` | 10.46% | 0.40% |
+| `Arc_5` | 4.48% | 0.16% |
+| `Generalist_nonNE` | 0.16% | 0.42% |
+
+A near-total collapse of NE-basin occupancy — directionally, and even proportionally,
+comparable to GEMM's own native `Arc_5`-seeded result in (A). Starting from organoid's
+`Intermediate`-labeled state shows the same qualitative pattern one step further along:
+knockdown *decreases* `Generalist_NE`/`Arc_3`/`Arc_6` occupancy (1.65%→0.83%,
+1.76%→0.68%, 1.53%→1.01%) while *increasing* `Generalist_nonNE` (7.37%→8.20%) — i.e. even
+starting already past "NE," knockdown pushes further away from NE-associated basins and
+toward the nonNE basin. **Starting from organoid's own literal `Generalist NE`-labeled
+state gives the same direction but a much smaller magnitude** (1.43%→0.21% `Generalist_NE`),
+consistent with that state simply starting farther from any GEMM basin to begin with (per
+the face-validity check).
+
+**Honest caveat**: none of the organoid-seeded walks land cleanly on a *specific* named
+alternative GEMM basin — occupancy mostly shifts into `"None"` (unclassified state-space
+region, e.g. `Neuroendocrine1`'s `None` share rises from 84.0% to 98.4%) rather than
+converging on `Generalist_nonNE`/`Arc_3` specifically. Consistent with §9's rewiring
+finding: **the destabilization *direction* transfers from GEMM to organoid's real states,
+but organoid's states don't correspond closely enough to any single GEMM-defined basin for
+the walk to converge cleanly onto a named alternative.** This is a more nuanced, but still
+genuinely positive, result than a clean "NE → Intermediate" attractor-to-attractor
+transition would be.
+
+**(C) Independent, non-simulation check in organoid's own real data — result: a real,
+substantial, statistically robust shift.** Fully decoupled from BoBa-T's rules: compared
+organoid's own Seurat-based archetype metadata across the real experimental conditions
+(`condition`: shGFP vs. shRORB1 vs. shRORB2). Every NE-ness score (`prediction.score.
+Generalist.NE`, `NE1_score1`, `NE2_score1`) decreases from shGFP to both shRORB
+conditions; every Intermediate-ness score except one near-zero exception increases;
+all 10 comparisons remain significant after Bonferroni correction. Most strikingly, the
+categorical `predicted.id` proportions show a clean, dose-like gradient:
+
+| `predicted.id` | shGFP | shRORB1 | shRORB2 |
+|---|---|---|---|
+| `Generalist NE` | 75.0% | 67.1% | 63.7% |
+| `Intermediate` | 4.8% | 14.4% | 29.3% |
+
+A negative control (randomly splitting shGFP into two halves and running the identical
+test) gives 0/5 significant results, confirming this isn't a large-N statistical
+artifact.
+
+**Overall verdict**: (C) firmly confirms the premise — organoid's real RORB knockdown
+data does show a real, substantial, dose-like shift from NE-like toward Intermediate
+identity. (B) shows GEMM's fitted rules, applied to organoid's own real starting states
+(not just GEMM's own attractor states), correctly reproduce the *direction* of
+NE-basin destabilization under knockdown — a genuine, non-trivial confirmation that the
+rule set's perturbation-response logic transfers at the archetype level, even though
+§9 already established it doesn't transfer at the absolute-expression-value level. What
+doesn't fully resolve: whether the walks' destination specifically corresponds to
+organoid's own "Intermediate" identity, since (i) GEMM's usable basin set has no clean
+"Intermediate" analog (`Arc_1` was filtered out, per (A)), and (ii) the simulated walks
+mostly move into unclassified state-space rather than a named basin. The direction
+matches; the specific destination isn't independently verifiable against GEMM's current
+attractor set.
+
+Outputs: `organoid_seeded_walk_basin_occupancy.csv` (simulation), `organoid_rorb_
+archetype_shift.csv`, `organoid_predicted_id_proportions_by_condition.csv` (real data).

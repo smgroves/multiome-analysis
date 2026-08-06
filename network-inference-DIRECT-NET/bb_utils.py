@@ -38,7 +38,7 @@ def make_percentage_popd_df(
     columns.append("None")
     columns.append("Start")
     columns.append("Walk")
-    popd_df = pd.DataFrame(columns=columns)
+    popd_rows = []
 
     reverse_attr_dist = {}
     for k, v in attractor_dict.items():
@@ -75,11 +75,13 @@ def make_percentage_popd_df(
                         reach_states_dict[closest_att] += 1
                     else:
                         reach_states_dict["None"] += 1
-                popd_df = popd_df.append(reach_states_dict, ignore_index=True)
+                popd_rows.append(reach_states_dict)
                 cnt += 1
                 line = file.readline()
                 if cnt == num_walks + 1:
                     break
+
+    popd_df = pd.DataFrame(popd_rows, columns=columns)
 
     if perturbation is None:
         outfile = f"{walk_path}/{starting_attractors}_radius_{radius}_percentages.csv"
