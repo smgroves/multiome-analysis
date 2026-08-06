@@ -93,3 +93,7 @@ benchmarking/data/scenic/
 # Preprocessed genome-wide SCLC/AA expression data (~206MB), derived from the source Box
 # multiome dataset — see preprocess_sclc_full_6667.py to regenerate from Box.
 benchmarking/data/sclc_full/
+*.feather
+*.tbl
+*.mtx
+benchmarking/data/tko_full/raw_counts_hvg.csv

@@ -1,0 +1,11 @@
+validation_set,brcd,r2,roc_auc_score,f1,accuracy
+mets_compiled,6667,0.0193,0.6582,0.6176,0.6423
+mets_compiled,6668,-0.0022,0.6555,0.6351,0.6416
+organoid,6667,0.0996,0.6944,0.6583,0.6713
+organoid,6668,0.0665,0.6901,0.66,0.6655
+organoid_shGFP,6667,0.0232,0.66,0.6237,0.6412
+organoid_shGFP,6668,0.004,0.6602,0.6384,0.6401
+organoid_shRORB1,6667,0.1508,0.7138,0.6721,0.6836
+organoid_shRORB1,6668,0.1043,0.7048,0.6748,0.6776
+organoid_shRORB2,6667,0.1618,0.7239,0.6773,0.6926
+organoid_shRORB2,6668,0.1276,0.7139,0.6806,0.6874

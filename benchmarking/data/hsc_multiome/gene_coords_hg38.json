@@ -1,0 +1,62 @@
+{
+  "GATA1": {
+    "chrom": "X",
+    "start": 48783122,
+    "end": 48794311,
+    "strand": 1
+  },
+  "GATA2": {
+    "chrom": "3",
+    "start": 128479423,
+    "end": 128493208,
+    "strand": -1
+  },
+  "SPI1": {
+    "chrom": "11",
+    "start": 47354860,
+    "end": 47409369,
+    "strand": -1
+  },
+  "FLI1": {
+    "chrom": "11",
+    "start": 128686535,
+    "end": 128813267,
+    "strand": 1
+  },
+  "CEBPA": {
+    "chrom": "19",
+    "start": 33299934,
+    "end": 33302534,
+    "strand": -1
+  },
+  "KLF1": {
+    "chrom": "19",
+    "start": 12884405,
+    "end": 12887201,
+    "strand": -1
+  },
+  "GFI1": {
+    "chrom": "1",
+    "start": 92472360,
+    "end": 92486925,
+    "strand": -1
+  },
+  "ZFPM1": {
+    "chrom": "16",
+    "start": 88453208,
+    "end": 88537031,
+    "strand": 1
+  },
+  "TAL1": {
+    "chrom": "1",
+    "start": 47216290,
+    "end": 47232225,
+    "strand": -1
+  },
+  "JUN": {
+    "chrom": "1",
+    "start": 58776845,
+    "end": 58784048,
+    "strand": -1
+  }
+}
