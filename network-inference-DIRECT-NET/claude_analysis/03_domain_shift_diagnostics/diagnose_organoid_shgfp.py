@@ -14,7 +14,7 @@ Three questions:
    (unseen GEMM-derived tumors, still in vivo) in 6667/validation/allografts/*/.
 
 Run in bobaT_env_py3.13:
-    /opt/anaconda3/envs/bobaT_env_py3.13/bin/python diagnose_organoid_shgfp.py
+    /opt/anaconda3/envs/bobaT_env_py3.13/bin/python claude_analysis/03_domain_shift_diagnostics/diagnose_organoid_shgfp.py
 """
 
 import glob

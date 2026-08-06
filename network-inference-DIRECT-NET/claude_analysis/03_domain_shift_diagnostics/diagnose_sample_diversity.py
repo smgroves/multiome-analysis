@@ -16,7 +16,7 @@ Tests this directly: per-sample mean per-gene raw standard deviation (relative t
 training data's own), correlated against mean R2 and against the sign-flip-rate metric.
 
 Run in bobaT_env_py3.13:
-    /opt/anaconda3/envs/bobaT_env_py3.13/bin/python diagnose_sample_diversity.py
+    /opt/anaconda3/envs/bobaT_env_py3.13/bin/python claude_analysis/03_domain_shift_diagnostics/diagnose_sample_diversity.py
 """
 
 import glob

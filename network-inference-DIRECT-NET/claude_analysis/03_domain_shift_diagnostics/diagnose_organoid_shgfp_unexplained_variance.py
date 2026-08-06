@@ -6,7 +6,7 @@ correlates each top PC's per-cell scores against every available metadata column
 that axis actually is.
 
 Run in bobaT_env_py3.13:
-    /opt/anaconda3/envs/bobaT_env_py3.13/bin/python diagnose_organoid_shgfp_unexplained_variance.py
+    /opt/anaconda3/envs/bobaT_env_py3.13/bin/python claude_analysis/03_domain_shift_diagnostics/diagnose_organoid_shgfp_unexplained_variance.py
 """
 
 import numpy as np

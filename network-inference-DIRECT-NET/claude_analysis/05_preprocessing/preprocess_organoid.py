@@ -21,7 +21,7 @@ organoid experiment, directly relevant as external validation for boba-T's RORA_
 perturbation predictions (see 6667/perturbations, walk_to_basin knockdowns).
 
 Run in bobaT_env (has `magic`; celloracle_env has anndata but not `magic`):
-    /opt/anaconda3/envs/bobaT_env/bin/python preprocess_organoid.py
+    /opt/anaconda3/envs/bobaT_env/bin/python claude_analysis/05_preprocessing/preprocess_organoid.py
 """
 
 import os

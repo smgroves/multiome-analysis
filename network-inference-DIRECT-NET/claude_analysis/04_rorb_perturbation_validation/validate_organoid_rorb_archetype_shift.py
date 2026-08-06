@@ -7,7 +7,7 @@ check of the premise itself, separate from whether GEMM's simulated dynamics rep
 (see run_organoid_perturbation_walks.py for that side).
 
 Run in bobaT_env_py3.13:
-    /opt/anaconda3/envs/bobaT_env_py3.13/bin/python validate_organoid_rorb_archetype_shift.py
+    /opt/anaconda3/envs/bobaT_env_py3.13/bin/python claude_analysis/04_rorb_perturbation_validation/validate_organoid_rorb_archetype_shift.py
 """
 
 import os

@@ -20,7 +20,7 @@ baseline state, which direction does this gene move" -- compared against the REA
 observed shift (organoid_shRORB1/2's actual mean minus organoid_shGFP's actual mean).
 
 Run in bobaT_env_py3.13:
-    /opt/anaconda3/envs/bobaT_env_py3.13/bin/python diagnose_rorb_perturbation_transfer.py
+    /opt/anaconda3/envs/bobaT_env_py3.13/bin/python claude_analysis/04_rorb_perturbation_validation/diagnose_rorb_perturbation_transfer.py
 """
 
 import os

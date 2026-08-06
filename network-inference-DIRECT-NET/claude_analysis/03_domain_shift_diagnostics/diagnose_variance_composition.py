@@ -16,7 +16,7 @@ then correlates both against mean R2 (and against §6's raw diversity number) to
 "the right kind of variance" is a better predictor than "how much variance."
 
 Run in bobaT_env_py3.13:
-    /opt/anaconda3/envs/bobaT_env_py3.13/bin/python diagnose_variance_composition.py
+    /opt/anaconda3/envs/bobaT_env_py3.13/bin/python claude_analysis/03_domain_shift_diagnostics/diagnose_variance_composition.py
 """
 
 import glob

@@ -15,7 +15,7 @@ more readily. No BoBa-T source change -- this is a multiome-side preprocessing s
 output feeds into bb.load.load_data with norm=None (pass-through, already scaled).
 
 Run in bobaT_env_py3.13:
-    /opt/anaconda3/envs/bobaT_env_py3.13/bin/python build_global_reference_norm.py
+    /opt/anaconda3/envs/bobaT_env_py3.13/bin/python claude_analysis/02_hyperparameter_experiments/build_global_reference_norm.py
 """
 
 import os

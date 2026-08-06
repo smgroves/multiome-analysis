@@ -9,7 +9,7 @@ rather than being spread uniformly across the population -- the signature you'd 
 culture-stress or a specific archetype, not the fitted rule itself, is driving the error.
 
 Run in bobaT_env_py3.13:
-    /opt/anaconda3/envs/bobaT_env_py3.13/bin/python diagnose_domain_shift_6667.py
+    /opt/anaconda3/envs/bobaT_env_py3.13/bin/python claude_analysis/03_domain_shift_diagnostics/diagnose_domain_shift_6667.py
 """
 
 import os

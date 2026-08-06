@@ -8,7 +8,7 @@ walks (thin) + mean (bold), knockdown (color) vs. unperturbed negative control (
 for each of the three NE-starting organoid populations.
 
 Run in bobaT_env_py3.13:
-    /opt/anaconda3/envs/bobaT_env_py3.13/bin/python diagnose_walk_axis_position.py
+    /opt/anaconda3/envs/bobaT_env_py3.13/bin/python claude_analysis/04_rorb_perturbation_validation/diagnose_walk_axis_position.py
 """
 
 import ast

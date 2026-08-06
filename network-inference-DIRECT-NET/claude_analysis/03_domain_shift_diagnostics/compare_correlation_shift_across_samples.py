@@ -16,7 +16,7 @@ relationship, not in a separate in-vitro category. The worst human tumor sample 
 and worst allografts (mt2, mt3) show comparably poor correlation preservation.
 
 Run in bobaT_env_py3.13:
-    /opt/anaconda3/envs/bobaT_env_py3.13/bin/python compare_correlation_shift_across_samples.py
+    /opt/anaconda3/envs/bobaT_env_py3.13/bin/python claude_analysis/03_domain_shift_diagnostics/compare_correlation_shift_across_samples.py
 """
 
 import glob

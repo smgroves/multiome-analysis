@@ -6,7 +6,7 @@ organoid_shGFP, the null/control condition this whole test was designed to diagn
 writeup this test is based on.
 
 Run in bobaT_env_py3.13:
-    /opt/anaconda3/envs/bobaT_env_py3.13/bin/python compare_6667_6668_normalization.py
+    /opt/anaconda3/envs/bobaT_env_py3.13/bin/python claude_analysis/01_normalization_sweep/compare_6667_6668_normalization.py
 """
 
 import os

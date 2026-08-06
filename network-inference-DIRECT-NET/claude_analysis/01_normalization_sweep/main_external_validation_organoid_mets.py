@@ -17,12 +17,12 @@ identical to before; pass a second arg to score a different brcd's rules, e.g. t
 node_normalization=0.4 hyperparameter-test run -- norm here must match whatever
 node_normalization that brcd's rules were fit with, since it controls how this script's
 own load_data() binarizes the external data before scoring):
-    /opt/anaconda3/envs/bobaT_env_py3.13/bin/python main_external_validation_organoid_mets.py organoid
-    /opt/anaconda3/envs/bobaT_env_py3.13/bin/python main_external_validation_organoid_mets.py mets_compiled
-    /opt/anaconda3/envs/bobaT_env_py3.13/bin/python main_external_validation_organoid_mets.py organoid_shGFP
-    /opt/anaconda3/envs/bobaT_env_py3.13/bin/python main_external_validation_organoid_mets.py organoid_shRORB1
-    /opt/anaconda3/envs/bobaT_env_py3.13/bin/python main_external_validation_organoid_mets.py organoid_shRORB2
-    /opt/anaconda3/envs/bobaT_env_py3.13/bin/python main_external_validation_organoid_mets.py organoid_shGFP 6668 0.4
+    /opt/anaconda3/envs/bobaT_env_py3.13/bin/python claude_analysis/01_normalization_sweep/main_external_validation_organoid_mets.py organoid
+    /opt/anaconda3/envs/bobaT_env_py3.13/bin/python claude_analysis/01_normalization_sweep/main_external_validation_organoid_mets.py mets_compiled
+    /opt/anaconda3/envs/bobaT_env_py3.13/bin/python claude_analysis/01_normalization_sweep/main_external_validation_organoid_mets.py organoid_shGFP
+    /opt/anaconda3/envs/bobaT_env_py3.13/bin/python claude_analysis/01_normalization_sweep/main_external_validation_organoid_mets.py organoid_shRORB1
+    /opt/anaconda3/envs/bobaT_env_py3.13/bin/python claude_analysis/01_normalization_sweep/main_external_validation_organoid_mets.py organoid_shRORB2
+    /opt/anaconda3/envs/bobaT_env_py3.13/bin/python claude_analysis/01_normalization_sweep/main_external_validation_organoid_mets.py organoid_shGFP 6668 0.4
 """
 
 import os

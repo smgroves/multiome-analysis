@@ -23,7 +23,7 @@ should not be over-interpreted as attractors reached. Only the 5 genuine GEMM ba
 columns (+ "None") are meaningful for the comparison this script is designed to make.
 
 Run in bobaT_env_py3.13:
-    /opt/anaconda3/envs/bobaT_env_py3.13/bin/python run_organoid_perturbation_walks.py
+    /opt/anaconda3/envs/bobaT_env_py3.13/bin/python claude_analysis/04_rorb_perturbation_validation/run_organoid_perturbation_walks.py
 """
 
 import os

@@ -14,7 +14,7 @@ raises R2 (rather than just making wrong predictions less confidently wrong) is 
 empirical question this script tests directly.
 
 Run in bobaT_env_py3.13:
-    /opt/anaconda3/envs/bobaT_env_py3.13/bin/python apply_global_reference_norm_external.py <sample>
+    /opt/anaconda3/envs/bobaT_env_py3.13/bin/python claude_analysis/02_hyperparameter_experiments/apply_global_reference_norm_external.py <sample>
     e.g. organoid_shGFP, organoid_shRORB1, organoid_shRORB2, organoid, mets_compiled
 """
 

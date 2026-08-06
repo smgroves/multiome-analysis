@@ -23,7 +23,7 @@ would mean the logic itself transfers and the R2 shortfall is a composition effe
 leaf-conditional agreement would mean the logic genuinely differs (real rewiring).
 
 Run in bobaT_env_py3.13:
-    /opt/anaconda3/envs/bobaT_env_py3.13/bin/python diagnose_leaf_conditional_agreement.py
+    /opt/anaconda3/envs/bobaT_env_py3.13/bin/python claude_analysis/03_domain_shift_diagnostics/diagnose_leaf_conditional_agreement.py
 """
 
 import os

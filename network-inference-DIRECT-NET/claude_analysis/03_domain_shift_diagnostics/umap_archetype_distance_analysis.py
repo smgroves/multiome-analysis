@@ -20,7 +20,7 @@ mets_compiled):
    of 6667's 8 characterized GEMM attractors (6667/attractors/average_states.txt).
 
 Run in bobaT_env_py3.13 (needs `pip install umap-learn`, already present):
-    /opt/anaconda3/envs/bobaT_env_py3.13/bin/python umap_archetype_distance_analysis.py
+    /opt/anaconda3/envs/bobaT_env_py3.13/bin/python claude_analysis/03_domain_shift_diagnostics/umap_archetype_distance_analysis.py
 """
 
 import glob

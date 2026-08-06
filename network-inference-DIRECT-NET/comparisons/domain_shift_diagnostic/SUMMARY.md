@@ -1,7 +1,8 @@
 # Headline summary: BoBa-T hyperparameters, domain shift, and RORB perturbation validation
 
-Full detail in `FINDINGS.md` (11 sections) and `../../BoBa-T_hyperparameters.md`. This is
-the condensed version.
+Full detail in `FINDINGS.md` (11 sections) and `../../claude_analysis/BoBa-T_hyperparameters.md`.
+This is the condensed version. *(Scripts referenced below live under
+`network-inference-DIRECT-NET/claude_analysis/`, organized by phase.)*
 
 ## 1. The organoid null-condition shortfall is not a fittable hyperparameter
 

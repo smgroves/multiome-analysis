@@ -22,7 +22,7 @@ identical to bb.utils.hamming_idx(x, y, n) for x, y < 2**n, but far faster in pu
 -- lets this run on the full walk trajectories without subsampling.
 
 Run in bobaT_env_py3.13:
-    /opt/anaconda3/envs/bobaT_env_py3.13/bin/python diagnose_walk_archetype_distance.py
+    /opt/anaconda3/envs/bobaT_env_py3.13/bin/python claude_analysis/04_rorb_perturbation_validation/diagnose_walk_archetype_distance.py
 """
 
 import ast

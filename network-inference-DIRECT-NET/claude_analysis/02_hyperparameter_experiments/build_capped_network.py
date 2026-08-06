@@ -12,7 +12,7 @@ regulators, drops the rest. This is a pure prefilter on the edge list; no BoBa-T
 change.
 
 Run in bobaT_env_py3.13:
-    /opt/anaconda3/envs/bobaT_env_py3.13/bin/python build_capped_network.py
+    /opt/anaconda3/envs/bobaT_env_py3.13/bin/python claude_analysis/02_hyperparameter_experiments/build_capped_network.py
 """
 
 import os

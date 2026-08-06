@@ -12,7 +12,7 @@ a norm=0.3-fitted rule for that gene. Two diagnostics per gene, on GEMM training
    mode described in BoBa-T_hyperparameters.md sec 4.
 
 Run in bobaT_env_py3.13 (needs `pip install diptest`):
-    /opt/anaconda3/envs/bobaT_env_py3.13/bin/python screen_bimodality_spread.py
+    /opt/anaconda3/envs/bobaT_env_py3.13/bin/python claude_analysis/02_hyperparameter_experiments/screen_bimodality_spread.py
 """
 
 import os

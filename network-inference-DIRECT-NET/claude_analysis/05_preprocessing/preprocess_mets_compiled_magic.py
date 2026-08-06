@@ -11,7 +11,7 @@ already look like they were QC'd before this object was saved, so this step is e
 drop few or zero cells -- included anyway per explicit instruction to not skip it.
 
 Run in bobaT_env (has `magic`):
-    /opt/anaconda3/envs/bobaT_env/bin/python preprocess_mets_compiled_magic.py
+    /opt/anaconda3/envs/bobaT_env/bin/python claude_analysis/05_preprocessing/preprocess_mets_compiled_magic.py
 """
 
 import magic

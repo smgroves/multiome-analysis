@@ -15,7 +15,7 @@ step of closest approach to Arc_1 earlier than the step of closest approach to t
 cluster (Wilcoxon signed-rank, paired within each walk)?
 
 Run in bobaT_env_py3.13:
-    /opt/anaconda3/envs/bobaT_env_py3.13/bin/python diagnose_walk_temporal_ordering.py
+    /opt/anaconda3/envs/bobaT_env_py3.13/bin/python claude_analysis/04_rorb_perturbation_validation/diagnose_walk_temporal_ordering.py
 """
 
 import ast

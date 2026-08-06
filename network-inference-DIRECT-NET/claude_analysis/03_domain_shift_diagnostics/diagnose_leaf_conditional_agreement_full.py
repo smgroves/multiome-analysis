@@ -14,7 +14,7 @@ Vectorized (bit bit-position weights instead of per-cell string ops) since this 
 53 genes x ~33 samples, some with tens of thousands of cells.
 
 Run in bobaT_env_py3.13:
-    /opt/anaconda3/envs/bobaT_env_py3.13/bin/python diagnose_leaf_conditional_agreement_full.py
+    /opt/anaconda3/envs/bobaT_env_py3.13/bin/python claude_analysis/03_domain_shift_diagnostics/diagnose_leaf_conditional_agreement_full.py
 """
 
 import glob

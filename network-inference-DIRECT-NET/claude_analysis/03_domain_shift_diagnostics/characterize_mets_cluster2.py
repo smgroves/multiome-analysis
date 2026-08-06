@@ -12,7 +12,7 @@ mets_compiled's worst-validating genes. Two questions:
    better explained by a technical confound the model was never expected to predict?
 
 Run in bobaT_env_py3.13:
-    /opt/anaconda3/envs/bobaT_env_py3.13/bin/python characterize_mets_cluster2.py
+    /opt/anaconda3/envs/bobaT_env_py3.13/bin/python claude_analysis/03_domain_shift_diagnostics/characterize_mets_cluster2.py
 """
 
 import os
