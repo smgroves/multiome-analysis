@@ -7,12 +7,19 @@ explicitly on the y-axis. Plots this position over walk steps for all 100 indivi
 walks (thin) + mean (bold), knockdown (color) vs. unperturbed negative control (grey),
 for each of the three NE-starting organoid populations.
 
+Default (no CLI args) reproduces the original RORA_RORB-knockdown-vs-unperturbed-only
+plot; pass "ascl1" to additionally overlay the ASCL1-knockout positive control (a
+canonical NE master regulator, so its knockout should drive an unambiguous, large
+NE -> nonNE shift) -- written to separate, differently-named outputs so neither version
+overwrites the other.
+
 Run in bobaT_env_py3.13:
-    /opt/anaconda3/envs/bobaT_env_py3.13/bin/python claude_analysis/04_rorb_perturbation_validation/diagnose_walk_axis_position.py
+    /opt/anaconda3/envs/bobaT_env_py3.13/bin/python claude_analysis/04_rorb_perturbation_validation/diagnose_walk_axis_position.py [ascl1]
 """
 
 import ast
 import os
+import sys
 
 import matplotlib
 matplotlib.use("Agg")
@@ -38,6 +45,8 @@ ORGANOID_STARTS = {
     "Neuroendocrine2": 17609338899731,
 }
 STEP_STRIDE = 10
+WITH_ASCL1 = "ascl1" in [a.lower() for a in sys.argv[1:]]
+OUT_SUFFIX = "_with_ASCL1" if WITH_ASCL1 else ""
 # Other archetypes' known axis positions (from FINDINGS.md sec 11), for reference lines.
 # Arc_N -> biological name mapping per user: Arc_1=Intermediate, Arc_2=nonNE2,
 # Arc_3=Secretory, Arc_4=nonNE1, Arc_5=NE1, Arc_6=NE2.
@@ -104,7 +113,21 @@ def main():
         _, p_final = mannwhitneyu(kd_final, unpert_final, alternative="two-sided")
         _, p_walkmean = mannwhitneyu(kd_walkmean, unpert_walkmean, alternative="two-sided")
 
+        if WITH_ASCL1:
+            walks_ascl1 = parse_walk_file(f"{WALK_PATH}/{start_idx}/results_ASCL1_kd.csv")
+            ascl1_pos = [position_series(w, ne_idx, mask, n_axis_genes) for w in walks_ascl1]
+            ascl1_mean = np.mean(ascl1_pos, axis=0)
+            ascl1_final = np.array([c[-1] for c in ascl1_pos])
+            ascl1_walkmean = np.array([c.mean() for c in ascl1_pos])
+            _, p_final_ascl1 = mannwhitneyu(ascl1_final, unpert_final, alternative="two-sided")
+            _, p_walkmean_ascl1 = mannwhitneyu(ascl1_walkmean, unpert_walkmean, alternative="two-sided")
+
         plt.figure(figsize=(9.5, 5.5))
+        if WITH_ASCL1:
+            for curve in ascl1_pos:
+                plt.plot(step_axis, curve, color="tab:red", alpha=0.08, linewidth=0.8, zorder=1)
+            plt.plot(step_axis, ascl1_mean, color="tab:red", linewidth=2.5,
+                      label=f"organoid '{label}' start, ASCL1 knockout (positive control, mean)", zorder=3)
         for curve in kd_pos:
             plt.plot(step_axis, curve, color="tab:purple", alpha=0.08, linewidth=0.8, zorder=1)
         plt.plot(step_axis, kd_mean, color="tab:purple", linewidth=2.5,
@@ -128,21 +151,36 @@ def main():
         plt.ylim(-5, 112)
         plt.legend(loc="lower left", fontsize=8.5)
 
-        stats_text = (
-            f"Mann-Whitney U, knockdown vs. unperturbed (n=100 walks each): "
-            f"final-step position {kd_final.mean():.1f} vs. {unpert_final.mean():.1f}, p={p_final:.1e}; "
-            f"whole-walk mean position {kd_walkmean.mean():.1f} vs. {unpert_walkmean.mean():.1f}, p={p_walkmean:.1e}"
-        )
-        plt.gcf().text(0.5, -0.02, stats_text, ha="center", va="top", fontsize=7.5,
+        if WITH_ASCL1:
+            stats_text = (
+                f"Mann-Whitney U vs. unperturbed (n=100 walks each) -- RORA_RORB kd: final-step "
+                f"{kd_final.mean():.1f} vs. {unpert_final.mean():.1f}, p={p_final:.1e}; whole-walk mean "
+                f"{kd_walkmean.mean():.1f} vs. {unpert_walkmean.mean():.1f}, p={p_walkmean:.1e}\n"
+                f"ASCL1 ko (positive control): final-step {ascl1_final.mean():.1f} vs. {unpert_final.mean():.1f}, "
+                f"p={p_final_ascl1:.1e}; whole-walk mean {ascl1_walkmean.mean():.1f} vs. {unpert_walkmean.mean():.1f}, "
+                f"p={p_walkmean_ascl1:.1e}"
+            )
+            rect = [0, 0.10, 1, 1]
+            text_y = -0.04
+        else:
+            stats_text = (
+                f"Mann-Whitney U, knockdown vs. unperturbed (n=100 walks each): "
+                f"final-step position {kd_final.mean():.1f} vs. {unpert_final.mean():.1f}, p={p_final:.1e}; "
+                f"whole-walk mean position {kd_walkmean.mean():.1f} vs. {unpert_walkmean.mean():.1f}, p={p_walkmean:.1e}"
+            )
+            rect = [0, 0.06, 1, 1]
+            text_y = -0.02
+        plt.gcf().text(0.5, text_y, stats_text, ha="center", va="top", fontsize=7.5,
                         bbox=dict(boxstyle="round", facecolor="white", edgecolor="0.7"))
-        plt.tight_layout(rect=[0, 0.06, 1, 1])
+        plt.tight_layout(rect=rect)
         for ext in ["png", "pdf"]:
-            plt.savefig(f"{OUT_DIR}/walk_axis_position_{label.replace(' ', '_')}.{ext}", dpi=150, bbox_inches="tight")
+            plt.savefig(f"{OUT_DIR}/walk_axis_position_{label.replace(' ', '_')}{OUT_SUFFIX}.{ext}", dpi=150, bbox_inches="tight")
         plt.close()
-        print(f"Wrote walk_axis_position_{label.replace(' ', '_')}.{{png,pdf}} "
+        extra = f", ascl1 mean start={ascl1_mean[0]:.1f}, end={ascl1_mean[-1]:.1f}, p_final_ascl1={p_final_ascl1:.2e}, p_walkmean_ascl1={p_walkmean_ascl1:.2e}" if WITH_ASCL1 else ""
+        print(f"Wrote walk_axis_position_{label.replace(' ', '_')}{OUT_SUFFIX}.{{png,pdf}} "
               f"(kd mean start={kd_mean[0]:.1f}, end={kd_mean[-1]:.1f}; "
               f"unpert mean start={unpert_mean[0]:.1f}, end={unpert_mean[-1]:.1f}; "
-              f"p_final={p_final:.2e}, p_walkmean={p_walkmean:.2e})")
+              f"p_final={p_final:.2e}, p_walkmean={p_walkmean:.2e}{extra})")
 
 
 if __name__ == "__main__":

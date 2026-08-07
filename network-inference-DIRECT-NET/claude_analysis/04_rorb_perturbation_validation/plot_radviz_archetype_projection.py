@@ -28,12 +28,17 @@ which is a different construction than literal Hamming closeness. Kept as-is per
 decision -- an honest, different, and itself informative view of the discrete state space,
 not force-fit to visually match the reference.
 
-Plots simulated walk trajectories only (organoid 'Neuroendocrine1' start, knockdown vs.
-unperturbed): all 100 individual walks per condition (thin, translucent) plus the bold
-mean path (time-colored, light->dark = early->late).
+Plots simulated walk trajectories only (organoid 'Neuroendocrine1' start): all individual
+walks per condition (thin, translucent) plus the bold mean path (time-colored, light->dark
+= early->late). Default (no CLI args) reproduces the original RORA_RORB-knockdown-vs-
+unperturbed-only plot; pass "ascl1" to additionally overlay the ASCL1-knockout positive
+control (a canonical NE master regulator, so its knockout is expected to drive an
+unambiguous, strong NE -> nonNE shift) -- written to a separate, differently-named output
+so neither version overwrites the other. Both conditions start from the identical
+organoid-derived state (NE1_START_IDX below) -- only the off_nodes clamp differs.
 
 Run in bobaT_env_py3.13:
-    /opt/anaconda3/envs/bobaT_env_py3.13/bin/python claude_analysis/04_rorb_perturbation_validation/plot_radviz_archetype_projection.py
+    /opt/anaconda3/envs/bobaT_env_py3.13/bin/python claude_analysis/04_rorb_perturbation_validation/plot_radviz_archetype_projection.py [T] [ascl1]
 """
 
 import ast
@@ -44,6 +49,7 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
+from matplotlib.patches import Rectangle
 import numpy as np
 
 if not hasattr(np, "trapz"):
@@ -60,8 +66,13 @@ OUT_DIR = f"{DIR_PREFIX}/comparisons/domain_shift_diagnostic_and_organoid_walks"
 WALK_PATH = f"{DIR_PREFIX}/6667/organoid_seeded/walks/long_walks/4000_step_walks"
 NE1_START_IDX = 5500048749758430
 STEP_STRIDE = 20
-T = float(sys.argv[1]) if len(sys.argv) > 1 else 10.0  # softmax temperature (bits); pass as CLI arg to override
-OUT_SUFFIX = f"_T{sys.argv[1]}" if len(sys.argv) > 1 else ""  # keeps the default-T output file untouched
+
+_cli_args = [a.lower() for a in sys.argv[1:]]
+WITH_ASCL1 = "ascl1" in _cli_args
+_t_args = [a for a in _cli_args if a.replace(".", "", 1).isdigit()]
+T = float(_t_args[0]) if _t_args else 10.0  # softmax temperature (bits); pass a number as a CLI arg to override
+# Keeps the default-T, RORB-only output file untouched when adding T or ASCL1 variants.
+OUT_SUFFIX = (f"_T{_t_args[0]}" if _t_args else "") + ("_with_ASCL1" if WITH_ASCL1 else "")
 
 ANCHOR_ORDER = ["nonNE1", "Generalist_nonNE", "NE1", "NE2", "Secretory", "nonNE2"]
 ANCHOR_ARC_MAP = {
@@ -111,8 +122,11 @@ def main():
     anchor_xy = hexagon_anchor_xy()
 
     # --- Simulated walk trajectories: organoid Neuroendocrine1 start ---
+    # ASCL1 ko (if enabled) starts from the identical NE1_START_IDX state -- only the
+    # off_nodes clamp passed to long_random_walks differs between conditions.
     walks_kd = parse_walk_file(f"{WALK_PATH}/{NE1_START_IDX}/results_RORA_RORB_kd.csv")
     walks_unpert = parse_walk_file(f"{WALK_PATH}/{NE1_START_IDX}/results.csv")
+    walks_ascl1 = parse_walk_file(f"{WALK_PATH}/{NE1_START_IDX}/results_ASCL1_kd.csv") if WITH_ASCL1 else None
 
     def project_all(walks):
         return [np.array([project(s, archetype_idx, anchor_xy) for s in w[::STEP_STRIDE]]) for w in walks]
@@ -120,17 +134,24 @@ def main():
     def mean_path(paths):
         return np.mean(np.stack(paths, axis=0), axis=0)
 
-    print(f"Projecting {len(walks_kd)} knockdown + {len(walks_unpert)} unperturbed walks...")
+    print(f"Projecting {len(walks_kd)} knockdown"
+          + (f" + {len(walks_ascl1)} ASCL1 ko" if WITH_ASCL1 else "")
+          + f" + {len(walks_unpert)} unperturbed walks...")
     kd_paths = project_all(walks_kd)
     unpert_paths = project_all(walks_unpert)
     kd_mean = mean_path(kd_paths)
     unpert_mean = mean_path(unpert_paths)
+    all_paths = kd_paths + unpert_paths
+    if WITH_ASCL1:
+        ascl1_paths = project_all(walks_ascl1)
+        ascl1_mean = mean_path(ascl1_paths)
+        all_paths = all_paths + ascl1_paths
 
-    # Zoom region for the inset: bounding box of all individual walk paths (both conditions),
+    # Zoom region for the inset: bounding box of all individual walk paths (all conditions),
     # padded -- computed from the ACTUAL data, not eyeballed, so the zoom box is honest about
     # what it covers relative to the full hexagon.
-    all_x = np.concatenate([p[:, 0] for p in kd_paths + unpert_paths])
-    all_y = np.concatenate([p[:, 1] for p in kd_paths + unpert_paths])
+    all_x = np.concatenate([p[:, 0] for p in all_paths])
+    all_y = np.concatenate([p[:, 1] for p in all_paths])
     pad_x = 0.08 * (all_x.max() - all_x.min())
     pad_y = 0.08 * (all_y.max() - all_y.min())
     zoom_xlim = (all_x.min() - pad_x, all_x.max() + pad_x)
@@ -154,9 +175,16 @@ def main():
             target_ax.plot(p[:, 0], p[:, 1], color="0.5", linewidth=spaghetti_lw, alpha=0.08, zorder=3)
         for p in kd_paths:
             target_ax.plot(p[:, 0], p[:, 1], color="tab:purple", linewidth=spaghetti_lw, alpha=0.08, zorder=3)
+        if WITH_ASCL1:
+            for p in ascl1_paths:
+                target_ax.plot(p[:, 0], p[:, 1], color="tab:red", linewidth=spaghetti_lw, alpha=0.08, zorder=3)
 
         # Bold mean path per condition, time-colored light->dark = early->late.
-        for path, cmap in [(kd_mean, plt.cm.Purples), (unpert_mean, plt.cm.Greys)]:
+        mean_paths = [(kd_mean, plt.cm.Purples)]
+        if WITH_ASCL1:
+            mean_paths.append((ascl1_mean, plt.cm.Reds))
+        mean_paths.append((unpert_mean, plt.cm.Greys))
+        for path, cmap in mean_paths:
             n = len(path)
             colors = cmap(np.linspace(0.3, 1.0, n))
             for i in range(n - 1):
@@ -169,11 +197,11 @@ def main():
     # with the manually-sized legend/note text below and caused overlap) -- main hexagon on
     # the left, zoomed panel on the right, legend + note in their own reserved band at the
     # bottom so nothing can collide regardless of content size.
-    from matplotlib.patches import Rectangle
-
-    fig = plt.figure(figsize=(14, 9.5))
-    ax = fig.add_axes([0.03, 0.32, 0.44, 0.60])
-    axins = fig.add_axes([0.52, 0.32, 0.44, 0.60])
+    fig_h = 10.5 if WITH_ASCL1 else 9.5
+    ax_h = 0.48 if WITH_ASCL1 else 0.60
+    fig = plt.figure(figsize=(14, fig_h))
+    ax = fig.add_axes([0.03, 0.38, 0.44, ax_h]) if WITH_ASCL1 else fig.add_axes([0.03, 0.32, 0.44, ax_h])
+    axins = fig.add_axes([0.52, 0.38, 0.44, ax_h]) if WITH_ASCL1 else fig.add_axes([0.52, 0.32, 0.44, ax_h])
 
     draw_content(ax)
     for name in ANCHOR_ORDER:
@@ -206,31 +234,53 @@ def main():
         spine.set_linewidth(1.5)
     axins.set_title("Zoomed inset -- same data, magnified\n(individual walks only legible at this scale)", fontsize=10)
 
+    condition_title = (
+        "Simulated RORA_RORB knockdown vs. ASCL1 knockout (positive control) vs. unperturbed walk trajectories"
+        if WITH_ASCL1 else
+        "Simulated RORA_RORB knockdown vs. unperturbed walk trajectories"
+    )
     fig.suptitle(
         f"Hamming-distance RadViz projection onto 6 archetype anchors (softmax T={T:g})\n"
-        "Simulated RORA_RORB knockdown vs. unperturbed walk trajectories (organoid 'Neuroendocrine1' start)",
+        f"{condition_title} (organoid 'Neuroendocrine1' start)",
         fontsize=12, y=0.99,
     )
 
     legend_elements = [
         Line2D([0], [0], color="tab:purple", lw=2.5, label="RORA_RORB knockdown: mean path (light->dark = early->late)"),
-        Line2D([0], [0], color="0.5", lw=2.5, label="Unperturbed: mean path (light->dark = early->late)"),
-        Line2D([0], [0], color="tab:purple", lw=1.0, alpha=0.4, label="RORA_RORB knockdown: 100 individual walks"),
-        Line2D([0], [0], color="0.5", lw=1.0, alpha=0.4, label="Unperturbed: 100 individual walks"),
+    ]
+    if WITH_ASCL1:
+        legend_elements.append(Line2D([0], [0], color="tab:red", lw=2.5, label="ASCL1 knockout (positive control): mean path (light->dark = early->late)"))
+    legend_elements.append(Line2D([0], [0], color="0.5", lw=2.5, label="Unperturbed: mean path (light->dark = early->late)"))
+    legend_elements.append(Line2D([0], [0], color="tab:purple", lw=1.0, alpha=0.4, label=f"RORA_RORB knockdown: {len(kd_paths)} individual walks"))
+    if WITH_ASCL1:
+        legend_elements.append(Line2D([0], [0], color="tab:red", lw=1.0, alpha=0.4, label=f"ASCL1 knockout: {len(ascl1_paths)} individual walks"))
+    legend_elements.append(Line2D([0], [0], color="0.5", lw=1.0, alpha=0.4, label=f"Unperturbed: {len(unpert_paths)} individual walks"))
+    legend_elements += [
         Line2D([0], [0], marker="o", color="w", markerfacecolor="grey", markeredgecolor="black", markersize=8, label="path start"),
         Line2D([0], [0], marker="s", color="w", markerfacecolor="grey", markeredgecolor="black", markersize=8, label="path end (step 4000)"),
         Line2D([0], [0], marker="o", color="w", markerfacecolor="0.4", markeredgecolor="black", markersize=9, label="Generalist_NE (archetype average state, not a hexagon vertex)"),
         Line2D([0], [0], marker="o", color="w", markerfacecolor="tab:blue", markeredgecolor="black", markersize=9, label="Intermediate/Arc_1 (archetype average state, not a hexagon vertex)"),
     ]
-    fig.legend(handles=legend_elements, loc="upper center", bbox_to_anchor=(0.5, 0.215), fontsize=8, ncol=3, frameon=True)
+    legend_y = 0.26 if WITH_ASCL1 else 0.215
+    fig.legend(handles=legend_elements, loc="upper center", bbox_to_anchor=(0.5, legend_y), fontsize=8, ncol=3, frameon=True)
 
-    note = (
-        f"Note: every labeled point (6 hexagon vertices + the 2 circles) is one of bobaT's 8 fitted archetype average states, projected by Hamming\n"
-        f"distance to the 6 vertex archetypes (softmax, T={T:g}) -- not the continuous archetype-signature scores used in the original reference figure.\n"
-        "Lower T sharpens the weighting toward the nearest anchor (less blending between similar archetypes, e.g. NE1/NE2 differ by only 9/53 genes)\n"
-        "at the cost of exaggerating apparent separation relative to true Hamming distance -- see the companion T=10 plot for the untuned version."
-    )
-    fig.text(0.5, 0.06, note, ha="center", va="center", fontsize=7.5,
+    note_lines = [
+        f"Note: every labeled point (6 hexagon vertices + the 2 circles) is one of bobaT's 8 fitted archetype average states, projected by Hamming",
+        f"distance to the 6 vertex archetypes (softmax, T={T:g}) -- not the continuous archetype-signature scores used in the original reference figure.",
+    ]
+    if WITH_ASCL1:
+        note_lines += [
+            "ASCL1 is a canonical NE master regulator, so its knockout is a positive control expected to drive an unambiguous, strong NE -> nonNE shift --",
+            "included as a reference point for how large a clearly-real effect looks here, alongside RORB's more subtle, hypothesis-specific one.",
+        ]
+    else:
+        note_lines.append(
+            "Lower T sharpens the weighting toward the nearest anchor (less blending between similar archetypes, e.g. NE1/NE2 differ by only 9/53 genes)\n"
+            "at the cost of exaggerating apparent separation relative to true Hamming distance -- see the companion T=3 plot for the sharpened version."
+        )
+    note = "\n".join(note_lines)
+    note_y = 0.065 if WITH_ASCL1 else 0.06
+    fig.text(0.5, note_y, note, ha="center", va="center", fontsize=7.5,
               bbox=dict(boxstyle="round", facecolor="white", edgecolor="0.7"))
 
     for ext in ["png", "pdf"]:

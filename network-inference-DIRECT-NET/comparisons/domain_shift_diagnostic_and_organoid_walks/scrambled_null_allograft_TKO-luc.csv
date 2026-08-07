@@ -1,0 +1,13 @@
+sample,category,iteration,mean_r2,mean_f1,mean_auc
+allograft_TKO-luc,TKO,0,-0.07,0.59,0.603
+allograft_TKO-luc,TKO,1,-0.069,0.59,0.604
+allograft_TKO-luc,TKO,2,-0.07,0.589,0.603
+allograft_TKO-luc,TKO,3,-0.07,0.59,0.603
+allograft_TKO-luc,TKO,4,-0.071,0.589,0.604
+allograft_TKO-luc,TKO,5,-0.074,0.59,0.602
+allograft_TKO-luc,TKO,6,-0.066,0.591,0.606
+allograft_TKO-luc,TKO,7,-0.068,0.591,0.605
+allograft_TKO-luc,TKO,8,-0.069,0.59,0.603
+allograft_TKO-luc,TKO,9,-0.069,0.591,0.604
+allograft_TKO-luc,TKO,10,-0.072,0.589,0.603
+allograft_TKO-luc,TKO,11,-0.066,0.592,0.605

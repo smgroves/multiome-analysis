@@ -1,0 +1,13 @@
+sample,category,iteration,mean_r2,mean_f1,mean_auc
+mets_compiled,mets_compiled,0,-0.073,0.573,0.602
+mets_compiled,mets_compiled,1,-0.072,0.574,0.603
+mets_compiled,mets_compiled,2,-0.072,0.574,0.603
+mets_compiled,mets_compiled,3,-0.069,0.575,0.604
+mets_compiled,mets_compiled,4,-0.071,0.574,0.603
+mets_compiled,mets_compiled,5,-0.07,0.575,0.604
+mets_compiled,mets_compiled,6,-0.071,0.575,0.603
+mets_compiled,mets_compiled,7,-0.07,0.574,0.603
+mets_compiled,mets_compiled,8,-0.072,0.574,0.603
+mets_compiled,mets_compiled,9,-0.07,0.575,0.603
+mets_compiled,mets_compiled,10,-0.068,0.576,0.605
+mets_compiled,mets_compiled,11,-0.07,0.574,0.604

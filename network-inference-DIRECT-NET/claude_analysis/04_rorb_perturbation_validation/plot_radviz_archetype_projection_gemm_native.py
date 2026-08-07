@@ -13,10 +13,18 @@ attractor member states (Arc_5 has 11), and `long_random_walks` was originally r
 separately from each member (`6667/walks/long_walks/4000_step_walks/<member_idx>/`, 100
 iters per member for most members). This script pools all of Arc_5's member-seeded walks
 together into one set of individual walks per condition, exactly analogous to organoid's
-100 pooled walks in the companion plot.
+pooled walks in the companion plot. All conditions (RORA_RORB kd, ASCL1 ko, unperturbed)
+start from the identical 11 member states -- only the off_nodes clamp passed to
+long_random_walks differs between them.
+
+Default (no CLI args) reproduces the original RORA_RORB-knockdown-vs-unperturbed-only
+plot; pass "ascl1" to additionally overlay the ASCL1-knockout positive control (a
+canonical NE master regulator, so its knockout is expected to drive an unambiguous, strong
+NE -> nonNE shift) -- written to a separate, differently-named output so neither version
+overwrites the other.
 
 Run in bobaT_env_py3.13:
-    /opt/anaconda3/envs/bobaT_env_py3.13/bin/python claude_analysis/04_rorb_perturbation_validation/plot_radviz_archetype_projection_gemm_native.py
+    /opt/anaconda3/envs/bobaT_env_py3.13/bin/python claude_analysis/04_rorb_perturbation_validation/plot_radviz_archetype_projection_gemm_native.py [T] [ascl1]
 """
 
 import ast
@@ -45,8 +53,12 @@ WALK_PATH = f"{DIR_PREFIX}/6667/walks/long_walks/4000_step_walks"
 ATTRACTOR_DIR = f"{DIR_PREFIX}/6667/attractors/attractors_threshold_0.5"
 START_ARCHETYPE = "Arc_5"  # NE1 -- GEMM-native counterpart to organoid's 'Neuroendocrine1'
 STEP_STRIDE = 20
-T = float(sys.argv[1]) if len(sys.argv) > 1 else 10.0  # softmax temperature (bits); pass as CLI arg to override
-OUT_SUFFIX = f"_T{sys.argv[1]}" if len(sys.argv) > 1 else ""  # keeps the default-T output file untouched
+
+_cli_args = [a.lower() for a in sys.argv[1:]]
+WITH_ASCL1 = "ascl1" in _cli_args
+_t_args = [a for a in _cli_args if a.replace(".", "", 1).isdigit()]
+T = float(_t_args[0]) if _t_args else 10.0  # softmax temperature (bits); pass a number as a CLI arg to override
+OUT_SUFFIX = (f"_T{_t_args[0]}" if _t_args else "") + ("_with_ASCL1" if WITH_ASCL1 else "")
 
 ANCHOR_ORDER = ["nonNE1", "Generalist_nonNE", "NE1", "NE2", "Secretory", "nonNE2"]
 ANCHOR_ARC_MAP = {
@@ -97,19 +109,26 @@ def main():
     member_idxs = attractor_dict[START_ARCHETYPE]
     print(f"{START_ARCHETYPE} basin has {len(member_idxs)} member states: {member_idxs}")
 
-    walks_kd, walks_unpert = [], []
+    walks_kd, walks_ascl1, walks_unpert = [], [], []
     for member_idx in member_idxs:
         member_dir = f"{WALK_PATH}/{member_idx}"
         kd_file = f"{member_dir}/results_RORA_RORB_kd.csv"
+        ascl1_file = f"{member_dir}/results_ASCL1_kd.csv"
         unpert_file = f"{member_dir}/results.csv"
-        if not (os.path.exists(kd_file) and os.path.exists(unpert_file)):
+        required = [kd_file, unpert_file] + ([ascl1_file] if WITH_ASCL1 else [])
+        if not all(os.path.exists(f) for f in required):
             print(f"  skipping member {member_idx}: missing walk output")
             continue
         member_kd = parse_walk_file(kd_file)
         member_unpert = parse_walk_file(unpert_file)
-        print(f"  member {member_idx}: {len(member_kd)} kd walks, {len(member_unpert)} unperturbed walks")
+        msg = f"  member {member_idx}: {len(member_kd)} kd walks"
         walks_kd.extend(member_kd)
         walks_unpert.extend(member_unpert)
+        if WITH_ASCL1:
+            member_ascl1 = parse_walk_file(ascl1_file)
+            walks_ascl1.extend(member_ascl1)
+            msg += f", {len(member_ascl1)} ASCL1 ko walks"
+        print(msg + f", {len(member_unpert)} unperturbed walks")
 
     def project_all(walks):
         return [np.array([project(s, archetype_idx, anchor_xy) for s in w[::STEP_STRIDE]]) for w in walks]
@@ -120,14 +139,21 @@ def main():
         min_len = min(len(p) for p in paths)
         return np.mean(np.stack([p[:min_len] for p in paths], axis=0), axis=0)
 
-    print(f"Pooled: {len(walks_kd)} knockdown + {len(walks_unpert)} unperturbed walks across all {START_ARCHETYPE} members...")
+    print(f"Pooled: {len(walks_kd)} knockdown"
+          + (f" + {len(walks_ascl1)} ASCL1 ko" if WITH_ASCL1 else "")
+          + f" + {len(walks_unpert)} unperturbed walks across all {START_ARCHETYPE} members...")
     kd_paths = project_all(walks_kd)
     unpert_paths = project_all(walks_unpert)
     kd_mean = mean_path(kd_paths)
     unpert_mean = mean_path(unpert_paths)
+    all_paths = kd_paths + unpert_paths
+    if WITH_ASCL1:
+        ascl1_paths = project_all(walks_ascl1)
+        ascl1_mean = mean_path(ascl1_paths)
+        all_paths = all_paths + ascl1_paths
 
-    all_x = np.concatenate([p[:, 0] for p in kd_paths + unpert_paths])
-    all_y = np.concatenate([p[:, 1] for p in kd_paths + unpert_paths])
+    all_x = np.concatenate([p[:, 0] for p in all_paths])
+    all_y = np.concatenate([p[:, 1] for p in all_paths])
     pad_x = 0.08 * (all_x.max() - all_x.min())
     pad_y = 0.08 * (all_y.max() - all_y.min())
     zoom_xlim = (all_x.min() - pad_x, all_x.max() + pad_x)
@@ -150,8 +176,15 @@ def main():
             target_ax.plot(p[:, 0], p[:, 1], color="0.5", linewidth=spaghetti_lw, alpha=0.05, zorder=3)
         for p in kd_paths:
             target_ax.plot(p[:, 0], p[:, 1], color="tab:purple", linewidth=spaghetti_lw, alpha=0.05, zorder=3)
+        if WITH_ASCL1:
+            for p in ascl1_paths:
+                target_ax.plot(p[:, 0], p[:, 1], color="tab:red", linewidth=spaghetti_lw, alpha=0.05, zorder=3)
 
-        for path, cmap in [(kd_mean, plt.cm.Purples), (unpert_mean, plt.cm.Greys)]:
+        mean_paths = [(kd_mean, plt.cm.Purples)]
+        if WITH_ASCL1:
+            mean_paths.append((ascl1_mean, plt.cm.Reds))
+        mean_paths.append((unpert_mean, plt.cm.Greys))
+        for path, cmap in mean_paths:
             n = len(path)
             colors = cmap(np.linspace(0.3, 1.0, n))
             for i in range(n - 1):
@@ -159,9 +192,11 @@ def main():
             target_ax.scatter(*path[0], color=colors[0], s=marker_s, edgecolor="black", zorder=7, marker="o")
             target_ax.scatter(*path[-1], color=colors[-1], s=marker_s_end, edgecolor="black", zorder=7, marker="s")
 
-    fig = plt.figure(figsize=(14, 9.5))
-    ax = fig.add_axes([0.03, 0.32, 0.44, 0.60])
-    axins = fig.add_axes([0.52, 0.32, 0.44, 0.60])
+    fig_h = 10.5 if WITH_ASCL1 else 9.5
+    ax_h = 0.48 if WITH_ASCL1 else 0.60
+    fig = plt.figure(figsize=(14, fig_h))
+    ax = fig.add_axes([0.03, 0.38, 0.44, ax_h]) if WITH_ASCL1 else fig.add_axes([0.03, 0.32, 0.44, ax_h])
+    axins = fig.add_axes([0.52, 0.38, 0.44, ax_h]) if WITH_ASCL1 else fig.add_axes([0.52, 0.32, 0.44, ax_h])
 
     draw_content(ax)
     for name in ANCHOR_ORDER:
@@ -191,31 +226,51 @@ def main():
         spine.set_linewidth(1.5)
     axins.set_title("Zoomed inset -- same data, magnified\n(individual walks only legible at this scale)", fontsize=10)
 
+    condition_title = (
+        f"Simulated RORA_RORB knockdown vs. ASCL1 knockout (positive control) vs. unperturbed walk trajectories"
+        if WITH_ASCL1 else
+        "Simulated RORA_RORB knockdown vs. unperturbed walk trajectories"
+    )
     fig.suptitle(
         f"Hamming-distance RadViz projection onto 6 archetype anchors (softmax T={T:g})\n"
-        f"Simulated RORA_RORB knockdown vs. unperturbed walk trajectories (GEMM-native {START_ARCHETYPE}/NE1 start)",
+        f"{condition_title} (GEMM-native {START_ARCHETYPE}/NE1 start)",
         fontsize=12, y=0.99,
     )
 
     legend_elements = [
         Line2D([0], [0], color="tab:purple", lw=2.5, label="RORA_RORB knockdown: mean path (light->dark = early->late)"),
-        Line2D([0], [0], color="0.5", lw=2.5, label="Unperturbed: mean path (light->dark = early->late)"),
-        Line2D([0], [0], color="tab:purple", lw=1.0, alpha=0.4, label=f"RORA_RORB knockdown: {len(kd_paths)} individual walks (pooled across {len(member_idxs)} {START_ARCHETYPE} attractor members)"),
-        Line2D([0], [0], color="0.5", lw=1.0, alpha=0.4, label=f"Unperturbed: {len(unpert_paths)} individual walks (pooled across {len(member_idxs)} {START_ARCHETYPE} attractor members)"),
+    ]
+    if WITH_ASCL1:
+        legend_elements.append(Line2D([0], [0], color="tab:red", lw=2.5, label="ASCL1 knockout (positive control): mean path (light->dark = early->late)"))
+    legend_elements.append(Line2D([0], [0], color="0.5", lw=2.5, label="Unperturbed: mean path (light->dark = early->late)"))
+    legend_elements.append(Line2D([0], [0], color="tab:purple", lw=1.0, alpha=0.4, label=f"RORA_RORB knockdown: {len(kd_paths)} individual walks (pooled across {len(member_idxs)} {START_ARCHETYPE} attractor members)"))
+    if WITH_ASCL1:
+        legend_elements.append(Line2D([0], [0], color="tab:red", lw=1.0, alpha=0.4, label=f"ASCL1 knockout: {len(ascl1_paths)} individual walks (pooled across {len(member_idxs)} {START_ARCHETYPE} attractor members)"))
+    legend_elements.append(Line2D([0], [0], color="0.5", lw=1.0, alpha=0.4, label=f"Unperturbed: {len(unpert_paths)} individual walks (pooled across {len(member_idxs)} {START_ARCHETYPE} attractor members)"))
+    legend_elements += [
         Line2D([0], [0], marker="o", color="w", markerfacecolor="grey", markeredgecolor="black", markersize=8, label="path start"),
         Line2D([0], [0], marker="s", color="w", markerfacecolor="grey", markeredgecolor="black", markersize=8, label="path end (step 4000)"),
         Line2D([0], [0], marker="o", color="w", markerfacecolor="0.4", markeredgecolor="black", markersize=9, label="Generalist_NE (archetype average state, not a hexagon vertex)"),
         Line2D([0], [0], marker="o", color="w", markerfacecolor="tab:blue", markeredgecolor="black", markersize=9, label="Intermediate/Arc_1 (archetype average state, not a hexagon vertex)"),
     ]
-    fig.legend(handles=legend_elements, loc="upper center", bbox_to_anchor=(0.5, 0.215), fontsize=8, ncol=2, frameon=True)
+    legend_y = 0.26 if WITH_ASCL1 else 0.215
+    fig.legend(handles=legend_elements, loc="upper center", bbox_to_anchor=(0.5, legend_y), fontsize=7.5, ncol=2, frameon=True)
 
-    note = (
-        f"Note: starts are GEMM's own {START_ARCHETYPE} basin -- {len(member_idxs)} individually-discovered attractor member states, each seeding its own\n"
-        f"set of long walks; all pooled here (unlike the organoid-seeded companion plot, which starts from one representative state). Every labeled\n"
-        f"point (6 hexagon vertices + the 2 circles) is one of bobaT's 8 fitted archetype average states, projected by Hamming distance to the 6 vertex\n"
-        f"archetypes (softmax, T={T:g}) -- not the continuous archetype-signature scores used in the original reference figure."
+    note_lines = [
+        f"Note: starts are GEMM's own {START_ARCHETYPE} basin -- {len(member_idxs)} individually-discovered attractor member states, each seeding its own",
+        "set of long walks; all pooled here (unlike the organoid-seeded companion plot, which starts from one representative state).",
+    ]
+    if WITH_ASCL1:
+        note_lines.append(
+            "ASCL1 is a canonical NE master regulator, so its knockout is a positive control expected to drive an unambiguous, strong NE -> nonNE shift."
+        )
+    note_lines.append(
+        f"Every labeled point (6 hexagon vertices + the 2 circles) is one of bobaT's 8 fitted archetype average states, projected by Hamming distance\n"
+        f"to the 6 vertex archetypes (softmax, T={T:g}) -- not the continuous archetype-signature scores used in the original reference figure."
     )
-    fig.text(0.5, 0.06, note, ha="center", va="center", fontsize=7.5,
+    note = "\n".join(note_lines)
+    note_y = 0.065 if WITH_ASCL1 else 0.06
+    fig.text(0.5, note_y, note, ha="center", va="center", fontsize=7.5,
               bbox=dict(boxstyle="round", facecolor="white", edgecolor="0.7"))
 
     for ext in ["png", "pdf"]:

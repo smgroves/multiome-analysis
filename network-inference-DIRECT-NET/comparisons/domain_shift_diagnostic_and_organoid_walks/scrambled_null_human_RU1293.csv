@@ -1,0 +1,5 @@
+sample,category,iteration,mean_r2,mean_f1,mean_auc
+human_RU1293,human_tumor,0,-0.075,0.576,0.603
+human_RU1293,human_tumor,1,-0.073,0.577,0.604
+human_RU1293,human_tumor,2,-0.076,0.577,0.603
+human_RU1293,human_tumor,3,-0.074,0.577,0.604

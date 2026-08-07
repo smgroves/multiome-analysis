@@ -1,0 +1,5 @@
+sample,category,iteration,mean_r2,mean_f1,mean_auc
+organoid_shGFP_D_Sample4,organoid,0,-0.068,0.582,0.604
+organoid_shGFP_D_Sample4,organoid,1,-0.07,0.579,0.602
+organoid_shGFP_D_Sample4,organoid,2,-0.073,0.58,0.602
+organoid_shGFP_D_Sample4,organoid,3,-0.068,0.58,0.605

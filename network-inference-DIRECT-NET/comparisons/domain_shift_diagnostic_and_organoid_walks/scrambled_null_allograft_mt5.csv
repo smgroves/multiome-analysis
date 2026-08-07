@@ -1,0 +1,5 @@
+sample,category,iteration,mean_r2,mean_f1,mean_auc
+allograft_mt5,allograft,0,-0.072,0.587,0.603
+allograft_mt5,allograft,1,-0.069,0.589,0.607
+allograft_mt5,allograft,2,-0.073,0.588,0.604
+allograft_mt5,allograft,3,-0.075,0.586,0.603

@@ -102,6 +102,9 @@ def main():
         category = (
             "organoid" if name.startswith("organoid") else
             "mets_compiled" if name == "mets_compiled" else
+            # TKO-luc lives under the allografts/ folder but isn't actually an allograft --
+            # keep it out of that category rather than mislabeling it.
+            "TKO" if name == "allograft_TKO-luc" else
             "allograft" if name.startswith("allograft") else "human_tumor"
         )
         rows.append({
