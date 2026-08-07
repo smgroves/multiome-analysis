@@ -713,3 +713,82 @@ established above, not artifacts of this specific plot:**
   expected, not missing data — the dose-like shift toward nonNE/Intermediate only shows up
   under `shRORB1`/`shRORB2` (per the (C) table above: `Generalist NE` 75%→67%→64%,
   `Intermediate` 4.8%→14.4%→29.3%).
+
+Hexagon orientation and vertex/circle colors in all three RadViz scripts were matched to
+the user's own reference figure (flat top edge: `nonNE1`/`Generalist_nonNE`; vertex colors
+`tab:red`/`lightcoral`/`tab:purple`/`darkred`/`tab:green`/`orange`; `Generalist_NE`="0.4"
+grey, `Arc_1`/Intermediate=`tab:blue`) rather than an independently-chosen palette.
+
+**ASCL1 knockout added as a positive control** (`run_ascl1_positive_control_walks.py`):
+ASCL1 is a canonical NE master regulator, so its knockout is expected to drive an
+unambiguous, large NE→nonNE shift — a sanity check on how large a *clearly real* effect
+looks by this method, next to RORB's smaller, hypothesis-specific one. New long walks
+(`off_nodes=["ASCL1"]`, same starting states already used for RORA_RORB, so the two
+perturbations are directly comparable) were generated for the same organoid-seeded starts
+(`Neuroendocrine1`, `Generalist NE`, `Neuroendocrine2`, `Intermediate`) and the same
+GEMM-native `Arc_5` basin. All four plot scripts (`plot_radviz_archetype_projection.py`,
+`plot_radviz_archetype_projection_gemm_native.py`, `diagnose_walk_axis_position.py`,
+`diagnose_walk_temporal_ordering.py`) gained an opt-in `ascl1` CLI flag that writes a
+separate `*_with_ASCL1` output rather than overwriting the original RORB-only files.
+Result: on the hexagon and per-target-distance views, ASCL1 shows a visibly larger/faster
+shift than RORB, as expected; on the single collapsed NE↔nonNE axis-position number,
+though, ASCL1 ends up close to RORB rather than far beyond it — an honest divergence
+between the two summary views (the axis position tracks generic %NE-likeness, while the
+hexagon's per-anchor projection is sensitive to which *specific* nonNE archetype a state
+lands nearest, which ASCL1 knockout appears to affect more than the aggregate axis does),
+not a contradiction.
+
+## 12. Validation-robustness checks: is the whole R²/F1/AUC comparison a metric artifact? (`plot_organoid_shgfp_by_line.py`, scrambled-null pipeline, `all_samples_metrics_by_category*.csv`)
+
+Separate from the domain-shift mechanism (§1-11), a more basic question underlies every
+result in this file: are the external-validation scores themselves trustworthy, or could
+the whole R²/F1/AUC comparison across categories be a metric artifact rather than a real
+signal?
+
+**(a) organoid_shGFP's poor validation isn't one bad replicate dragging down the average.**
+Split shGFP by its 5 constituent sequencing lines (`D_Sample1/4/6` etc.) and scored each
+independently (`organoid_shgfp_by_line_metrics.csv`). R²/F1/AUC are consistent across all
+5 lines — no single line is an outlier inflating or deflating the pooled shGFP score.
+
+**(b) Real validation scores are not a metric artifact: every category clears a
+scrambled-data null.** Built a scrambled-label null (`scrambled_null_*.csv`: regulator
+values randomly permuted within each sample, 50+ iterations per sample/gene) and compared
+every external sample category's real R²/F1/AUC against its own null distribution
+(`all_samples_r2_by_category.png`, `all_samples_f1_by_category.png`,
+`all_samples_auc_by_category.png`). Every category — allograft, human tumor, organoid,
+mets_compiled — scores clearly above its scrambled null. The domain-shift effects in §1-11
+are differences in the *size* of a real signal, not the presence/absence of one.
+
+**(c) ~20% of the network's genes get a "free" boost from self-referencing regulation,
+inflating both the null and the real headline numbers alike.** 11 of the network's 53
+genes are their own regulator (the same self-loop-only "source" nodes flagged in §10:
+`CREB1`, `TCF4`, `ESR1`, `SOX9`, `RBPJ`, `NR6A1`, `NFYC`, `JUND`, `ZEB1`, `STAT1`, `TFDP1`).
+A rule that predicts a gene mostly from its own current value scores near-perfectly
+(AUC≈1.0, r≈1.0) even on scrambled data, since permuting *other* regulators barely touches
+a self-loop-dominated prediction. That means these 11 genes inflate the null baseline and
+the real score by the same mechanism, in every category, everywhere they appear.
+
+**(d) Once self-loop genes are excluded, most categories collapse to near-zero — only
+allograft and TKO retain a clearly real, cross-gene signal.** Re-scored every category
+excluding the 11 self-loop genes (`all_samples_metrics_by_category_excl_selfloops.csv`,
+`all_samples_r2_by_category_excl_selfloops.png` and the F1/AUC equivalents):
+human_tumor, organoid, and mets_compiled validation collapses to near-zero or negative R²
+once the free self-loop boost is removed. **Allograft and TKO are the exception** — they
+keep a real, non-trivial cross-gene predictive signal even without self-loop genes
+propping up the score. This sharpens every category-level comparison in this file: the
+categories that looked "okay" partly because of self-loop genes turn out to have little
+real cross-gene signal once those are excluded, while allograft/TKO's validation is
+genuinely robust.
+
+**(e) `TKO-luc` was miscategorized as an allograft — it's not one, and it's the
+best-scoring sample overall.** `TKO-luc` lives in the allograft data folder but isn't
+actually an allograft; recategorized into its own category for the plots above. Once
+separated out, it's the single best-scoring sample in the entire 33-sample set (consistent
+with its high `relative diversity` and low sign-flip rate already noted in §4/§6).
+
+Outputs: `organoid_shgfp_by_line.png`/`.pdf` + `organoid_shgfp_by_line_metrics.csv`;
+`all_samples_r2_by_category.png`, `all_samples_f1_by_category.png`,
+`all_samples_auc_by_category.png` (+ `_excl_selfloops` variants and matching `.pdf`s);
+`all_samples_metrics_by_category_incl_selfloops.csv`,
+`all_samples_metrics_by_category_excl_selfloops.csv`; `scrambled_null_*.csv` (per-sample
+and per-gene scrambled-null distributions).
