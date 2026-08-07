@@ -44,7 +44,7 @@ NETWORK_PATH = (
     "networks/feature_selection/DIRECT-NET_network_2020db_0.1/"
     "combined_DIRECT-NET_network_2020db_0.1_Lasso_wo_sinks_RORA_RORB_combined.csv"
 )
-OUT_DIR = f"{DIR_PREFIX}/comparisons/domain_shift_diagnostic_and_organoid_walks"
+OUT_DIR = f"{DIR_PREFIX}/comparisons/organoid_walks"
 ORGANOID_WALK_DIR = f"{DIR_PREFIX}/6667/organoid_seeded"
 GEMM_WALK_DIR = f"{DIR_PREFIX}/6667"
 MIN_CELLS_PER_GROUP = 20

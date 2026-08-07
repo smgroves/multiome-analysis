@@ -44,7 +44,8 @@ NETWORK_PATH = (
     "networks/feature_selection/DIRECT-NET_network_2020db_0.1/"
     "combined_DIRECT-NET_network_2020db_0.1_Lasso_wo_sinks_RORA_RORB_combined.csv"
 )
-OUT_DIR = f"{DIR_PREFIX}/comparisons/domain_shift_diagnostic_and_organoid_walks"
+OUT_DIR = f"{DIR_PREFIX}/comparisons/organoid_walks"
+PLOT_DIR = f"{OUT_DIR}/temporal_distance_plots"
 WALK_PATH = f"{DIR_PREFIX}/6667/organoid_seeded/walks/long_walks/4000_step_walks"
 ORGANOID_STARTS = {
     "Neuroendocrine1": 5500048749758430,
@@ -78,6 +79,7 @@ def distance_series(walk, targets_idx):
 
 def main():
     os.makedirs(OUT_DIR, exist_ok=True)
+    os.makedirs(PLOT_DIR, exist_ok=True)
 
     graph, vertex_dict = bb.load.load_network(f"{DIR_PREFIX}/{NETWORK_PATH}", remove_sinks=False, remove_selfloops=True, remove_sources=False)
     v_names, nodes = bb.utils.get_nodes(vertex_dict, graph)
@@ -210,7 +212,7 @@ def main():
                             bbox=dict(boxstyle="round", facecolor="white", edgecolor="0.7"))
             plt.tight_layout(rect=[0, 0.13, 1, 0.92] if WITH_ASCL1 else [0, 0.08, 1, 1])
             for ext in ["png", "pdf"]:
-                plt.savefig(f"{OUT_DIR}/walk_temporal_distance_{label.replace(' ', '_')}_combined{OUT_SUFFIX}.{ext}", dpi=150, bbox_inches="tight")
+                plt.savefig(f"{PLOT_DIR}/walk_temporal_distance_{label.replace(' ', '_')}_combined{OUT_SUFFIX}.{ext}", dpi=150, bbox_inches="tight")
             plt.close()
 
     ordering_df = pd.DataFrame(ordering_rows)

@@ -48,7 +48,7 @@ NETWORK_PATH = (
     "networks/feature_selection/DIRECT-NET_network_2020db_0.1/"
     "combined_DIRECT-NET_network_2020db_0.1_Lasso_wo_sinks_RORA_RORB_combined.csv"
 )
-OUT_DIR = f"{DIR_PREFIX}/comparisons/domain_shift_diagnostic_and_organoid_walks"
+OUT_DIR = f"{DIR_PREFIX}/comparisons/organoid_walks/hexagon_plots/walks"
 WALK_PATH = f"{DIR_PREFIX}/6667/walks/long_walks/4000_step_walks"
 ATTRACTOR_DIR = f"{DIR_PREFIX}/6667/attractors/attractors_threshold_0.5"
 START_ARCHETYPE = "Arc_5"  # NE1 -- GEMM-native counterpart to organoid's 'Neuroendocrine1'

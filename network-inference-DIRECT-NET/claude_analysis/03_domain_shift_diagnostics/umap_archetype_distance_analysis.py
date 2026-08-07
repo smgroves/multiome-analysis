@@ -43,7 +43,7 @@ NETWORK_PATH = (
     "networks/feature_selection/DIRECT-NET_network_2020db_0.1/"
     "combined_DIRECT-NET_network_2020db_0.1_Lasso_wo_sinks_RORA_RORB_combined.csv"
 )
-OUT_DIR = f"{DIR_PREFIX}/comparisons/domain_shift_diagnostic_and_organoid_walks"
+OUT_DIR = f"{DIR_PREFIX}/comparisons/domain_shift_diagnostic_low_R2_samples"
 MAX_CELLS_PER_SAMPLE = 1500
 RANDOM_STATE = 1234
 KNN_K = 15

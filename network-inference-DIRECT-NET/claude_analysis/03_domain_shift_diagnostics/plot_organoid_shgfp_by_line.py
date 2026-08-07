@@ -39,7 +39,7 @@ from sklearn.metrics import f1_score, r2_score, roc_auc_score
 DIR_PREFIX = "/Users/xpz5km/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET"
 ACC_DIR = f"{DIR_PREFIX}/6667/validation/external_validation/organoid_shGFP/accuracy_plots"
 CLUSTERS_CSV = f"{DIR_PREFIX}/data/organoid/organoid_clusters.csv"
-OUT_DIR = f"{DIR_PREFIX}/comparisons/domain_shift_diagnostic_and_organoid_walks"
+OUT_DIR = f"{DIR_PREFIX}/comparisons/domain_shift_diagnostic_low_R2_samples"
 
 LINE_COLORS = {
     "D_Sample1": "tab:blue", "D_Sample4": "tab:orange", "D_Sample6": "tab:green",

@@ -20,7 +20,7 @@ from scipy.stats import pearsonr
 
 DIR_PREFIX = "/Users/xpz5km/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET"
 BRCD = "6667"
-OUT_DIR = f"{DIR_PREFIX}/comparisons/domain_shift_diagnostic_and_organoid_walks"
+OUT_DIR = f"{DIR_PREFIX}/comparisons/domain_shift_diagnostic_low_R2_samples"
 
 DATASETS = {
     "organoid_shGFP": {

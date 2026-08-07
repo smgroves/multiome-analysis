@@ -15,7 +15,7 @@ self-loop genes vs. AUC=0.51/R²=-0.33 for the other 42). The real vs. null comp
 is still fair (both include the same 11 genes), but see the companion "excluding
 self-loops" plots for the more conservative 42-gene-only version.
 
-Reuses all_samples_corr_vs_r2.csv (comparisons/domain_shift_diagnostic_and_organoid_walks/,
+Reuses all_samples_corr_vs_r2.csv (comparisons/domain_shift_diagnostic_low_R2_samples/,
 built by compare_correlation_shift_across_samples.py) for the name/category/mean_r2 columns
 and sample filtering (organoid_combined excluded as an aggregate; samples with no
 summary_stats.csv on disk dropped) -- then re-derives the same summary_stats.csv path per
@@ -37,15 +37,15 @@ import pandas as pd
 from scipy import stats as sp_stats
 
 DIR_PREFIX = "/Users/xpz5km/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET"
-IN_CSV = f"{DIR_PREFIX}/comparisons/domain_shift_diagnostic_and_organoid_walks/all_samples_corr_vs_r2.csv"
-OUT_DIR = f"{DIR_PREFIX}/comparisons/domain_shift_diagnostic_and_organoid_walks"
+IN_CSV = f"{DIR_PREFIX}/comparisons/domain_shift_diagnostic_low_R2_samples/all_samples_corr_vs_r2.csv"
+OUT_DIR = f"{DIR_PREFIX}/comparisons/domain_shift_diagnostic_low_R2_samples"
 # Scrambled-data null (see run_scrambled_null_validation.py): each network gene's values
 # independently permuted across cells, then re-scored with the same fitted rules. Pools
 # every scrambled_null_*.csv on disk -- for allograft/human_tumor/organoid this spans
 # multiple distinct real samples per category (not just repeated permutations of one),
 # so the null reflects both scrambling noise and real inter-sample variation.
-NULL_CSV_GLOB = f"{DIR_PREFIX}/comparisons/domain_shift_diagnostic_and_organoid_walks/scrambled_null_*.csv"
-NULL_CSV_COMBINED = f"{DIR_PREFIX}/comparisons/domain_shift_diagnostic_and_organoid_walks/scrambled_null_all.csv"
+NULL_CSV_GLOB = f"{DIR_PREFIX}/comparisons/domain_shift_diagnostic_low_R2_samples/scrambled_null_*.csv"
+NULL_CSV_COMBINED = f"{DIR_PREFIX}/comparisons/domain_shift_diagnostic_low_R2_samples/scrambled_null_all.csv"
 
 CATEGORY_ORDER = ["allograft", "TKO", "human_tumor", "organoid", "mets_compiled"]
 CATEGORY_COLORS = {
