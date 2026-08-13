@@ -1,0 +1,54 @@
+gene,mean_abs_diff,n_regulators,note
+TBX15,0.014453464008910184,6,
+ICAM1,0.013215240325608892,6,
+SIX1,0.006867908051000287,5,
+TCF7L2,0.006115662504815541,5,
+REST,0.0021224168384966526,3,
+SOX11,0.0017737055987201468,4,
+ZEB1,0.0016348038401326204,1,
+NFATC2,0.0015036394355878828,3,
+BACH2,0.00126903125914846,3,
+EHF,0.0012420348964620395,2,
+THRB,0.0011418795784547409,1,
+JUNB,0.0011089089940739616,3,
+SOX9,0.0009536830432469029,1,
+JUND,0.0005278979514941468,1,
+NR6A1,0.0004596932117027913,1,
+ESR1,0.0002185410450157299,1,
+TCF4,5.684571478398182e-07,1,
+RBPJ,2.854936579504974e-07,1,
+STAT1,2.4080346334998115e-07,1,
+NFYC,2.1862757543233968e-07,1,
+CREB1,1.70809251007209e-07,1,
+TFDP1,1.6438523846307174e-07,1,
+ASCL1,,6,regulator set changed vs 6667
+BACH1,,5,regulator set changed vs 6667
+CUX2,,7,regulator set changed vs 6667
+EGR1,,7,regulator set changed vs 6667
+EPCAM,,6,regulator set changed vs 6667
+ETS1,,4,regulator set changed vs 6667
+FOS,,8,regulator set changed vs 6667
+FOXO3,,4,regulator set changed vs 6667
+GRHL2,,4,regulator set changed vs 6667
+HES1,,5,regulator set changed vs 6667
+HSF2,,6,regulator set changed vs 6667
+JUN,,6,regulator set changed vs 6667
+KMT2A,,7,regulator set changed vs 6667
+LMX1B,,4,regulator set changed vs 6667
+MEIS2,,4,regulator set changed vs 6667
+NCAM1,,7,regulator set changed vs 6667
+NFIA,,7,regulator set changed vs 6667
+NFIB,,8,regulator set changed vs 6667
+NFIX,,5,regulator set changed vs 6667
+NFKB1,,4,regulator set changed vs 6667
+PBX1,,4,regulator set changed vs 6667
+PKNOX2,,5,regulator set changed vs 6667
+PROX1,,2,regulator set changed vs 6667
+RORA_RORB,,5,regulator set changed vs 6667
+RUNX1,,7,regulator set changed vs 6667
+SIX4,,8,regulator set changed vs 6667
+SMAD3,,5,regulator set changed vs 6667
+STAT2,,5,regulator set changed vs 6667
+TCF7L1,,6,regulator set changed vs 6667
+TEAD1,,6,regulator set changed vs 6667
+ZBTB20,,7,regulator set changed vs 6667

@@ -39,13 +39,13 @@ T = 10.0
 
 # (out_subdir, out_name, label, walk_dir, start_idx, pert_file, pert_display, pert_color)
 SPECS = [
-    ("gemm_ne1_start", "hexagon_GEMM_NE1", "GEMM NE1 real cell", NEW_WALK_DIR, 8914049663948766,
+    ("gemm_ne1_start", "hexagon_GEMM_NE1", "GEMM NE1 (archetype average state)", NEW_WALK_DIR, 8914049663948766,
      "results_RORA_RORB_kd.csv", "RORA_RORB knockdown", "tab:purple"),
-    ("gemm_nonne_start_oe", "hexagon_GEMM_Generalist_nonNE", "GEMM Generalist_nonNE real cell", NEW_WALK_DIR, 1222330852650596,
+    ("gemm_nonne_start_oe", "hexagon_GEMM_Generalist_nonNE", "GEMM Generalist_nonNE (archetype average state)", NEW_WALK_DIR, 1222330852650596,
      "results_RORA_RORB_act.csv", "RORA_RORB overexpression", "tab:green"),
-    ("gemm_nonne_start_oe", "hexagon_GEMM_Arc4_nonNE1", "GEMM nonNE1 (Arc_4) real cell", NEW_WALK_DIR, 3474165076405860,
+    ("gemm_nonne_start_oe", "hexagon_GEMM_Arc4_nonNE1", "GEMM nonNE1/Arc_4 (archetype average state)", NEW_WALK_DIR, 3474165076405860,
      "results_RORA_RORB_act.csv", "RORA_RORB overexpression", "tab:green"),
-    ("gemm_nonne_start_oe", "hexagon_GEMM_Arc2_nonNE2", "GEMM nonNE2 (Arc_2) real cell", NEW_WALK_DIR, 3474165059628640,
+    ("gemm_nonne_start_oe", "hexagon_GEMM_Arc2_nonNE2", "GEMM nonNE2/Arc_2 (archetype average state)", NEW_WALK_DIR, 3474165059628640,
      "results_RORA_RORB_act.csv", "RORA_RORB overexpression", "tab:green"),
     ("organoid_shrorb_nonne_oe", "hexagon_organoid_shRORB_Generalist_nonNE", "organoid shRORB Generalist_nonNE", ORGANOID_WALK_DIR, 1371881672649956,
      "results_RORA_RORB_act.csv", "RORA_RORB overexpression (rescue?)", "tab:green"),
@@ -143,7 +143,7 @@ def main():
                 target_ax.scatter(*path[0], color=colors[0], s=marker_s, edgecolor="black", zorder=7, marker="o")
                 target_ax.scatter(*path[-1], color=colors[-1], s=marker_s_end, edgecolor="black", zorder=7, marker="s")
 
-        fig = plt.figure(figsize=(14, 9.5))
+        fig = plt.figure(figsize=(14, 10.3))
         ax = fig.add_axes([0.03, 0.32, 0.44, 0.60])
         axins = fig.add_axes([0.52, 0.32, 0.44, 0.60])
 
@@ -194,11 +194,19 @@ def main():
         ]
         fig.legend(handles=legend_elements, loc="upper center", bbox_to_anchor=(0.5, 0.215), fontsize=8, ncol=2, frameon=True)
 
-        note = (
-            f"Note: start is a single real GEMM/organoid cell (Hamming distance 0 from its archetype's average state, confirmed directly)\n"
-            f"-- not a pooled/averaged population. Hexagon vertices + the 2 circles are GEMM's own fitted archetype average states, projected\n"
-            f"by Hamming distance to the 6 vertex archetypes (softmax, T={T:g}); colors matched to the user's reference figure (ref_hex)."
-        )
+        if "organoid" in out_subdir:
+            note = (
+                "Note: start is a single population-collapsed state (find_avg_states over real shRORB1+shRORB2 cells, not a GEMM\n"
+                f"archetype). Hexagon vertices + the 2 circles are GEMM's own fitted archetype average states, projected by Hamming\n"
+                f"distance to the 6 vertex archetypes (softmax, T={T:g}); colors matched to the user's reference figure (ref_hex)."
+            )
+        else:
+            note = (
+                "Note: start is the archetype's own AVERAGE state (average_states.txt; confirmed matched exactly by real cells) --\n"
+                "NOT one of bobaT's own dynamically-discovered attractor states. A genuine attractor has 0/53 genes with >50% flip\n"
+                "probability under the fitted rules; this average state does not (see FINDINGS.md and the companion\n"
+                "*_true_attractor plots, which start from an actual discovered attractor instead)."
+            )
         fig.text(0.5, 0.065, note, ha="center", va="center", fontsize=7.5,
                   bbox=dict(boxstyle="round", facecolor="white", edgecolor="0.7"))
 

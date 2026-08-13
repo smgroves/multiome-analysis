@@ -276,3 +276,73 @@ hexagon's per-anchor projection is sensitive to which *specific* nonNE archetype
 lands nearest, which ASCL1 knockout appears to affect more than the aggregate axis does),
 not a contradiction.
 
+## 2. Pseudotime-calibrated axis, new single-real-cell starts, and RORB-overexpression rescue (`pseudotime_axis_utils.py`, `diagnose_walk_pseudotime_axis.py`, `run_new_start_walks.py`, `plot_new_start_*.py`, `plot_kde_reference_additional.py`)
+
+**The NE<->nonNE axis's poles were wrong -- fixed using real pseudotime, not assumption.**
+The original axis (§1) poled on `Generalist_NE`/`Generalist_nonNE`. Checked directly
+against real GEMM cells' own `palantir_pseudotime` (`palantir_data.csv` joined to
+`data/AA_clusters_splitgen.csv` phenotype labels): the true pseudotime extremes are
+`Arc_5`/**NE1** (mean 0.013) and `Arc_4`/**nonNE1** (mean 0.532) -- the Generalists sit
+well short of both ends (0.057 and 0.466). `Arc_1`/Intermediate landing near the true
+middle (0.243) is a reassuring consistency check. Rebuilt the axis on NE1/nonNE1 (41 of 53
+genes differ between them, vs. 46 for the Generalist pair), and calibrated the resulting
+0-100 raw position to real pseudotime via isotonic regression fit on real GEMM cells
+(binned first to avoid the noisy step-function artifact raw per-cell isotonic produces,
+which showed up as vertical spikes in individual walk lines). New calibrated-axis plots
+(`walk_pseudotime_axis_*.png`, with/without ASCL1) live in `axis_position_plots/
+pseudotime_calibrated_axis/`; the original raw-Hamming-%-based plots were moved (not
+deleted) to `axis_position_plots/raw_hamming_axis/`.
+
+**New starting points: single real cells, not pooled populations.** For "the GEMM NE1
+cell closest to the NE1 average" and equivalent nonNE queries: every archetype average
+state checked is achieved *exactly* (Hamming distance 0) by at least one real, phenotype
+-labeled GEMM cell -- so these starts are literally real cells' own discrete profiles, not
+synthesized attractor states or population averages. Ran fresh long walks (4000 steps x
+100 iters) from:
+- **GEMM NE1 real cell** (idx `8914049663948766`), unperturbed vs. RORA_RORB knockdown --
+  same qualitative NE->nonNE collapse as every other NE-start result in this doc. Outputs
+  in `gemm_ne1_start/`.
+- **GEMM's 3 nonNE archetypes** (`Generalist_nonNE`, `Arc_4`/nonNE1, `Arc_2`/nonNE2), each
+  its own real cell, unperturbed vs. RORA_RORB **overexpression** (`on_nodes`, not
+  `off_nodes`) -- outputs in `gemm_nonne_start_oe/`.
+- **Organoid's real shRORB1+shRORB2 "Generalist nonNE" cells** (pooled, `find_avg_states`
+  -collapsed, since there's no single-archetype analog for organoid's own real perturbed
+  data), unperturbed vs. RORA_RORB overexpression -- outputs in
+  `organoid_shrorb_nonne_oe/`.
+
+**Result: RORB overexpression rescues nonNE states back toward NE, consistently, across
+every nonNE start tested (4 of 4).** On the calibrated pseudotime axis, unperturbed walks
+from a nonNE start drift *further* into nonNE territory (final pseudotime 0.18-0.27);
+RORA_RORB overexpression instead pulls them back down to 0.09-0.13 (near
+Intermediate/Secretory), a large, consistent, statistically robust reversal in every case
+(p as low as 6.8e-17) -- including organoid's own real shRORB-perturbed cells, the closest
+thing to a direct experimental analog available here.
+
+**KDE reference plots extended to organoid's shRORB1/shRORB2 and to GEMM's own real
+cells** (`plot_kde_reference_additional.py`, outputs in `hexagon_plots/kde_references/`,
+alongside the original shGFP-only plot, untouched). Two findings:
+- organoid shRORB1->shRORB2 shows the same dose-like spread/shift toward nonNE already
+  established quantitatively (§1); visually confirmed here on the hexagon.
+- **GEMM's own real cells mostly don't separate by fine phenotype label either.**
+  Projecting GEMM's real cells by their own true phenotype (`Generalist_NE`, `Arc_1`
+  -`Arc_6`) shows most subtypes (`Generalist_NE`, `Arc_5`/NE1, `Arc_6`/NE2, `Arc_1`
+  /Intermediate, `Arc_3`/Secretory, `Arc_4`/nonNE1) overlapping in nearly the same region
+  rather than each sitting near its own vertex -- only `Generalist_nonNE`/`Arc_2` form a
+  distinct, separate cluster. This is the same phenomenon as the domain-shift rewiring
+  finding (`../domain_shift_diagnostic/FINDINGS.md` §2/§9), just visualized directly: even
+  GEMM's own fine-grained labels don't cleanly separate under this Hamming-distance
+  projection -- it isn't something specific to organoid's domain shift.
+
+**Checked whether the palantir calibration itself was causing the archetype "smushing" --
+it isn't.** (`diagnose_walk_axis_position_ne1nonne1_raw.py`, outputs in
+`axis_position_plots/ne1_nonne1_raw_axis/`.) Re-plotted the NE1/nonNE1 axis with the same
+poles but *no* pseudotime calibration (raw %-agreement, 0-100). Same collapse persists:
+`Arc_4`/`Arc_2` (nonNE1/nonNE2) are both exactly 0 on the raw axis too, and checking why
+directly -- they differ by only 2 of the network's 53 genes total (`NFYC`, `THRB`), and
+both of those happen to be genes where NE1 and nonNE1 *agree* with each other, so they
+fall outside this axis's 41-gene definition entirely. `Generalist_NE`/`NE1` are similarly
+close (97.6 vs. 100) in the raw metric. This is a property of the fitted archetypes
+themselves (the nonNE side of the state space is much less differentiated than the NE
+side, at least along genes this specific axis inspects) -- not an artifact introduced by
+calibrating to pseudotime.
+

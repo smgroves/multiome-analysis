@@ -33,13 +33,13 @@ NONNE_GROUP = ["Generalist_nonNE", "Arc_2", "Arc_4"]
 INTERMEDIATE = "Arc_1"
 
 SPECS = [
-    ("gemm_ne1_start", "temporal_GEMM_NE1", "GEMM NE1 real cell", NEW_WALK_DIR, 8914049663948766,
+    ("gemm_ne1_start", "temporal_GEMM_NE1", "GEMM NE1 (archetype average state)", NEW_WALK_DIR, 8914049663948766,
      "results_RORA_RORB_kd.csv", "RORA_RORB knockdown"),
-    ("gemm_nonne_start_oe", "temporal_GEMM_Generalist_nonNE", "GEMM Generalist_nonNE real cell", NEW_WALK_DIR, 1222330852650596,
+    ("gemm_nonne_start_oe", "temporal_GEMM_Generalist_nonNE", "GEMM Generalist_nonNE (archetype average state)", NEW_WALK_DIR, 1222330852650596,
      "results_RORA_RORB_act.csv", "RORA_RORB overexpression"),
-    ("gemm_nonne_start_oe", "temporal_GEMM_Arc4_nonNE1", "GEMM nonNE1 (Arc_4) real cell", NEW_WALK_DIR, 3474165076405860,
+    ("gemm_nonne_start_oe", "temporal_GEMM_Arc4_nonNE1", "GEMM nonNE1/Arc_4 (archetype average state)", NEW_WALK_DIR, 3474165076405860,
      "results_RORA_RORB_act.csv", "RORA_RORB overexpression"),
-    ("gemm_nonne_start_oe", "temporal_GEMM_Arc2_nonNE2", "GEMM nonNE2 (Arc_2) real cell", NEW_WALK_DIR, 3474165059628640,
+    ("gemm_nonne_start_oe", "temporal_GEMM_Arc2_nonNE2", "GEMM nonNE2/Arc_2 (archetype average state)", NEW_WALK_DIR, 3474165059628640,
      "results_RORA_RORB_act.csv", "RORA_RORB overexpression"),
     ("organoid_shrorb_nonne_oe", "temporal_organoid_shRORB_Generalist_nonNE", "organoid shRORB Generalist_nonNE", ORGANOID_WALK_DIR, 1371881672649956,
      "results_RORA_RORB_act.csv", "RORA_RORB overexpression (rescue?)"),

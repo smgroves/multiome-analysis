@@ -1,0 +1,400 @@
+[seed 9] fitting on 3563/7126 cells
+Fitting  0 / 53 rules
+NFIA
+0
+100
+...checking if TCF4 is irrelevant
+...checking if EHF is irrelevant
+...checking if MEIS2 is irrelevant
+...checking if NFIB is irrelevant
+...checking if NFIX is irrelevant
+...checking if RUNX1 is irrelevant
+...checking if STAT1 is irrelevant
+Fitting  1 / 53 rules
+PKNOX2
+0
+...checking if RBPJ is irrelevant
+...checking if REST is irrelevant
+...checking if STAT1 is irrelevant
+...checking if TCF7L1 is irrelevant
+...checking if TCF7L2 is irrelevant
+Fitting  2 / 53 rules
+SMAD3
+0
+...checking if EHF is irrelevant
+...checking if PBX1 is irrelevant
+...checking if REST is irrelevant
+...checking if RUNX1 is irrelevant
+...checking if ASCL1 is irrelevant
+Fitting  3 / 53 rules
+STAT2
+0
+...checking if NFIA is irrelevant
+...checking if NFIB is irrelevant
+...checking if RUNX1 is irrelevant
+...checking if TCF7L1 is irrelevant
+...checking if TEAD1 is irrelevant
+Fitting  4 / 53 rules
+HES1
+0
+...checking if JUND is irrelevant
+...checking if NFIB is irrelevant
+...checking if RORA_RORB is irrelevant
+...checking if RUNX1 is irrelevant
+...checking if ASCL1 is irrelevant
+Fitting  5 / 53 rules
+ETS1
+0
+...checking if FOS is irrelevant
+...checking if NFIX is irrelevant
+...checking if TCF4 is irrelevant
+...checking if BACH2 is irrelevant
+Fitting  6 / 53 rules
+ZBTB20
+0
+100
+...checking if CREB1 is irrelevant
+...checking if ETS1 is irrelevant
+...checking if FOS is irrelevant
+...checking if JUN is irrelevant
+...checking if JUND is irrelevant
+...checking if NFIA is irrelevant
+...checking if TBX15 is irrelevant
+Fitting  7 / 53 rules
+JUN
+0
+...checking if RUNX1 is irrelevant
+...checking if TCF4 is irrelevant
+...checking if EGR1 is irrelevant
+...checking if EHF is irrelevant
+...checking if FOS is irrelevant
+...checking if JUNB is irrelevant
+Fitting  8 / 53 rules
+NFIX
+0
+...checking if RORA_RORB is irrelevant
+...checking if RUNX1 is irrelevant
+...checking if STAT1 is irrelevant
+...checking if HSF2 is irrelevant
+...checking if NFATC2 is irrelevant
+Fitting  9 / 53 rules
+NFATC2
+0
+...checking if JUN is irrelevant
+...checking if MEIS2 is irrelevant
+...checking if ASCL1 is irrelevant
+Fitting  10 / 53 rules
+TCF4
+0
+...checking if TCF4 is irrelevant
+Fitting  11 / 53 rules
+TFDP1
+0
+...checking if TFDP1 is irrelevant
+Fitting  12 / 53 rules
+TEAD1
+0
+...checking if NFIB is irrelevant
+...checking if PBX1 is irrelevant
+...checking if RUNX1 is irrelevant
+...checking if TCF4 is irrelevant
+...checking if EGR1 is irrelevant
+...checking if EHF is irrelevant
+Fitting  13 / 53 rules
+NFKB1
+0
+...checking if ASCL1 is irrelevant
+...checking if EHF is irrelevant
+...checking if NFIB is irrelevant
+...checking if RUNX1 is irrelevant
+Fitting  14 / 53 rules
+CUX2
+0
+100
+...checking if EHF is irrelevant
+...checking if JUND is irrelevant
+...checking if MEIS2 is irrelevant
+...checking if NFIB is irrelevant
+...checking if RORA_RORB is irrelevant
+...checking if RUNX1 is irrelevant
+...checking if TFDP1 is irrelevant
+Fitting  15 / 53 rules
+SIX1
+0
+...checking if RUNX1 is irrelevant
+...checking if TCF4 is irrelevant
+...checking if EHF is irrelevant
+...checking if REST is irrelevant
+...checking if RORA_RORB is irrelevant
+Fitting  16 / 53 rules
+PBX1
+0
+...checking if RUNX1 is irrelevant
+...checking if ASCL1 is irrelevant
+...checking if EHF is irrelevant
+...checking if NFIB is irrelevant
+Fitting  17 / 53 rules
+LMX1B
+0
+...checking if MEIS2 is irrelevant
+...checking if ASCL1 is irrelevant
+...checking if EGR1 is irrelevant
+...checking if JUND is irrelevant
+Fitting  18 / 53 rules
+NR6A1
+0
+...checking if NR6A1 is irrelevant
+Fitting  19 / 53 rules
+EPCAM
+0
+...checking if FOS is irrelevant
+...checking if HES1 is irrelevant
+...checking if JUN is irrelevant
+...checking if NR6A1 is irrelevant
+...checking if STAT1 is irrelevant
+...checking if TCF4 is irrelevant
+Fitting  20 / 53 rules
+STAT1
+0
+...checking if STAT1 is irrelevant
+Fitting  21 / 53 rules
+BACH2
+0
+...checking if NFIB is irrelevant
+...checking if TEAD1 is irrelevant
+...checking if ASCL1 is irrelevant
+Fitting  22 / 53 rules
+ICAM1
+0
+...checking if EGR1 is irrelevant
+...checking if MEIS2 is irrelevant
+...checking if NFIA is irrelevant
+...checking if RORA_RORB is irrelevant
+...checking if RUNX1 is irrelevant
+...checking if STAT1 is irrelevant
+Fitting  23 / 53 rules
+SOX9
+0
+...checking if SOX9 is irrelevant
+Fitting  24 / 53 rules
+EHF
+0
+...checking if RUNX1 is irrelevant
+...checking if NFIB is irrelevant
+Fitting  25 / 53 rules
+CREB1
+0
+...checking if CREB1 is irrelevant
+Fitting  26 / 53 rules
+TCF7L2
+0
+...checking if EGR1 is irrelevant
+...checking if MEIS2 is irrelevant
+...checking if NFIA is irrelevant
+...checking if PROX1 is irrelevant
+...checking if TFDP1 is irrelevant
+Fitting  27 / 53 rules
+SOX11
+0
+...checking if BACH1 is irrelevant
+...checking if CREB1 is irrelevant
+...checking if JUN is irrelevant
+...checking if SMAD3 is irrelevant
+Fitting  28 / 53 rules
+REST
+0
+...checking if HES1 is irrelevant
+...checking if SOX9 is irrelevant
+...checking if ASCL1 is irrelevant
+Fitting  29 / 53 rules
+FOXO3
+0
+...checking if MEIS2 is irrelevant
+...checking if RORA_RORB is irrelevant
+...checking if SOX9 is irrelevant
+...checking if FOS is irrelevant
+Fitting  30 / 53 rules
+FOS
+0
+100
+200
+...checking if RORA_RORB is irrelevant
+...checking if RUNX1 is irrelevant
+...checking if TEAD1 is irrelevant
+...checking if TFDP1 is irrelevant
+...checking if ASCL1 is irrelevant
+...checking if EGR1 is irrelevant
+...checking if JUN is irrelevant
+...checking if REST is irrelevant
+Fitting  31 / 53 rules
+TBX15
+0
+...checking if GRHL2 is irrelevant
+...checking if NFATC2 is irrelevant
+...checking if NFIA is irrelevant
+...checking if NFIX is irrelevant
+...checking if SIX1 is irrelevant
+...checking if ESR1 is irrelevant
+Fitting  32 / 53 rules
+THRB
+0
+...checking if SIX1 is irrelevant
+Fitting  33 / 53 rules
+NFYC
+0
+...checking if NFYC is irrelevant
+Fitting  34 / 53 rules
+JUND
+0
+...checking if JUND is irrelevant
+Fitting  35 / 53 rules
+MEIS2
+0
+...checking if ASCL1 is irrelevant
+...checking if EGR1 is irrelevant
+...checking if REST is irrelevant
+...checking if RUNX1 is irrelevant
+Fitting  36 / 53 rules
+RUNX1
+0
+100
+...checking if FOS is irrelevant
+...checking if JUND is irrelevant
+...checking if NFIB is irrelevant
+...checking if PBX1 is irrelevant
+...checking if STAT1 is irrelevant
+...checking if TCF7L2 is irrelevant
+...checking if TEAD1 is irrelevant
+Fitting  37 / 53 rules
+ZEB1
+0
+...checking if ZEB1 is irrelevant
+Fitting  38 / 53 rules
+HSF2
+0
+...checking if TCF4 is irrelevant
+...checking if TEAD1 is irrelevant
+...checking if TFDP1 is irrelevant
+...checking if ZEB1 is irrelevant
+...checking if EGR1 is irrelevant
+...checking if NFYC is irrelevant
+Fitting  39 / 53 rules
+KMT2A
+0
+100
+...checking if EGR1 is irrelevant
+...checking if EHF is irrelevant
+...checking if JUN is irrelevant
+...checking if JUND is irrelevant
+...checking if LMX1B is irrelevant
+...checking if NFATC2 is irrelevant
+...checking if STAT1 is irrelevant
+Fitting  40 / 53 rules
+SIX4
+0
+100
+200
+...checking if LMX1B is irrelevant
+...checking if NFIX is irrelevant
+...checking if NFYC is irrelevant
+...checking if REST is irrelevant
+...checking if RUNX1 is irrelevant
+...checking if SIX1 is irrelevant
+...checking if TCF7L1 is irrelevant
+...checking if TEAD1 is irrelevant
+Fitting  41 / 53 rules
+TCF7L1
+0
+...checking if NFIA is irrelevant
+...checking if NFIB is irrelevant
+...checking if REST is irrelevant
+...checking if RUNX1 is irrelevant
+...checking if ASCL1 is irrelevant
+...checking if EHF is irrelevant
+Fitting  42 / 53 rules
+RORA_RORB
+0
+...checking if FOXO3 is irrelevant
+...checking if GRHL2 is irrelevant
+...checking if LMX1B is irrelevant
+...checking if NFIA is irrelevant
+...checking if ASCL1 is irrelevant
+Fitting  43 / 53 rules
+ASCL1
+0
+...checking if HES1 is irrelevant
+...checking if JUN is irrelevant
+...checking if JUND is irrelevant
+...checking if RORA_RORB is irrelevant
+...checking if SIX1 is irrelevant
+...checking if EGR1 is irrelevant
+Fitting  44 / 53 rules
+GRHL2
+0
+...checking if RUNX1 is irrelevant
+...checking if TCF4 is irrelevant
+...checking if NFIA is irrelevant
+...checking if NFIB is irrelevant
+Fitting  45 / 53 rules
+EGR1
+0
+100
+...checking if RORA_RORB is irrelevant
+...checking if RUNX1 is irrelevant
+...checking if TFDP1 is irrelevant
+...checking if EHF is irrelevant
+...checking if JUND is irrelevant
+...checking if MEIS2 is irrelevant
+...checking if NFIB is irrelevant
+Fitting  46 / 53 rules
+ESR1
+0
+...checking if ESR1 is irrelevant
+Fitting  47 / 53 rules
+PROX1
+0
+...checking if RBPJ is irrelevant
+...checking if NFATC2 is irrelevant
+Fitting  48 / 53 rules
+BACH1
+0
+...checking if JUND is irrelevant
+...checking if RUNX1 is irrelevant
+...checking if TCF4 is irrelevant
+...checking if TEAD1 is irrelevant
+...checking if EHF is irrelevant
+Fitting  49 / 53 rules
+NFIB
+0
+100
+200
+...checking if THRB is irrelevant
+...checking if ZEB1 is irrelevant
+...checking if ASCL1 is irrelevant
+...checking if HSF2 is irrelevant
+...checking if PKNOX2 is irrelevant
+...checking if STAT1 is irrelevant
+...checking if TCF4 is irrelevant
+...checking if TCF7L1 is irrelevant
+Fitting  50 / 53 rules
+RBPJ
+0
+...checking if RBPJ is irrelevant
+Fitting  51 / 53 rules
+NCAM1
+0
+100
+...checking if EGR1 is irrelevant
+...checking if MEIS2 is irrelevant
+...checking if NFIA is irrelevant
+...checking if NFIX is irrelevant
+...checking if NFYC is irrelevant
+...checking if RUNX1 is irrelevant
+...checking if TFDP1 is irrelevant
+Fitting  52 / 53 rules
+JUNB
+0
+...checking if EGR1 is irrelevant
+...checking if PROX1 is irrelevant
+...checking if TEAD1 is irrelevant
+[seed 9] done -> /Users/xpz5km/Documents/GitHub/multiome-analysis/network-inference-DIRECT-NET/claude_analysis/10_stability_selection_9999/bootstrap_runs/resample_seed9.pkl

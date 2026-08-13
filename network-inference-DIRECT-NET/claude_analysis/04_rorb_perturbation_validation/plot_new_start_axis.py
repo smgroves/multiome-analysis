@@ -33,13 +33,13 @@ ORGANOID_WALK_DIR = f"{DIR_PREFIX}/6667/organoid_seeded/walks/long_walks/4000_st
 STEP_STRIDE = 10
 
 SPECS = [
-    ("gemm_ne1_start", "axis_GEMM_NE1", "GEMM NE1 real cell", NEW_WALK_DIR, 8914049663948766,
+    ("gemm_ne1_start", "axis_GEMM_NE1", "GEMM NE1 (archetype average state)", NEW_WALK_DIR, 8914049663948766,
      "results_RORA_RORB_kd.csv", "RORA_RORB knockdown", "tab:purple"),
-    ("gemm_nonne_start_oe", "axis_GEMM_Generalist_nonNE", "GEMM Generalist_nonNE real cell", NEW_WALK_DIR, 1222330852650596,
+    ("gemm_nonne_start_oe", "axis_GEMM_Generalist_nonNE", "GEMM Generalist_nonNE (archetype average state)", NEW_WALK_DIR, 1222330852650596,
      "results_RORA_RORB_act.csv", "RORA_RORB overexpression", "tab:green"),
-    ("gemm_nonne_start_oe", "axis_GEMM_Arc4_nonNE1", "GEMM nonNE1 (Arc_4) real cell", NEW_WALK_DIR, 3474165076405860,
+    ("gemm_nonne_start_oe", "axis_GEMM_Arc4_nonNE1", "GEMM nonNE1/Arc_4 (archetype average state)", NEW_WALK_DIR, 3474165076405860,
      "results_RORA_RORB_act.csv", "RORA_RORB overexpression", "tab:green"),
-    ("gemm_nonne_start_oe", "axis_GEMM_Arc2_nonNE2", "GEMM nonNE2 (Arc_2) real cell", NEW_WALK_DIR, 3474165059628640,
+    ("gemm_nonne_start_oe", "axis_GEMM_Arc2_nonNE2", "GEMM nonNE2/Arc_2 (archetype average state)", NEW_WALK_DIR, 3474165059628640,
      "results_RORA_RORB_act.csv", "RORA_RORB overexpression", "tab:green"),
     ("organoid_shrorb_nonne_oe", "axis_organoid_shRORB_Generalist_nonNE", "organoid shRORB Generalist_nonNE", ORGANOID_WALK_DIR, 1371881672649956,
      "results_RORA_RORB_act.csv", "RORA_RORB overexpression (rescue?)", "tab:green"),
